@@ -3,13 +3,23 @@
 
 \begin{document}
 
-\title{My Article}
-\author{Nobody Jr.}
-\date{Today}
+\title{Prior Work in Touch Prototyping}
+\author{Valkyrie Savage, UC Berkeley BiD}
+\date{26 October 2011}
 \maketitle
 
-Blablabla said Nobody ~\cite{Nobody06}.
+Designers have more or less settled on a process for creating the look and feel of new physical artifact.  For most, this involves either the traditional foam carving for low-fidelity prototypes or the more recent 3D printing for more exact ones.  However, it is important that designers be able to communicate how the object should *work* at an early stage in order to get feedback from customers and future users.  It should be possible to add all kinds of input sensitivities to a prototype object, but particularly touch.
 
-\bibliography{mybib}{}
+There have been a number of people coming from many angles to think at the problem of properly interactive prototypes.  Beginning with the Phidgets ~\cite{PHIDGETS} physical interface system in 2001, we have seen an onslaught of people working to make buttons \cite{CALDER}\cite{ISTUFF}\cite{BOXES}\cite{SMART-ITS}\cite{BOXES}\cite{HUDSON02} a part of the prototyping process in stages ranging from the cardboard, low-fidelity stage \cite{BOXES} to a finished product stage \cite{ISTUFF}.  There has also been some work to include accelerometers \cite{EXEMPLAR} and other sensing devices as a part of the design process via the process of programming by demonstration.  Many of the systems emphasize the designer, although a few \cite{ISTUFF}\cite{SMART-ITS} are still geared more towards programmers.  The interfaces for connecting the parts of these systems range from addition of VB code to a program \cite{PHIDGETS} to a GUI toolkit for a designer to inject keyboard and mouse events into the UI of an existing and unistrumented computer program \cite{BOXES}.  This second approach is valuable for broadening the reach of the BOXES platform.
+
+However, accelerometers and buttons aren't enough any more.  With the ubiquity of the iPhone and similar systems, touch is becoming an increasingly important and attractive method of input for new devices.  A few groups have begun to look into touch interactions for arbitrary objects through different methods.  The use of time domain reflectometers, previously employed to find breaks in long underground cables, has been explored as a method of finding a touch point along a one-dimensional conductive wire \cite{TDR}.  This approach involves the use of a large, expensive, and finicky time-domain reflectometer, which is not a reasonable acquisition for most designers to justify.  This approach also does not permit the sensing of 2D touch points, except when one for instance folds a wire into a Hilbert curve on a plane.  Additionally, there is no interface for a designer to prototype interactions: she can only sense the touch.  Other systems, like the Kinect \cite{KINECT} allow for touch on arbitrary objects, but they, too, lack an interface for designers.
+
+Much of the touch-sensing world is still off-limits to non-programmers.  MacLean, et al., \cite{USER-TAILORABLE} back in 1990 discussed the differences between workers, tinkerers, programmers, and handymen as potential audiences for new technologies.  Workers are those who wish to complete a goal using a technology and who have no interest in its low-level workings.  Tinkerers are mainly goal-oriented, but they dabble in the core pieces of systems as the situation dictates.  Programmers are deep in the system, working to grok its functionality and possibilities.  Designers are not, in general, programmers: more systems need to be created which focus on workers.
+
+My proposed system will draw inspiration from all these papers, allowing a designer to augment a prototype with touch input that can be easily mapped to existing program interactions.
+
+If there is time, I'd certainly like to investigate a system similar to DisplayObjects \cite{DISPLAYOBJECTS}, except perhaps one that combines picoprojectors with the Kinect rather than using the arcane marking system used in the paper.  If it were possible to mock up screens and touch sensitivity concurrently on an arbitrary object, that would be a valuable contribution, indeed.  (Perhaps this becomes work for next semester!)
+
+\bibliography{sources}{}
 \bibliographystyle{plain}
 \end{document}

@@ -1,0 +1,7 @@
+.*.swp
+*.pyc
+*.aux
+*.bbl
+*.dvi
+*.blg
+*.log
