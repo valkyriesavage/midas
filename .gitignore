@@ -5,7 +5,8 @@
 *.dvi
 *.blg
 *.log
-*bin/*
+codez/touchit/bin/*
+*.metadata
 *.classpath
 *.project*
 *.settings*
