@@ -5,3 +5,7 @@
 *.dvi
 *.blg
 *.log
+*bin/*
+*.classpath
+*.project*
+*.settings*
