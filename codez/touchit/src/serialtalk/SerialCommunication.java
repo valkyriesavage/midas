@@ -1,20 +1,27 @@
 package serialtalk;
 
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+
+import java.awt.AWTException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import gnu.io.CommPortIdentifier; 
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent; 
-import gnu.io.SerialPortEventListener; 
 import java.util.Enumeration;
 
-public class SerialExample implements SerialPortEventListener {
+import capture.UIAction;
+
+/**
+ * This code was stolen from the internet.
+ */
+
+public class SerialCommunication implements SerialPortEventListener {
   SerialPort serialPort;
         /** The port we're normally going to use. */
   private static final String PORT_NAMES[] = { 
       "/dev/tty.usbserial-A9007UX1", // Mac OS X
-      "/dev/ttyACM0", // Linux
-      "/dev/ttyS4", // Linux also
+      "/dev/ttyACM0", // Linux, specifically for Arduino Uno
       "COM3", // Windows
       };
   /** Buffered input stream from the port */
@@ -25,10 +32,13 @@ public class SerialExample implements SerialPortEventListener {
   private static final int TIME_OUT = 2000;
   /** Default bits per second for COM port. */
   private static final int DATA_RATE = 9600;
-
-  public void initialize() {
+  
+  private ArduinoDispatcher dispatcher;
+  
+  public void initialize() throws AWTException {
     CommPortIdentifier portId = null;
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
+    dispatcher = new ArduinoDispatcher();
 
     // iterate through, looking for the port
     while (portEnum.hasMoreElements()) {
@@ -86,22 +96,21 @@ public class SerialExample implements SerialPortEventListener {
   public synchronized void serialEvent(SerialPortEvent oEvent) {
     if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
       try {
-        int available = input.available();
-        byte chunk[] = new byte[available];
-        input.read(chunk, 0, available);
+        byte touched[] = new byte[1];
+        input.read(touched, 0, 1);
 
         // Displayed results are codepage dependent
-        System.out.print(new String(chunk));
+        System.out.println(new String(touched));
+        dispatcher.handleEvent(new ArduinoEvent((int)(Integer(touched[0])));
+        
       } catch (Exception e) {
         System.err.println(e.toString());
       }
     }
     // Ignore all the other eventTypes, but you should consider the other ones.
   }
-
-  public static void main(String[] args) throws Exception {
-    SerialExample main = new SerialExample();
-    main.initialize();
-    System.out.println("Started");
+  
+  public void registerSerialEvent(ArduinoEvent e, UIAction a) {
+    dispatcher.registerEvent(e, a);
   }
 }

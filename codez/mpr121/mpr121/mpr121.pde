@@ -1,3 +1,4 @@
+
 #include "mpr121.h"
 #include <Wire.h>
 
@@ -23,7 +24,7 @@ void readTouchInputs(){
   if(!checkInterrupt()){
     
     //read the touch state from the MPR121
-    Wire.requestFrom(0x5A,2); 
+    Wire.requestFrom(0x5A,2);
     
     byte LSB = Wire.receive();
     byte MSB = Wire.receive();
@@ -36,9 +37,9 @@ void readTouchInputs(){
       
         if(touchStates[i] == 0){
           //pin i was just touched
-          Serial.print("pin ");
+          /*Serial.print("pin ");
           Serial.print(i);
-          Serial.println(" was just touched");
+          Serial.println(" was just touched");*/
         
         }else if(touchStates[i] == 1){
           //pin i is still being touched
@@ -47,9 +48,9 @@ void readTouchInputs(){
         touchStates[i] = 1;      
       }else{
         if(touchStates[i] == 1){
-          Serial.print("pin ");
+          //Serial.print("pin ");
           Serial.print(i);
-          Serial.println(" is no longer being touched");
+          //Serial.println(" is no longer being touched");
           
           //pin i is no longer being touched
        }
@@ -129,9 +130,9 @@ void mpr121_setup(void){
   
   // Section F
   // Enable Auto Config and auto Reconfig
-  set_register(0x5A, ATO_CFG0, 0x0B);
+  /*set_register(0x5A, ATO_CFG0, 0x0B);
   set_register(0x5A, ATO_CFGU, 0xC9);  // USL = (Vdd-0.7)/vdd*256 = 0xC9 @3.3V   set_register(0x5A, ATO_CFGL, 0x82);  // LSL = 0.65*USL = 0x82 @3.3V
-  set_register(0x5A, ATO_CFGT, 0xB5);  // Target = 0.9*USL = 0xB5 @3.3V
+  set_register(0x5A, ATO_CFGT, 0xB5);*/  // Target = 0.9*USL = 0xB5 @3.3V
 }
 
 
