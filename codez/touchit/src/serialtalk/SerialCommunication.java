@@ -101,7 +101,7 @@ public class SerialCommunication implements SerialPortEventListener {
 
         // Displayed results are codepage dependent
         System.out.println(new String(touched));
-        dispatcher.handleEvent(new ArduinoEvent((int)(Integer(touched[0])));
+        dispatcher.handleEvent(new ArduinoEvent((int)(Integer.parseInt(new String(touched)))));
         
       } catch (Exception e) {
         System.err.println(e.toString());
