@@ -110,8 +110,8 @@ public class SerialCommunication implements SerialPortEventListener {
     // Ignore all the other eventTypes, but you should consider the other ones.
   }
   
-  public void registerSerialEvent(ArduinoEvent e, UIAction a) {
-    dispatcher.registerEvent(e, a);
+  public void registerSerialEvent(List<ArduinoEvent> l, UIAction a) {
+    dispatcher.registerEvent(l, a);
   }
   
   public void handleEvent_forTestingOnly(ArduinoEvent e) {
@@ -120,7 +120,7 @@ public class SerialCommunication implements SerialPortEventListener {
   
   public String listOfRegisteredEvents() {
     String retVal = new String();
-    for (Entry<ArduinoEvent, List<UIAction>> p:dispatcher.eventsToHandlers.entrySet()) {
+    for (Entry<List<ArduinoEvent>, List<UIAction>> p:dispatcher.eventsToHandlers.entrySet()) {
       retVal += "" + p.getKey() + " -> " + p.getValue().toString() + "\n";
     }
     return retVal;

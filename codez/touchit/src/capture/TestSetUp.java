@@ -17,18 +17,25 @@ import util.Pair;
 
 public class TestSetUp extends SetUp {
   
-  @SuppressWarnings("unchecked")
-  List<Pair> l = new ArrayList<Pair>();
+  List<Pair<List<ArduinoEvent>, UIAction>> l = new ArrayList<Pair<List<ArduinoEvent>, UIAction>>();
 
   public TestSetUp() throws AWTException {
     super();
     setSize(280, 500);
+    List<ArduinoEvent> zeroUp = new ArrayList<ArduinoEvent>();
+    zeroUp.add(new ArduinoEvent(0, TouchDirection.UP));
+    List<ArduinoEvent> oneUp = new ArrayList<ArduinoEvent>();
+    oneUp.add(new ArduinoEvent(1, TouchDirection.UP));
+    List<ArduinoEvent> twoUp = new ArrayList<ArduinoEvent>();
+    twoUp.add(new ArduinoEvent(2, TouchDirection.UP));
+    List<ArduinoEvent> threeUp = new ArrayList<ArduinoEvent>();
+    threeUp.add(new ArduinoEvent(3, TouchDirection.UP));
     
-    l.add(new Pair<ArduinoEvent, UIAction>(new ArduinoEvent(0, TouchDirection.UP), new KeyAction(KeyEvent.VK_H)));
-    l.add(new Pair<ArduinoEvent, UIAction>(new ArduinoEvent(1, TouchDirection.UP), new KeyAction(KeyEvent.VK_E)));
-    l.add(new Pair<ArduinoEvent, UIAction>(new ArduinoEvent(2, TouchDirection.UP), new KeyAction(KeyEvent.VK_L)));
-    l.add(new Pair<ArduinoEvent, UIAction>(new ArduinoEvent(6, TouchDirection.UP), new KeyAction(KeyEvent.VK_L)));
-    l.add(new Pair<ArduinoEvent, UIAction>(new ArduinoEvent(0, TouchDirection.UP), new KeyAction(KeyEvent.VK_O)));
+    l.add(new Pair<List<ArduinoEvent>, UIAction>(zeroUp, new KeyAction(KeyEvent.VK_H)));
+    l.add(new Pair<List<ArduinoEvent>, UIAction>(oneUp, new KeyAction(KeyEvent.VK_E)));
+    l.add(new Pair<List<ArduinoEvent>, UIAction>(twoUp, new KeyAction(KeyEvent.VK_L)));
+    l.add(new Pair<List<ArduinoEvent>, UIAction>(threeUp, new KeyAction(KeyEvent.VK_L)));
+    l.add(new Pair<List<ArduinoEvent>, UIAction>(zeroUp, new KeyAction(KeyEvent.VK_O)));
 
     Container contentPane = getContentPane();
     contentPane.setLayout(new FlowLayout());
@@ -36,8 +43,8 @@ public class TestSetUp extends SetUp {
     JButton startB = new JButton("Set a bunch of useless defaults!");
     startB.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
-        for(Pair<ArduinoEvent, UIAction> p: l) {
-          serialCommunication.registerSerialEvent((ArduinoEvent)p.getLeft(),
+        for(Pair<List<ArduinoEvent>, UIAction> p: l) {
+          serialCommunication.registerSerialEvent((List<ArduinoEvent>)p.getLeft(),
                                                   (UIAction)p.getRight());
           listOfThingsHappening.setText(serialCommunication.listOfRegisteredEvents());
         }
