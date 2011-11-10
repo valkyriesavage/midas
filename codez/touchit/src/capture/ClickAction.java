@@ -18,4 +18,7 @@ public class ClickAction implements UIAction {
     r.mouseRelease(buttonCode);
   }
 
+  public String toString() {
+    return new String("click at " + mouseLocation.toString());
+  }
 }

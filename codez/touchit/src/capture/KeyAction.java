@@ -1,6 +1,7 @@
 package capture;
 
 import java.awt.Robot;
+import java.awt.event.KeyEvent;
 
 public class KeyAction implements UIAction {
   int keyCode;
@@ -13,4 +14,7 @@ public class KeyAction implements UIAction {
     r.keyPress(keyCode);
   }
 
+  public String toString() {
+    return new String("press " + KeyEvent.getKeyText(keyCode));
+  }
 }

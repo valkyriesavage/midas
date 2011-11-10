@@ -4,6 +4,8 @@
 
 int irqpin = 2;  // Digital 2
 boolean touchStates[12]; //to keep track of the previous touch states
+int UP = 0;
+int DOWN = 1;
 
 void setup(){
   pinMode(irqpin, INPUT);
@@ -37,9 +39,10 @@ void readTouchInputs(){
       
         if(touchStates[i] == 0){
           //pin i was just touched
-          /*Serial.print("pin ");
+          /*Serial.print("pin ");*/
           Serial.print(i);
-          Serial.println(" was just touched");*/
+          Serial.print(DOWN);
+          /*Serial.println(" was just touched");*/
         
         }else if(touchStates[i] == 1){
           //pin i is still being touched
@@ -50,6 +53,7 @@ void readTouchInputs(){
         if(touchStates[i] == 1){
           //Serial.print("pin ");
           Serial.print(i);
+          Serial.print(UP);
           //Serial.println(" is no longer being touched");
           
           //pin i is no longer being touched

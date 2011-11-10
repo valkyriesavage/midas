@@ -9,6 +9,8 @@ import java.awt.AWTException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map.Entry;
 
 import capture.UIAction;
 
@@ -95,22 +97,32 @@ public class SerialCommunication implements SerialPortEventListener {
    */
   public synchronized void serialEvent(SerialPortEvent oEvent) {
     if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
+      byte touched[] = new byte[2];
       try {
-        byte touched[] = new byte[1];
         input.read(touched, 0, 1);
-
         // Displayed results are codepage dependent
         System.out.println(new String(touched));
-        dispatcher.handleEvent(new ArduinoEvent((int)(Integer.parseInt(new String(touched)))));
-        
       } catch (Exception e) {
         System.err.println(e.toString());
       }
+      dispatcher.handleEvent(new ArduinoEvent((int)touched[0], TouchDirection.values()[touched[1]]));
     }
     // Ignore all the other eventTypes, but you should consider the other ones.
   }
   
   public void registerSerialEvent(ArduinoEvent e, UIAction a) {
     dispatcher.registerEvent(e, a);
+  }
+  
+  public void handleEvent_forTestingOnly(ArduinoEvent e) {
+    dispatcher.handleEvent(e);
+  }
+  
+  public String listOfRegisteredEvents() {
+    String retVal = new String();
+    for (Entry<ArduinoEvent, List<UIAction>> p:dispatcher.eventsToHandlers.entrySet()) {
+      retVal += "" + p.getKey() + " -> " + p.getValue().toString() + "\n";
+    }
+    return retVal;
   }
 }

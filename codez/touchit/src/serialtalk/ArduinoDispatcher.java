@@ -18,8 +18,11 @@ public class ArduinoDispatcher {
   }
   
   void handleEvent(ArduinoEvent e) {
-    for (UIAction a : eventsToHandlers.get(e)) {
-      a.performAction(screenRobot);
+    System.out.println("***" + eventsToHandlers.toString());
+    if (eventsToHandlers.containsKey(e)) {
+      for (UIAction a : eventsToHandlers.get(e)) {
+        a.performAction(screenRobot);
+      }
     }
   }
   
