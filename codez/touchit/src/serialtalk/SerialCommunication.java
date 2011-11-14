@@ -98,14 +98,14 @@ public class SerialCommunication implements SerialPortEventListener {
     }
   }
   
-  public void toggleCapturing() {
+  public synchronized void toggleCapturing() {
     if (!capturing) {
       currentCapture = new ArrayList<ArduinoEvent>();
     }
     capturing = !capturing;
   }
   
-  public boolean isCapturing() {
+  public synchronized boolean isCapturing() {
     return capturing;
   }
 
@@ -134,20 +134,20 @@ public class SerialCommunication implements SerialPortEventListener {
     // Ignore all the other eventTypes, but you should consider the other ones.
   }
   
-  public void registerSerialEvent(List<ArduinoEvent> l, SikuliScript s) {
+  public synchronized void registerSerialEvent(List<ArduinoEvent> l, SikuliScript s) {
     dispatcher.registerEvent(l, s);
   }
   
-  public void registerCurrentCapture() {
-    //TODO : this will ultimately save the list of arduino events
-    // with the list of UIActions as a tie-in
+  public synchronized void registerCurrentCapture(SikuliScript outputAction) {
+    dispatcher.registerEvent(currentCapture, outputAction);
+    capturing = false;
   }
   
   public String currentCaptureToString() {
     return currentCapture.toString();
   }
   
-  public void handleEvent_forTestingOnly(ArduinoEvent e) {
+  public synchronized void handleEvent_forTestingOnly(ArduinoEvent e) {
     dispatcher.handleEvent(e);
   }
   

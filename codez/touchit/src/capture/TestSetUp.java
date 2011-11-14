@@ -2,12 +2,14 @@ package capture;
 
 import java.awt.AWTException;
 import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JWindow;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.TouchDirection;
@@ -16,14 +18,20 @@ import util.Pair;
 public class TestSetUp extends SetUp {
   
   List<Pair<List<ArduinoEvent>, SikuliScript>> l = new ArrayList<Pair<List<ArduinoEvent>, SikuliScript>>();
-
+  JWindow arduinoButtons = new JWindow();
+  
   public TestSetUp() throws AWTException {
     super();
-    setSize(280, 920);
     
     populateDefaultsList();
 
     Container contentPane = getContentPane();
+    
+    whenIDo.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent A) {
+            arduinoButtons.setVisible(true);
+        }
+    });
     
     JButton startB = new JButton("set a bunch of defaults!");
     startB.addActionListener(new ActionListener() {
@@ -35,6 +43,9 @@ public class TestSetUp extends SetUp {
         }
       }
     });
+    
+    arduinoButtons.setSize(280, 720);
+    arduinoButtons.setLayout(new FlowLayout());
 
     for(int i=0; i<12; i++) {
       JButton touchi = new JButton("touch " + i);
@@ -49,8 +60,8 @@ public class TestSetUp extends SetUp {
           serialCommunication.handleEvent_forTestingOnly(new ArduinoEvent(Integer.parseInt((((JButton)A.getSource()).getText().split(" ")[1])), TouchDirection.UP));
         }
       });
-      contentPane.add(touchi);
-      contentPane.add(untouchi);
+      arduinoButtons.add(touchi);
+      arduinoButtons.add(untouchi);
     }
 
     contentPane.add(startB);
