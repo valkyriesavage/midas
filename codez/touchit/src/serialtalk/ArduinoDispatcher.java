@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import capture.UIAction;
+import capture.SikuliScript;
 
 public class ArduinoDispatcher {
-  HashMap<List<ArduinoEvent>, List<UIAction>> eventsToHandlers;
-  Robot screenRobot;
+  HashMap<List<ArduinoEvent>, List<SikuliScript>> eventsToHandlers;
   List<ArduinoEvent> recentEvents;
   
   // this is the maximum number of Arduino events that can be tied to a 
@@ -18,8 +17,7 @@ public class ArduinoDispatcher {
   private static final int MAX_LENGTH_OF_INSTRUCTION = 6;
   
   public ArduinoDispatcher() throws AWTException {
-    this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<UIAction>>();
-    this.screenRobot = new Robot();
+    this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<SikuliScript>>();
     this.recentEvents = new ArrayList<ArduinoEvent>();
   }
   
@@ -31,17 +29,17 @@ public class ArduinoDispatcher {
       }
       List<ArduinoEvent> iLengthList = recentEvents.subList(recentEvents.size()-i-1,recentEvents.size()-1);
       if (eventsToHandlers.containsKey(iLengthList)) {
-        for (UIAction a : eventsToHandlers.get(iLengthList)) {
-          a.performAction(screenRobot);
+        for (SikuliScript s : eventsToHandlers.get(iLengthList)) {
+          s.doAction();
         }
       }
     }
   }
   
-  void registerEvent(List<ArduinoEvent> l, UIAction a) {
+  void registerEvent(List<ArduinoEvent> l, SikuliScript s) {
     if (!eventsToHandlers.containsKey(l)) {
-      eventsToHandlers.put(l, new ArrayList<UIAction>());
+      eventsToHandlers.put(l, new ArrayList<SikuliScript>());
     }
-    eventsToHandlers.get(l).add(a);
+    eventsToHandlers.get(l).add(s);
   }
 }

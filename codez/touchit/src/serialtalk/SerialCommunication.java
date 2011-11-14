@@ -8,11 +8,12 @@ import gnu.io.SerialPortEventListener;
 import java.awt.AWTException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
 
-import capture.UIAction;
+import capture.SikuliScript;
 
 /**
  * This code was stolen from the internet.
@@ -37,10 +38,15 @@ public class SerialCommunication implements SerialPortEventListener {
   
   private ArduinoDispatcher dispatcher;
   
+  // are we saving events?
+  boolean capturing = false;
+  List<ArduinoEvent> currentCapture;
+  
   public void initialize() throws AWTException {
     CommPortIdentifier portId = null;
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     dispatcher = new ArduinoDispatcher();
+    currentCapture = new ArrayList<ArduinoEvent>();
 
     // iterate through, looking for the port
     while (portEnum.hasMoreElements()) {
@@ -91,6 +97,17 @@ public class SerialCommunication implements SerialPortEventListener {
       serialPort.close();
     }
   }
+  
+  public void toggleCapturing() {
+    if (!capturing) {
+      currentCapture = new ArrayList<ArduinoEvent>();
+    }
+    capturing = !capturing;
+  }
+  
+  public boolean isCapturing() {
+    return capturing;
+  }
 
   /**
    * Handle an event on the serial port. Read the data and print it.
@@ -105,13 +122,29 @@ public class SerialCommunication implements SerialPortEventListener {
       } catch (Exception e) {
         System.err.println(e.toString());
       }
-      dispatcher.handleEvent(new ArduinoEvent((int)touched[0], TouchDirection.values()[touched[1]]));
+      
+      ArduinoEvent e = new ArduinoEvent((int)touched[0], TouchDirection.values()[touched[1]]);
+      
+      if (capturing) {
+        currentCapture.add(e);
+      } else {
+        dispatcher.handleEvent(e);
+      }
     }
     // Ignore all the other eventTypes, but you should consider the other ones.
   }
   
-  public void registerSerialEvent(List<ArduinoEvent> l, UIAction a) {
-    dispatcher.registerEvent(l, a);
+  public void registerSerialEvent(List<ArduinoEvent> l, SikuliScript s) {
+    dispatcher.registerEvent(l, s);
+  }
+  
+  public void registerCurrentCapture() {
+    //TODO : this will ultimately save the list of arduino events
+    // with the list of UIActions as a tie-in
+  }
+  
+  public String currentCaptureToString() {
+    return currentCapture.toString();
   }
   
   public void handleEvent_forTestingOnly(ArduinoEvent e) {
@@ -120,7 +153,7 @@ public class SerialCommunication implements SerialPortEventListener {
   
   public String listOfRegisteredEvents() {
     String retVal = new String();
-    for (Entry<List<ArduinoEvent>, List<UIAction>> p:dispatcher.eventsToHandlers.entrySet()) {
+    for (Entry<List<ArduinoEvent>, List<SikuliScript>> p:dispatcher.eventsToHandlers.entrySet()) {
       retVal += "" + p.getKey() + " -> " + p.getValue().toString() + "\n";
     }
     return retVal;

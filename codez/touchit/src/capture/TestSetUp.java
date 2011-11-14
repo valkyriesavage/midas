@@ -2,10 +2,8 @@ package capture;
 
 import java.awt.AWTException;
 import java.awt.Container;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,35 +15,22 @@ import util.Pair;
 
 public class TestSetUp extends SetUp {
   
-  List<Pair<List<ArduinoEvent>, UIAction>> l = new ArrayList<Pair<List<ArduinoEvent>, UIAction>>();
+  List<Pair<List<ArduinoEvent>, SikuliScript>> l = new ArrayList<Pair<List<ArduinoEvent>, SikuliScript>>();
 
   public TestSetUp() throws AWTException {
     super();
-    setSize(280, 500);
-    List<ArduinoEvent> zeroUp = new ArrayList<ArduinoEvent>();
-    zeroUp.add(new ArduinoEvent(0, TouchDirection.UP));
-    List<ArduinoEvent> oneUp = new ArrayList<ArduinoEvent>();
-    oneUp.add(new ArduinoEvent(1, TouchDirection.UP));
-    List<ArduinoEvent> twoUp = new ArrayList<ArduinoEvent>();
-    twoUp.add(new ArduinoEvent(2, TouchDirection.UP));
-    List<ArduinoEvent> threeUp = new ArrayList<ArduinoEvent>();
-    threeUp.add(new ArduinoEvent(3, TouchDirection.UP));
+    setSize(280, 920);
     
-    l.add(new Pair<List<ArduinoEvent>, UIAction>(zeroUp, new KeyAction(KeyEvent.VK_H)));
-    l.add(new Pair<List<ArduinoEvent>, UIAction>(oneUp, new KeyAction(KeyEvent.VK_E)));
-    l.add(new Pair<List<ArduinoEvent>, UIAction>(twoUp, new KeyAction(KeyEvent.VK_L)));
-    l.add(new Pair<List<ArduinoEvent>, UIAction>(threeUp, new KeyAction(KeyEvent.VK_L)));
-    l.add(new Pair<List<ArduinoEvent>, UIAction>(zeroUp, new KeyAction(KeyEvent.VK_O)));
+    populateDefaultsList();
 
     Container contentPane = getContentPane();
-    contentPane.setLayout(new FlowLayout());
     
-    JButton startB = new JButton("Set a bunch of useless defaults!");
+    JButton startB = new JButton("set a bunch of defaults!");
     startB.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
-        for(Pair<List<ArduinoEvent>, UIAction> p: l) {
+        for(Pair<List<ArduinoEvent>, SikuliScript> p: l) {
           serialCommunication.registerSerialEvent((List<ArduinoEvent>)p.getLeft(),
-                                                  (UIAction)p.getRight());
+                                                  (SikuliScript)p.getRight());
           listOfThingsHappening.setText(serialCommunication.listOfRegisteredEvents());
         }
       }
@@ -69,6 +54,23 @@ public class TestSetUp extends SetUp {
     }
 
     contentPane.add(startB);
+  }
+  
+  private void populateDefaultsList() {
+    List<ArduinoEvent> zeroUp = new ArrayList<ArduinoEvent>();
+    zeroUp.add(new ArduinoEvent(0, TouchDirection.UP));
+    List<ArduinoEvent> oneUp = new ArrayList<ArduinoEvent>();
+    oneUp.add(new ArduinoEvent(1, TouchDirection.UP));
+    List<ArduinoEvent> twoUp = new ArrayList<ArduinoEvent>();
+    twoUp.add(new ArduinoEvent(2, TouchDirection.UP));
+    List<ArduinoEvent> threeUp = new ArrayList<ArduinoEvent>();
+    threeUp.add(new ArduinoEvent(3, TouchDirection.UP));
+    
+    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(zeroUp, new SikuliScript("/home/valkyrie/press_h.sikuli")));
+    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(oneUp, new SikuliScript("/home/valkyrie/press_e.sikuli")));
+    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(twoUp, new SikuliScript("/home/valkyrie/press_l.sikuli")));
+    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(threeUp, new SikuliScript("/home/valkyrie/press_l.sikuli")));
+    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(zeroUp, new SikuliScript("/home/valkyrie/press_o.sikuli")));
   }
 
   public static void main(String[] args) {
