@@ -24,10 +24,10 @@ public class ArduinoDispatcher {
   void handleEvent(ArduinoEvent e) {
     recentEvents.add(e);
     for (int i=0; i<MAX_LENGTH_OF_INSTRUCTION; i++) {
-      if (i >= recentEvents.size()) {
+      if (i > recentEvents.size()) {
         return;
       }
-      List<ArduinoEvent> iLengthList = recentEvents.subList(recentEvents.size()-i-1,recentEvents.size()-1);
+      List<ArduinoEvent> iLengthList = recentEvents.subList(recentEvents.size()-i,recentEvents.size());
       if (eventsToHandlers.containsKey(iLengthList)) {
         for (SikuliScript s : eventsToHandlers.get(iLengthList)) {
           s.doAction();

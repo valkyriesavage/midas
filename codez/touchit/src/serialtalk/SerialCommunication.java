@@ -13,6 +13,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
 
+import antlr.StringUtils;
+
 import capture.SikuliScript;
 
 /**
@@ -41,6 +43,7 @@ public class SerialCommunication implements SerialPortEventListener {
   // are we saving events?
   boolean capturing = false;
   List<ArduinoEvent> currentCapture;
+  private ArduinoEvent currentEvent;
   
   public void initialize() throws AWTException {
     CommPortIdentifier portId = null;
@@ -114,21 +117,53 @@ public class SerialCommunication implements SerialPortEventListener {
    */
   public synchronized void serialEvent(SerialPortEvent oEvent) {
     if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-      byte touched[] = new byte[2];
+      byte touched[] = new byte[3];
       try {
-        input.read(touched, 0, 1);
+        input.read(touched, 0, 3);
         // Displayed results are codepage dependent
-        System.out.println(new String(touched));
       } catch (Exception e) {
         System.err.println(e.toString());
+        return;
       }
       
-      ArduinoEvent e = new ArduinoEvent((int)touched[0], TouchDirection.values()[touched[1]]);
+      String info = new String(touched);
+
+      if (currentEvent == null) {
+          String which = info.substring(0,2);
+          currentEvent = new ArduinoEvent(Integer.parseInt(which));
+          if (info.length() > 1) {
+        	  String dir = info.substring(2,3);
+        	  TouchDirection direction;
+        	  System.out.println("<<<" + dir + ">>>");
+              if (dir.equals("D")) {
+            	  direction = TouchDirection.DOWN;
+              } else if (dir.equals("U")) {
+            	  direction = TouchDirection.UP;
+              } else {
+            	  direction = null;
+              }
+              currentEvent.setDirection(direction);
+          }
+      } /*else {
+    	  String dir = info.substring(0,1);
+    	  TouchDirection direction;
+    	  System.out.println("<<<" + dir + ">>>");
+          if (dir.equals("D")) {
+        	  direction = TouchDirection.DOWN;
+          } else if (dir.equals("U")) {
+        	  direction = TouchDirection.UP;
+          } else {
+        	  direction = null;
+          }
+          currentEvent.setDirection(direction);
+      }*/
       
-      if (capturing) {
-        currentCapture.add(e);
-      } else {
-        dispatcher.handleEvent(e);
+      
+      System.out.println(currentEvent.toString() + "*****\n\n");
+      
+      if (currentEvent.isComplete()) {
+    	  handleCompleteEvent(currentEvent);
+    	  currentEvent = null;
       }
     }
     // Ignore all the other eventTypes, but you should consider the other ones.
@@ -140,6 +175,7 @@ public class SerialCommunication implements SerialPortEventListener {
   
   public synchronized void registerCurrentCapture(SikuliScript outputAction) {
     dispatcher.registerEvent(currentCapture, outputAction);
+    currentCapture = null;
     capturing = false;
   }
   
@@ -147,8 +183,12 @@ public class SerialCommunication implements SerialPortEventListener {
     return currentCapture.toString();
   }
   
-  public synchronized void handleEvent_forTestingOnly(ArduinoEvent e) {
-    dispatcher.handleEvent(e);
+  public synchronized void handleCompleteEvent(ArduinoEvent e) {
+	  if (capturing) {
+  	    currentCapture.add(e);
+  	  } else {
+        dispatcher.handleEvent(e);
+	  }
   }
   
   public String listOfRegisteredEvents() {

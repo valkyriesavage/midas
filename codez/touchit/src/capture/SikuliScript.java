@@ -15,33 +15,23 @@ public class SikuliScript {
   
   public SikuliScript(String scriptPath) {
     this.scriptPath = scriptPath;
-    /*Process catProc;
-	try {
-		catProc = Runtime.getRuntime().exec("/bin/cat " + scriptPath + "/*.py");
-		catProc.waitFor();
-		BufferedReader output = new BufferedReader(new InputStreamReader(catProc.getInputStream()));
-		String line;
-		while((line = output.readLine()) != null) {
-			System.out.println(line);
-			this.myDescription += line;
-		}
-	} catch (IOException e) {
-		e.printStackTrace();
-		this.myDescription = scriptPath;
-	} catch (InterruptedException e) {
-		e.printStackTrace();
-		this.myDescription = scriptPath;
-	}*/ myDescription = new File(scriptPath).getName();
+    myDescription = new File(scriptPath).getName();
   }
   
   public void doAction() {
     try {
-      Runtime.getRuntime().exec(SikuliScript.SIKULI + " -s -r " + this.scriptPath);
+      String commandStr = new String(SikuliScript.SIKULI + " -s -r " + this.scriptPath);
+      System.out.println(commandStr);
+      Process sikuliProc = Runtime.getRuntime().exec(commandStr);
+      sikuliProc.waitFor();
     } catch (IOException e) {
       e.printStackTrace();
       JFrame errorPop = new JFrame("problems!");
       errorPop.add(new JLabel("there was a problem with that sikuli script. did you save it?"));
-    }
+      errorPop.setVisible(true);
+    } catch (InterruptedException e) {
+	  e.printStackTrace();
+	}
   }
   
   public String toString() {

@@ -32,7 +32,6 @@ public class SetUp extends JFrame implements ActionListener {
   
   Container contentPane = getContentPane();
       
-  @SuppressWarnings("restriction")
   public SetUp() throws AWTException {
     setSize(530, 480);
 
@@ -80,7 +79,6 @@ public class SetUp extends JFrame implements ActionListener {
     	  int returnVal = chooser.showOpenDialog(((JButton)A.getSource()).getParent());
     	  if(returnVal == JFileChooser.APPROVE_OPTION) {
     		  outputAction = new SikuliScript(chooser.getCurrentDirectory().getAbsolutePath());
-    		  System.out.println(outputAction.toString());
     		  itDoes.setText(outputAction.toString());
     	  }
       }
@@ -94,8 +92,11 @@ public class SetUp extends JFrame implements ActionListener {
     JButton saveInteraction = new JButton("save interaction");
     saveInteraction.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
+    	  whenIDo.setText("when i do...");
+    	  itDoes.setText("it does...");
           serialCommunication.registerCurrentCapture(outputAction);
           outputAction = null;
+          listOfThingsHappening.setText(serialCommunication.listOfRegisteredEvents());
       }
     });
     

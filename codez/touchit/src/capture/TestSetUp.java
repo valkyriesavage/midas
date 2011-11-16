@@ -5,83 +5,55 @@ import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JWindow;
+import javax.swing.JFrame;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.TouchDirection;
-import util.Pair;
 
 public class TestSetUp extends SetUp {
   
-  List<Pair<List<ArduinoEvent>, SikuliScript>> l = new ArrayList<Pair<List<ArduinoEvent>, SikuliScript>>();
-  JWindow arduinoButtons = new JWindow();
+  JFrame arduinoButtons = new JFrame();
   
   public TestSetUp() throws AWTException {
     super();
     
-    populateDefaultsList();
-
-    Container contentPane = getContentPane();
-    
     whenIDo.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent A) {
-            arduinoButtons.setVisible(true);
+        	if (((JButton)A.getSource()).getText().equals("when i do")) {
+        		whenIDo.setText("done capturing");
+        	} else {
+        		whenIDo.setText("when i do");
+        	}
+        	serialCommunication.toggleCapturing();
         }
     });
     
-    JButton startB = new JButton("set a bunch of defaults!");
-    startB.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent A) {
-        for(Pair<List<ArduinoEvent>, SikuliScript> p: l) {
-          serialCommunication.registerSerialEvent((List<ArduinoEvent>)p.getLeft(),
-                                                  (SikuliScript)p.getRight());
-          listOfThingsHappening.setText(serialCommunication.listOfRegisteredEvents());
-        }
-      }
-    });
-    
-    arduinoButtons.setSize(280, 720);
+    arduinoButtons.setSize(280, 400);
     arduinoButtons.setLayout(new FlowLayout());
+    arduinoButtons.setLocation(500, 20);
 
     for(int i=0; i<12; i++) {
       JButton touchi = new JButton("touch " + i);
       JButton untouchi = new JButton("release " + i);
       touchi.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent A) {
-          serialCommunication.handleEvent_forTestingOnly(new ArduinoEvent(Integer.parseInt((((JButton)A.getSource()).getText().split(" ")[1])), TouchDirection.DOWN));
+          ArduinoEvent event = new ArduinoEvent(Integer.parseInt((((JButton)A.getSource()).getText().split(" ")[1])), TouchDirection.DOWN);
+          serialCommunication.handleCompleteEvent(event);
         }
       });
       untouchi.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent A) {
-          serialCommunication.handleEvent_forTestingOnly(new ArduinoEvent(Integer.parseInt((((JButton)A.getSource()).getText().split(" ")[1])), TouchDirection.UP));
+          ArduinoEvent event = new ArduinoEvent(Integer.parseInt((((JButton)A.getSource()).getText().split(" ")[1])), TouchDirection.UP);
+          serialCommunication.handleCompleteEvent(event);
         }
       });
       arduinoButtons.add(touchi);
       arduinoButtons.add(untouchi);
     }
 
-    contentPane.add(startB);
-  }
-  
-  private void populateDefaultsList() {
-    List<ArduinoEvent> zeroUp = new ArrayList<ArduinoEvent>();
-    zeroUp.add(new ArduinoEvent(0, TouchDirection.UP));
-    List<ArduinoEvent> oneUp = new ArrayList<ArduinoEvent>();
-    oneUp.add(new ArduinoEvent(1, TouchDirection.UP));
-    List<ArduinoEvent> twoUp = new ArrayList<ArduinoEvent>();
-    twoUp.add(new ArduinoEvent(2, TouchDirection.UP));
-    List<ArduinoEvent> threeUp = new ArrayList<ArduinoEvent>();
-    threeUp.add(new ArduinoEvent(3, TouchDirection.UP));
-    
-    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(zeroUp, new SikuliScript("/home/valkyrie/press_h.sikuli")));
-    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(oneUp, new SikuliScript("/home/valkyrie/press_e.sikuli")));
-    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(twoUp, new SikuliScript("/home/valkyrie/press_l.sikuli")));
-    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(threeUp, new SikuliScript("/home/valkyrie/press_l.sikuli")));
-    l.add(new Pair<List<ArduinoEvent>, SikuliScript>(zeroUp, new SikuliScript("/home/valkyrie/press_o.sikuli")));
+    arduinoButtons.setVisible(true);
   }
 
   public static void main(String[] args) {

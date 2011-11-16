@@ -34,22 +34,23 @@ void readTouchInputs(){
     
     for (int i=0; i < 12; i++){  // Check what electrodes were pressed
       if(touched & (1<<i)){
-      
         if(touchStates[i] == 0){
           //pin i was just touched
-          Serial.print(i);
-          Serial.println(" : touched");
+          char buffer[4];
+          sprintf(buffer, "%02dD", i);
+          Serial.print(buffer);
         }else if(touchStates[i] == 1){
           //pin i is still being touched
         }  
       
-        touchStates[i] = 1;      
+        touchStates[i] = 1;   
+   
       }else{
         if(touchStates[i] == 1){
           //pin i is no longer being touched
-          Serial.print(i);
-          Serial.println(" : released");
-          
+          char buffer[4];
+          sprintf(buffer, "%02dU", i);
+          Serial.print(buffer);
           mpr121_setup();
        }
         
