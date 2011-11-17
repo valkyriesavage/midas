@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import antlr.StringUtils;
 
@@ -23,12 +25,11 @@ import capture.SikuliScript;
 
 public class SerialCommunication implements SerialPortEventListener {
   SerialPort serialPort;
-        /** The port we're normally going to use. */
-  private static final String PORT_NAMES[] = { 
-      "/dev/tty.usbserial-A9007UX1", // Mac OS X
+  /** The port we're normally going to use. */
+  private static final String PORT_NAMES[] = { "/dev/tty.usbserial-A9007UX1", // Mac
       "/dev/ttyACM0", // Linux, specifically for Arduino Uno
       "COM3", // Windows
-      };
+  };
   /** Buffered input stream from the port */
   private InputStream input;
   /** The output stream to the port */
@@ -37,14 +38,16 @@ public class SerialCommunication implements SerialPortEventListener {
   private static final int TIME_OUT = 2000;
   /** Default bits per second for COM port. */
   private static final int DATA_RATE = 9600;
-  
+
   private ArduinoDispatcher dispatcher;
-  
+
   // are we saving events?
   boolean capturing = false;
   List<ArduinoEvent> currentCapture;
-  private ArduinoEvent currentEvent;
-  
+  private String currentSerialInfo = new String();
+
+  private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
+
   public void initialize() throws AWTException {
     CommPortIdentifier portId = null;
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
@@ -53,7 +56,8 @@ public class SerialCommunication implements SerialPortEventListener {
 
     // iterate through, looking for the port
     while (portEnum.hasMoreElements()) {
-      CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
+      CommPortIdentifier currPortId = (CommPortIdentifier) portEnum
+          .nextElement();
       for (String portName : PORT_NAMES) {
         if (currPortId.getName().equals(portName)) {
           portId = currPortId;
@@ -69,14 +73,12 @@ public class SerialCommunication implements SerialPortEventListener {
 
     try {
       // open serial port, and use class name for the appName.
-      serialPort = (SerialPort) portId.open(this.getClass().getName(),
-          TIME_OUT);
+      serialPort = (SerialPort) portId
+          .open(this.getClass().getName(), TIME_OUT);
 
       // set port parameters
-      serialPort.setSerialPortParams(DATA_RATE,
-          SerialPort.DATABITS_8,
-          SerialPort.STOPBITS_1,
-          SerialPort.PARITY_NONE);
+      serialPort.setSerialPortParams(DATA_RATE, SerialPort.DATABITS_8,
+          SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
       // open the streams
       input = serialPort.getInputStream();
@@ -91,8 +93,8 @@ public class SerialCommunication implements SerialPortEventListener {
   }
 
   /**
-   * This should be called when you stop using the port.
-   * This will prevent port locking on platforms like Linux.
+   * This should be called when you stop using the port. This will prevent port
+   * locking on platforms like Linux.
    */
   public synchronized void close() {
     if (serialPort != null) {
@@ -100,14 +102,14 @@ public class SerialCommunication implements SerialPortEventListener {
       serialPort.close();
     }
   }
-  
+
   public synchronized void toggleCapturing() {
     if (!capturing) {
       currentCapture = new ArrayList<ArduinoEvent>();
     }
     capturing = !capturing;
   }
-  
+
   public synchronized boolean isCapturing() {
     return capturing;
   }
@@ -125,75 +127,56 @@ public class SerialCommunication implements SerialPortEventListener {
         System.err.println(e.toString());
         return;
       }
-      
-      String info = new String(touched);
 
-      if (currentEvent == null) {
-          String which = info.substring(0,2);
-          currentEvent = new ArduinoEvent(Integer.parseInt(which));
-          if (info.length() > 1) {
-        	  String dir = info.substring(2,3);
-        	  TouchDirection direction;
-        	  System.out.println("<<<" + dir + ">>>");
-              if (dir.equals("D")) {
-            	  direction = TouchDirection.DOWN;
-              } else if (dir.equals("U")) {
-            	  direction = TouchDirection.UP;
-              } else {
-            	  direction = null;
-              }
-              currentEvent.setDirection(direction);
-          }
-      } /*else {
-    	  String dir = info.substring(0,1);
-    	  TouchDirection direction;
-    	  System.out.println("<<<" + dir + ">>>");
-          if (dir.equals("D")) {
-        	  direction = TouchDirection.DOWN;
-          } else if (dir.equals("U")) {
-        	  direction = TouchDirection.UP;
-          } else {
-        	  direction = null;
-          }
-          currentEvent.setDirection(direction);
-      }*/
-      
-      
-      System.out.println(currentEvent.toString() + "*****\n\n");
-      
-      if (currentEvent.isComplete()) {
-    	  handleCompleteEvent(currentEvent);
-    	  currentEvent = null;
+      currentSerialInfo = currentSerialInfo + new String(touched).trim();
+
+      Matcher oneMessage;
+
+      while ((oneMessage = matchOneArduinoMessage.matcher(currentSerialInfo)).lookingAt()) {
+        currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
+        TouchDirection direction;
+        if (oneMessage.group(2).equals("U")) {
+          direction = TouchDirection.UP;
+        } else {
+          direction = TouchDirection.DOWN;
+        }
+        ArduinoEvent currentEvent = new ArduinoEvent(
+            Integer.parseInt(oneMessage.group(1)), direction);
+        handleCompleteEvent(currentEvent);
+
+        System.out.println(currentEvent.toString() + "*****");
       }
     }
     // Ignore all the other eventTypes, but you should consider the other ones.
   }
-  
-  public synchronized void registerSerialEvent(List<ArduinoEvent> l, SikuliScript s) {
+
+  public synchronized void registerSerialEvent(List<ArduinoEvent> l,
+      SikuliScript s) {
     dispatcher.registerEvent(l, s);
   }
-  
+
   public synchronized void registerCurrentCapture(SikuliScript outputAction) {
     dispatcher.registerEvent(currentCapture, outputAction);
     currentCapture = null;
     capturing = false;
   }
-  
+
   public String currentCaptureToString() {
     return currentCapture.toString();
   }
-  
+
   public synchronized void handleCompleteEvent(ArduinoEvent e) {
-	  if (capturing) {
-  	    currentCapture.add(e);
-  	  } else {
-        dispatcher.handleEvent(e);
-	  }
+    if (capturing) {
+      currentCapture.add(e);
+    } else {
+      dispatcher.handleEvent(e);
+    }
   }
-  
+
   public String listOfRegisteredEvents() {
     String retVal = new String();
-    for (Entry<List<ArduinoEvent>, List<SikuliScript>> p:dispatcher.eventsToHandlers.entrySet()) {
+    for (Entry<List<ArduinoEvent>, List<SikuliScript>> p : dispatcher.eventsToHandlers
+        .entrySet()) {
       retVal += "" + p.getKey() + " -> " + p.getValue().toString() + "\n";
     }
     return retVal;

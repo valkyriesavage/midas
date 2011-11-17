@@ -7,6 +7,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -18,7 +20,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import serialtalk.ArduinoEvent;
 import serialtalk.SerialCommunication;
+import serialtalk.TouchDirection;
 
 public class SetUp extends JFrame implements ActionListener {
   private static final long serialVersionUID = -7176602414855781819L;
@@ -29,9 +33,9 @@ public class SetUp extends JFrame implements ActionListener {
   JTextField whenIDo = new JTextField("when i do...");
   SikuliScript outputAction;
   JTextField itDoes = new JTextField("it does...");
-  
+
   Container contentPane = getContentPane();
-      
+
   public SetUp() throws AWTException {
     setSize(530, 480);
 
@@ -43,10 +47,10 @@ public class SetUp extends JFrame implements ActionListener {
     captureIn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
         if (serialCommunication.isCapturing()) {
-          ((JButton)A.getSource()).setText("capture Arduino interaction");
+          ((JButton) A.getSource()).setText("capture Arduino interaction");
           whenIDo.setText(serialCommunication.currentCaptureToString());
         } else {
-          ((JButton)A.getSource()).setText("done capturing");
+          ((JButton) A.getSource()).setText("done capturing");
         }
         serialCommunication.toggleCapturing();
       }
@@ -55,32 +59,36 @@ public class SetUp extends JFrame implements ActionListener {
     input.setLayout(new BorderLayout());
     input.add(whenIDo, BorderLayout.NORTH);
     input.add(captureIn, BorderLayout.SOUTH);
-    
+
     JPanel output = new JPanel();
     JButton captureOut = new JButton("create sikuli script (launch sikuli)");
     captureOut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
-          try {
-           Runtime.getRuntime().exec(SikuliScript.SIKULI);
-          } catch (IOException e) {
-            e.printStackTrace();
-            JDialog errorPop = new JDialog();
-            errorPop.add(new JLabel("there was a problem with sikuli. is it in your path?"));
-          }
+        try {
+          Runtime.getRuntime().exec(SikuliScript.SIKULI);
+        } catch (IOException e) {
+          e.printStackTrace();
+          JDialog errorPop = new JDialog();
+          errorPop.add(new JLabel(
+              "there was a problem with sikuli. is it in your path?"));
+        }
       }
     });
     JButton selectSikuliScript = new JButton("select sikuli script");
     selectSikuliScript.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
-    	  JFileChooser chooser = new JFileChooser(SikuliScript.SIKULI_SCRIPT_DIRECTORY);
-    	  FileNameExtensionFilter filter = new FileNameExtensionFilter(
-    	        "Sikuli Scripts", "py");
-    	  chooser.setFileFilter(filter);
-    	  int returnVal = chooser.showOpenDialog(((JButton)A.getSource()).getParent());
-    	  if(returnVal == JFileChooser.APPROVE_OPTION) {
-    		  outputAction = new SikuliScript(chooser.getCurrentDirectory().getAbsolutePath());
-    		  itDoes.setText(outputAction.toString());
-    	  }
+        JFileChooser chooser = new JFileChooser(
+            SikuliScript.SIKULI_SCRIPT_DIRECTORY);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+            "Sikuli Scripts", "py");
+        chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(((JButton) A.getSource())
+            .getParent());
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+          outputAction = new SikuliScript(chooser.getCurrentDirectory()
+              .getAbsolutePath());
+          itDoes.setText(outputAction.toString());
+        }
       }
     });
     itDoes.setEditable(false);
@@ -88,19 +96,20 @@ public class SetUp extends JFrame implements ActionListener {
     output.add(captureOut, BorderLayout.NORTH);
     output.add(itDoes, BorderLayout.CENTER);
     output.add(selectSikuliScript, BorderLayout.SOUTH);
-    
+
     JButton saveInteraction = new JButton("save interaction");
     saveInteraction.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
-    	  whenIDo.setText("when i do...");
-    	  itDoes.setText("it does...");
-          serialCommunication.registerCurrentCapture(outputAction);
-          outputAction = null;
-          listOfThingsHappening.setText(serialCommunication.listOfRegisteredEvents());
+        whenIDo.setText("when i do...");
+        itDoes.setText("it does...");
+        serialCommunication.registerCurrentCapture(outputAction);
+        outputAction = null;
+        listOfThingsHappening.setText(serialCommunication
+            .listOfRegisteredEvents());
       }
     });
-    
-    listOfThingsHappening  = new JTextArea(25, 15);
+
+    listOfThingsHappening = new JTextArea(25, 15);
     listOfThingsHappening.setEditable(false);
     listOfThingsHappening.setText("recorded interactions will appear here");
 
@@ -112,9 +121,9 @@ public class SetUp extends JFrame implements ActionListener {
 
     contentPane.setVisible(true);
   }
-  
+
   public void actionPerformed(ActionEvent evt) {
-    
+
   }
 
   public static void main(String[] args) {
@@ -128,4 +137,3 @@ public class SetUp extends JFrame implements ActionListener {
     setup.setVisible(true);
   }
 }
-

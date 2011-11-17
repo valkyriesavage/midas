@@ -11,23 +11,25 @@ import capture.SikuliScript;
 public class ArduinoDispatcher {
   HashMap<List<ArduinoEvent>, List<SikuliScript>> eventsToHandlers;
   List<ArduinoEvent> recentEvents;
-  
-  // this is the maximum number of Arduino events that can be tied to a 
-  // UIAction.  we don't want any kind of infinite shit happening because that is slow.
-  private static final int MAX_LENGTH_OF_INSTRUCTION = 6;
-  
+
+  // this is the maximum number of Arduino events that can be tied to a
+  // UIAction. we don't want any kind of infinite shit happening because that is
+  // slow.
+  private static final int MAX_LENGTH_OF_INSTRUCTION = 8;
+
   public ArduinoDispatcher() throws AWTException {
     this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<SikuliScript>>();
     this.recentEvents = new ArrayList<ArduinoEvent>();
   }
-  
+
   void handleEvent(ArduinoEvent e) {
     recentEvents.add(e);
-    for (int i=0; i<MAX_LENGTH_OF_INSTRUCTION; i++) {
+    for (int i = 0; i < MAX_LENGTH_OF_INSTRUCTION; i++) {
       if (i > recentEvents.size()) {
         return;
       }
-      List<ArduinoEvent> iLengthList = recentEvents.subList(recentEvents.size()-i,recentEvents.size());
+      List<ArduinoEvent> iLengthList = recentEvents.subList(recentEvents.size()
+          - i, recentEvents.size());
       if (eventsToHandlers.containsKey(iLengthList)) {
         for (SikuliScript s : eventsToHandlers.get(iLengthList)) {
           s.doAction();
@@ -35,7 +37,7 @@ public class ArduinoDispatcher {
       }
     }
   }
-  
+
   void registerEvent(List<ArduinoEvent> l, SikuliScript s) {
     if (!eventsToHandlers.containsKey(l)) {
       eventsToHandlers.put(l, new ArrayList<SikuliScript>());
