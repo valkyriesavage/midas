@@ -10,14 +10,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import antlr.StringUtils;
-
-import capture.SikuliScript;
+import capture.UIAction;
 
 /**
  * This code was stolen from the internet.
@@ -43,7 +42,9 @@ public class SerialCommunication implements SerialPortEventListener {
 
   // are we saving events?
   boolean capturing = false;
-  List<ArduinoEvent> currentCapture;
+  boolean capturingSlider = false;
+  List<ArduinoEvent> currentCapture = null;
+  List<ArduinoSensor> currentSliderCapture = null;
   private String currentSerialInfo = new String();
 
   private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
@@ -110,8 +111,19 @@ public class SerialCommunication implements SerialPortEventListener {
     capturing = !capturing;
   }
 
+  public synchronized void toggleCapturingSlider() {
+    if (!capturingSlider) {
+      currentSliderCapture = new ArrayList<ArduinoSensor>();
+    }
+    capturingSlider = !capturingSlider;
+  }
+
   public synchronized boolean isCapturing() {
     return capturing;
+  }
+
+  public synchronized boolean isCapturingSlider() {
+    return capturingSlider;
   }
 
   /**
@@ -132,7 +144,8 @@ public class SerialCommunication implements SerialPortEventListener {
 
       Matcher oneMessage;
 
-      while ((oneMessage = matchOneArduinoMessage.matcher(currentSerialInfo)).lookingAt()) {
+      while ((oneMessage = matchOneArduinoMessage.matcher(currentSerialInfo))
+          .lookingAt()) {
         currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
         TouchDirection direction;
         if (oneMessage.group(2).equals("U")) {
@@ -141,41 +154,60 @@ public class SerialCommunication implements SerialPortEventListener {
           direction = TouchDirection.DOWN;
         }
         ArduinoEvent currentEvent = new ArduinoEvent(
-            Integer.parseInt(oneMessage.group(1)), direction);
+            ArduinoSetup.sensors[Integer.parseInt(oneMessage.group(1))],
+            direction);
         handleCompleteEvent(currentEvent);
-
-        System.out.println(currentEvent.toString() + "*****");
       }
     }
     // Ignore all the other eventTypes, but you should consider the other ones.
   }
 
-  public synchronized void registerSerialEvent(List<ArduinoEvent> l,
-      SikuliScript s) {
-    dispatcher.registerEvent(l, s);
+  public synchronized void registerCurrentCapture(UIAction outputAction) {
+    if (currentCapture != null && currentCapture.size() > 0) {
+      dispatcher.registerEvent(currentCapture, outputAction);
+      currentCapture = null;
+      capturing = false;
+    } else if (currentSliderCapture != null && currentSliderCapture.size() > 0) {
+      dispatcher.registerSliderEvent(cleanCurrentSlider(), outputAction);
+      currentSliderCapture = null;
+      capturingSlider = false;
+    }
   }
 
-  public synchronized void registerCurrentCapture(SikuliScript outputAction) {
-    dispatcher.registerEvent(currentCapture, outputAction);
-    currentCapture = null;
-    capturing = false;
+  private synchronized List<ArduinoSensor> cleanCurrentSlider() {
+    // make sure all elements are unique but that we retain ORDER because that
+    // is IMPORTANT
+    return new ArrayList<ArduinoSensor>(new LinkedHashSet<ArduinoSensor>(
+        currentSliderCapture));
   }
 
   public String currentCaptureToString() {
     return currentCapture.toString();
   }
 
+  public String currentSliderCaptureToString() {
+    return "slider : " + currentSliderCapture.toString();
+  }
+
   public synchronized void handleCompleteEvent(ArduinoEvent e) {
     if (capturing) {
       currentCapture.add(e);
     } else {
-      dispatcher.handleEvent(e);
+      if (capturingSlider) {
+        currentSliderCapture.add(e.whichSensor);
+      } else {
+        dispatcher.handleEvent(e);
+      }
     }
   }
 
   public String listOfRegisteredEvents() {
     String retVal = new String();
-    for (Entry<List<ArduinoEvent>, List<SikuliScript>> p : dispatcher.eventsToHandlers
+    for (Entry<List<ArduinoEvent>, List<UIAction>> p : dispatcher.eventsToHandlers
+        .entrySet()) {
+      retVal += "" + p.getKey() + " -> " + p.getValue().toString() + "\n";
+    }
+    for (Entry<ArduinoSlider, List<UIAction>> p : dispatcher.slidersToHandlers
         .entrySet()) {
       retVal += "" + p.getKey() + " -> " + p.getValue().toString() + "\n";
     }

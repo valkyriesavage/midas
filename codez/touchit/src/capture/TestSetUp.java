@@ -1,17 +1,15 @@
 package capture;
 
 import java.awt.AWTException;
-import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import serialtalk.ArduinoEvent;
+import serialtalk.ArduinoSetup;
 import serialtalk.TouchDirection;
 
 public class TestSetUp extends SetUp {
@@ -20,17 +18,6 @@ public class TestSetUp extends SetUp {
 
   public TestSetUp() throws AWTException {
     super();
-
-    whenIDo.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent A) {
-        if (((JButton) A.getSource()).getText().equals("when i do")) {
-          whenIDo.setText("done capturing");
-        } else {
-          whenIDo.setText("when i do");
-        }
-        serialCommunication.toggleCapturing();
-      }
-    });
 
     arduinoButtons.setSize(280, 400);
     arduinoButtons.setLayout(new FlowLayout());
@@ -41,15 +28,15 @@ public class TestSetUp extends SetUp {
       JButton untouchi = new JButton("release " + i);
       touchi.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent A) {
-          ArduinoEvent event = new ArduinoEvent(Integer.parseInt((((JButton) A
-              .getSource()).getText().split(" ")[1])), TouchDirection.DOWN);
+          ArduinoEvent event = new ArduinoEvent(ArduinoSetup.sensors[Integer.parseInt((((JButton) A
+              .getSource()).getText().split(" ")[1]))], TouchDirection.DOWN);
           serialCommunication.handleCompleteEvent(event);
         }
       });
       untouchi.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent A) {
-          ArduinoEvent event = new ArduinoEvent(Integer.parseInt((((JButton) A
-              .getSource()).getText().split(" ")[1])), TouchDirection.UP);
+          ArduinoEvent event = new ArduinoEvent(ArduinoSetup.sensors[Integer.parseInt((((JButton) A
+              .getSource()).getText().split(" ")[1]))], TouchDirection.UP);
           serialCommunication.handleCompleteEvent(event);
         }
       });

@@ -4,14 +4,14 @@ import java.util.List;
 
 public class ArduinoEvent {
   TouchDirection touchDirection;
-  int whichSensor;
+  ArduinoSensor whichSensor;
   
-  public ArduinoEvent(int whichSensor, TouchDirection touchDirection) {
+  public ArduinoEvent(ArduinoSensor whichSensor, TouchDirection touchDirection) {
 	    this.whichSensor = whichSensor;
 	    this.touchDirection = touchDirection;
   }
   
-  public ArduinoEvent(int whichSensor) {
+  public ArduinoEvent(ArduinoSensor whichSensor) {
 		this.whichSensor = whichSensor;
   }
   
@@ -24,7 +24,7 @@ public class ArduinoEvent {
   }
   
   public int hashCode() {
-    return this.whichSensor + 100*this.touchDirection.ordinal();
+    return this.whichSensor.which + 100*this.touchDirection.ordinal();
   }
   
   @Override
@@ -35,7 +35,7 @@ public class ArduinoEvent {
     } else if (touchDirection == TouchDirection.DOWN) {
       retVal += "touch ";
     }
-    retVal += whichSensor;
+    retVal += whichSensor.which;
     return retVal;
   }
   

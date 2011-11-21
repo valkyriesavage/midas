@@ -7,22 +7,19 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import serialtalk.ArduinoEvent;
 import serialtalk.SerialCommunication;
-import serialtalk.TouchDirection;
 
 public class SetUp extends JFrame implements ActionListener {
   private static final long serialVersionUID = -7176602414855781819L;
@@ -30,9 +27,21 @@ public class SetUp extends JFrame implements ActionListener {
   SerialCommunication serialCommunication;
 
   JTextArea listOfThingsHappening;
+  
+  JPanel input = new JPanel();
   JTextField whenIDo = new JTextField("when i do...");
+  JButton captureIn = new JButton("capture touch interaction");
+  JButton registerSlider = new JButton("register a slider");
+  
+  JPanel output = new JPanel();
+  JPanel selectSliderActionsPanel = new JPanel();
   SikuliScript outputAction;
+  SikuliScript ascendingAction;
+  SikuliScript descendingAction;
   JTextField itDoes = new JTextField("it does...");
+  JButton selectOutputAction = new JButton("select sikuli script");
+  JButton selectAscendingAction = new JButton("select ascending action");
+  JButton selectDescendingAction = new JButton("select descending action");
 
   Container contentPane = getContentPane();
 
@@ -42,25 +51,39 @@ public class SetUp extends JFrame implements ActionListener {
     serialCommunication = new SerialCommunication();
     serialCommunication.initialize();
 
-    JPanel input = new JPanel();
-    JButton captureIn = new JButton("capture Arduino interaction");
     captureIn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
         if (serialCommunication.isCapturing()) {
-          ((JButton) A.getSource()).setText("capture Arduino interaction");
+          ((JButton) A.getSource()).setText("capture touch interaction");
           whenIDo.setText(serialCommunication.currentCaptureToString());
+          output.add(itDoes, BorderLayout.CENTER);
+          output.add(selectOutputAction, BorderLayout.SOUTH);
         } else {
           ((JButton) A.getSource()).setText("done capturing");
+          registerSlider.setEnabled(false);
         }
         serialCommunication.toggleCapturing();
       }
     });
     whenIDo.setEditable(false);
+    registerSlider.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent A) {
+        if (serialCommunication.isCapturingSlider()) {
+          ((JButton) A.getSource()).setText("register a slider");
+          whenIDo.setText(serialCommunication.currentSliderCaptureToString());
+          output.add(selectSliderActionsPanel, BorderLayout.SOUTH);
+        } else {
+          ((JButton) A.getSource()).setText("done");
+          captureIn.setEnabled(false);
+        }
+        serialCommunication.toggleCapturingSlider();
+      }
+    });
     input.setLayout(new BorderLayout());
     input.add(whenIDo, BorderLayout.NORTH);
-    input.add(captureIn, BorderLayout.SOUTH);
+    input.add(captureIn, BorderLayout.CENTER);
+    input.add(registerSlider, BorderLayout.SOUTH);
 
-    JPanel output = new JPanel();
     JButton captureOut = new JButton("create sikuli script (launch sikuli)");
     captureOut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
@@ -74,8 +97,8 @@ public class SetUp extends JFrame implements ActionListener {
         }
       }
     });
-    JButton selectSikuliScript = new JButton("select sikuli script");
-    selectSikuliScript.addActionListener(new ActionListener() {
+    
+    selectOutputAction.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
         JFileChooser chooser = new JFileChooser(
             SikuliScript.SIKULI_SCRIPT_DIRECTORY);
@@ -91,11 +114,46 @@ public class SetUp extends JFrame implements ActionListener {
         }
       }
     });
+    selectAscendingAction.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent A) {
+        JFileChooser chooser = new JFileChooser(
+            SikuliScript.SIKULI_SCRIPT_DIRECTORY);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+            "Sikuli Scripts", "py");
+        chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(((JButton) A.getSource())
+            .getParent());
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+          ascendingAction = new SikuliScript(chooser.getCurrentDirectory()
+              .getAbsolutePath());
+          itDoes.setText(ascendingAndDescending());
+        }
+      }
+    });
+    selectDescendingAction.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent A) {
+        JFileChooser chooser = new JFileChooser(
+            SikuliScript.SIKULI_SCRIPT_DIRECTORY);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+            "Sikuli Scripts", "py");
+        chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(((JButton) A.getSource())
+            .getParent());
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+          descendingAction = new SikuliScript(chooser.getCurrentDirectory()
+              .getAbsolutePath());
+          itDoes.setText(ascendingAndDescending());
+        }
+      }
+    });
     itDoes.setEditable(false);
     output.setLayout(new BorderLayout());
     output.add(captureOut, BorderLayout.NORTH);
     output.add(itDoes, BorderLayout.CENTER);
-    output.add(selectSikuliScript, BorderLayout.SOUTH);
+    
+    selectSliderActionsPanel.setLayout(new BorderLayout());
+    selectSliderActionsPanel.add(selectAscendingAction, BorderLayout.WEST);
+    selectSliderActionsPanel.add(selectDescendingAction, BorderLayout.EAST);
 
     JButton saveInteraction = new JButton("save interaction");
     saveInteraction.addActionListener(new ActionListener() {
@@ -104,8 +162,14 @@ public class SetUp extends JFrame implements ActionListener {
         itDoes.setText("it does...");
         serialCommunication.registerCurrentCapture(outputAction);
         outputAction = null;
+        ascendingAction = null;
+        descendingAction = null;
         listOfThingsHappening.setText(serialCommunication
             .listOfRegisteredEvents());
+        captureIn.setEnabled(true);
+        registerSlider.setEnabled(true);
+        output.remove(selectSliderActionsPanel);
+        output.remove(selectOutputAction);
       }
     });
 
@@ -124,6 +188,14 @@ public class SetUp extends JFrame implements ActionListener {
 
   public void actionPerformed(ActionEvent evt) {
 
+  }
+  
+  private String ascendingAndDescending() {
+    if (ascendingAction != null && descendingAction != null) {
+      return "asc : " + ascendingAction.toString() + " ; desc : " + descendingAction.toString();
+    } if (ascendingAction != null) {
+      return "asc : " + ascendingAction.toString() + " ; desc : ?";
+    } return "asc : ? ; desc : " + descendingAction.toString();
   }
 
   public static void main(String[] args) {

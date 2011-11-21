@@ -6,7 +6,7 @@ import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-public class SikuliScript {
+public class SikuliScript implements UIAction {
   public static final String SIKULI = "/home/valkyrie/src/Sikuli-X-1.0rc3/Sikuli-IDE/sikuli-ide.sh";
   public static final String SIKULI_SCRIPT_DIRECTORY = "/home/valkyrie/other/touch-it-data/";
 
