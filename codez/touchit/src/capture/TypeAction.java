@@ -1,11 +1,19 @@
 package capture;
 
-public class TypeAction implements UIAction {
+import java.awt.AWTException;
 
-  @Override
+public class TypeAction extends RobotAction implements UIAction {
+  
+  int keyCode;
+
+  public TypeAction(int keyCode) throws AWTException {
+    super();
+    this.keyCode = keyCode;
+  }
+  
   public void doAction() {
-    // TODO Auto-generated method stub
-
+    robot.keyPress(keyCode);
+    robot.keyRelease(keyCode);
   }
 
 }

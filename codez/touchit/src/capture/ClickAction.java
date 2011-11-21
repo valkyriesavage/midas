@@ -2,29 +2,21 @@ package capture;
 
 import java.awt.AWTException;
 import java.awt.Point;
-import java.awt.Robot;
 
-public class ClickAction implements UIAction {
-  private static Robot robot;
+public class ClickAction extends RobotAction implements UIAction {
   
-  Point start;
-  Point end;
+  Point p;
   int buttons;
   
-  public ClickAction(Point start, Point end, int buttons) throws AWTException {
-    if (robot == null) {
-      robot = new Robot();
-    }
-    this.start = start;
-    this.end = end;
+  public ClickAction(Point p, int buttons) throws AWTException {
+    super();
+    this.p = p;
     this.buttons = buttons;
   }
 
   public void doAction() {
-    robot.mouseMove(start.x, start.y);
+    robot.mouseMove(p.x, p.y);
     robot.mousePress(buttons);
-    robot.mouseMove(end.x, end.y);
-    robot.mouseRelease(buttons);
   }
 
 }
