@@ -1,0 +1,9 @@
+Touchit is a small program designed to work with an Arduino connected
+to a serial port which communicates with a Java program.  It isn't done yet,
+but when it is, the idea is this:
+
+1. connect the Arduino to an MPR121 capacitive touch board
+2. add some touch sensors
+3. use the Java Robot-driven interface to assign those touch inputs
+   to actions on-screen (e.g. typing, pressing buttons, opening programs...)
+4. repeat
