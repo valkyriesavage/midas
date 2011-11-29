@@ -13,8 +13,8 @@ public class ArduinoSlider {
     return sensors.contains(sensor);
   }
   
-  public Direction upOrDown(List<ArduinoSensor> sensorsTouched) {
-    if (sensors.indexOf(sensorsTouched.get(0)) > sensors.indexOf(sensors.get(1))) {
+  public Direction ascOrDesc(ArduinoSensor previous, ArduinoSensor current) {
+    if (sensors.indexOf(previous) > sensors.indexOf(current)) {
       return Direction.ASCENDING;
     }
     return Direction.DESCENDING;
@@ -26,5 +26,20 @@ public class ArduinoSlider {
   
   public String toString() {
     return "slider : " + sensors.toString();
+  }
+  
+  public int hashCode() {
+    String allSensors = "";
+    for (ArduinoSensor as : sensors) {
+      allSensors += as.which;
+    }
+    return Integer.parseInt(allSensors);
+  }
+  
+  public boolean equals(Object o) {
+    if (o.getClass() == ArduinoSlider.class && o.hashCode() == this.hashCode()) {
+      return true;
+    }
+    return false;
   }
 }

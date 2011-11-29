@@ -7,18 +7,21 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import serialtalk.ArduinoEvent;
+import serialtalk.ArduinoSlider;
 import serialtalk.SerialCommunication;
 
 public class SetUp extends JFrame implements ActionListener {
@@ -160,27 +163,38 @@ public class SetUp extends JFrame implements ActionListener {
       public void actionPerformed(ActionEvent A) {
         whenIDo.setText("when i do...");
         itDoes.setText("it does...");
-        serialCommunication.registerCurrentCapture(outputAction);
-        outputAction = null;
-        ascendingAction = null;
-        descendingAction = null;
-        listOfThingsHappening.setText(serialCommunication
-            .listOfRegisteredEvents());
+        if (ascendingAction != null && descendingAction != null) {
+          serialCommunication.registerCurrentCapture(ascendingAction, descendingAction);
+          ascendingAction = null;
+          descendingAction = null;
+          output.remove(selectSliderActionsPanel);
+        } else if (outputAction != null) {
+          serialCommunication.registerCurrentCapture(outputAction);
+          outputAction = null;
+          output.remove(selectOutputAction);
+        }
+        setListOfThingsHappening();
         captureIn.setEnabled(true);
         registerSlider.setEnabled(true);
-        output.remove(selectSliderActionsPanel);
-        output.remove(selectOutputAction);
+      }
+    });
+    JButton clearInteractions = new JButton("clear all interactions");
+    clearInteractions.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent A) {
+        serialCommunication.clearAllInteractions();
+        setListOfThingsHappening();
       }
     });
 
-    listOfThingsHappening = new JTextArea(25, 15);
-    listOfThingsHappening.setEditable(false);
+    listOfThingsHappening = new JTextArea();
     listOfThingsHappening.setText("recorded interactions will appear here");
+    listOfThingsHappening.setEditable(false);
 
     contentPane.setLayout(new FlowLayout());
     contentPane.add(input);
     contentPane.add(output);
     contentPane.add(saveInteraction);
+    contentPane.add(clearInteractions);
     contentPane.add(listOfThingsHappening);
 
     contentPane.setVisible(true);
@@ -188,6 +202,21 @@ public class SetUp extends JFrame implements ActionListener {
 
   public void actionPerformed(ActionEvent evt) {
 
+  }
+  
+  private void setListOfThingsHappening() {
+    String allTheThings = "";
+    for(Entry<List<ArduinoEvent>, List<UIAction>> interaction : serialCommunication.eventsToHandlers().entrySet()) {
+      allTheThings.concat(interaction.getKey().toString() + " -> " + interaction.getValue().toString() + "\n");
+    }
+    for(Entry<ArduinoSlider, List<UIAction>> interaction : serialCommunication.slidersToAscHandlers().entrySet()) {
+      allTheThings.concat(interaction.getKey() + " -> " + interaction.getValue() + "\n");
+    }
+    for(Entry<ArduinoSlider, List<UIAction>> interaction : serialCommunication.slidersToDescHandlers().entrySet()) {
+      allTheThings.concat(interaction.getKey() + " -> " + interaction.getValue() + "\n");
+    }
+    System.out.println(allTheThings);
+    listOfThingsHappening.setText(allTheThings);
   }
   
   private String ascendingAndDescending() {

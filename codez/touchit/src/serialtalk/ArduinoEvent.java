@@ -5,6 +5,7 @@ import java.util.List;
 public class ArduinoEvent {
   TouchDirection touchDirection;
   ArduinoSensor whichSensor;
+  long timestamp = System.currentTimeMillis();
   
   public ArduinoEvent(ArduinoSensor whichSensor, TouchDirection touchDirection) {
 	    this.whichSensor = whichSensor;

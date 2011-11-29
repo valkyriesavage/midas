@@ -6,6 +6,8 @@
 *.blg
 *.log
 codez/touchit/bin/*
+codez/cad/*
+codez/touchit/src/examples/*
 *.metadata
 *.classpath
 *.project*

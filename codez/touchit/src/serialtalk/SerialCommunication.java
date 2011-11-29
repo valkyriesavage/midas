@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -167,8 +168,13 @@ public class SerialCommunication implements SerialPortEventListener {
       dispatcher.registerEvent(currentCapture, outputAction);
       currentCapture = null;
       capturing = false;
-    } else if (currentSliderCapture != null && currentSliderCapture.size() > 0) {
-      dispatcher.registerSliderEvent(cleanCurrentSlider(), outputAction);
+    }
+  }
+  
+  public synchronized void registerCurrentCapture(UIAction ascendingAction, UIAction descendingAction) {
+    if (currentSliderCapture != null && currentSliderCapture.size() > 0) {
+      dispatcher.registerSliderAscendingEvent(cleanCurrentSlider(), ascendingAction);
+      dispatcher.registerSliderDescendingEvent(cleanCurrentSlider(), descendingAction);
       currentSliderCapture = null;
       capturingSlider = false;
     }
@@ -200,17 +206,22 @@ public class SerialCommunication implements SerialPortEventListener {
       }
     }
   }
+  
+  public void unregisterEvent(List<ArduinoEvent> l, UIAction s) {
+    dispatcher.unregisterEvent(l, s);
+  }
+  
+  public void clearAllInteractions() {
+    dispatcher.clearAllInteractions();
+  }
 
-  public String listOfRegisteredEvents() {
-    String retVal = new String();
-    for (Entry<List<ArduinoEvent>, List<UIAction>> p : dispatcher.eventsToHandlers
-        .entrySet()) {
-      retVal += "" + p.getKey() + " -> " + p.getValue().toString() + "\n";
-    }
-    for (Entry<ArduinoSlider, List<UIAction>> p : dispatcher.slidersToHandlers
-        .entrySet()) {
-      retVal += "" + p.getKey() + " -> " + p.getValue().toString() + "\n";
-    }
-    return retVal;
+  public HashMap<List<ArduinoEvent>, List<UIAction>> eventsToHandlers() {
+    return dispatcher.eventsToHandlers;
+  }
+  public HashMap<ArduinoSlider, List<UIAction>> slidersToAscHandlers() {
+    return dispatcher.slidersToAscHandlers;
+  }
+  public HashMap<ArduinoSlider, List<UIAction>> slidersToDescHandlers() {
+    return dispatcher.slidersToDescHandlers;
   }
 }

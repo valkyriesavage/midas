@@ -4,41 +4,62 @@ import java.awt.AWTException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import capture.UIAction;
 
 public class ArduinoDispatcher {
-  HashMap<List<ArduinoEvent>, List<UIAction>> eventsToHandlers;
-  List<ArduinoEvent> recentEvents;
-  HashMap<ArduinoSlider, List<UIAction>> slidersToHandlers;
+  private List<ArduinoEvent> recentEvents;
 
-  // this is the maximum number of Arduino events that can be tied to a
-  // UIAction. we don't want any kind of infinite shit happening because that is
-  // slow.
-  private static final int MAX_LENGTH_OF_INSTRUCTION = 8;
+  public HashMap<List<ArduinoEvent>, List<UIAction>> eventsToHandlers;
+  public HashMap<ArduinoSlider, List<UIAction>> slidersToAscHandlers;
+  public HashMap<ArduinoSlider, List<UIAction>> slidersToDescHandlers;
+
+  // we want to phase out old events since they won't be part of the same gesture
+  private static final int TIMEOUT_FOR_INSTRUCTION = 2000;
 
   public ArduinoDispatcher() throws AWTException {
     this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<UIAction>>();
-    this.slidersToHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
+    this.slidersToAscHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
+    this.slidersToDescHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.recentEvents = new ArrayList<ArduinoEvent>();
+  }
+  
+  public void clearAllInteractions() {
+    this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<UIAction>>();
+    this.slidersToAscHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
+    this.slidersToDescHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
   }
 
   void handleEvent(ArduinoEvent e) {
+    // phase out old events
+    if (recentEvents.size() > 0
+        && recentEvents.get(recentEvents.size() - 1).timestamp < System.currentTimeMillis() - TIMEOUT_FOR_INSTRUCTION) {
+      recentEvents = new ArrayList<ArduinoEvent>();
+    }
+
     recentEvents.add(e);
     ArduinoSlider slider;
 
     if ((slider = ArduinoSetup.isPartOfSlider(e.whichSensor)) != null) {
-      if (ArduinoSetup.isPartOfSlider(recentEvents.get(recentEvents.size()-1).whichSensor) == slider) {
-        List<UIAction> toDo = this.slidersToHandlers.get(slider);
-        for (UIAction action : toDo) {
-          action.doAction(); // how do we know to go up or down? TODO
+      if (recentEvents.size() > 1
+          && ArduinoSetup
+              .isPartOfSlider(recentEvents.get(recentEvents.size() - 1).whichSensor) == slider) {
+        ArduinoSensor previous = recentEvents.get(recentEvents.size() - 1).whichSensor;
+        if (slider.ascOrDesc(previous, e.whichSensor) == Direction.ASCENDING) {
+          List<UIAction> toDo = this.slidersToAscHandlers.get(slider);
+          for (UIAction action : toDo) {
+            action.doAction();
+          }
+        } else {
+          List<UIAction> toDo = this.slidersToDescHandlers.get(slider);
+          for (UIAction action : toDo) {
+            action.doAction();
+          }
         }
       }
     } else {
-      for (int i = 0; i < MAX_LENGTH_OF_INSTRUCTION; i++) {
-        if (i > recentEvents.size()) {
-          return;
-        }
+      for (int i = 0; i <= recentEvents.size(); i++) {
         List<ArduinoEvent> iLengthList = recentEvents.subList(
             recentEvents.size() - i, recentEvents.size());
         if (eventsToHandlers.containsKey(iLengthList)) {
@@ -56,13 +77,56 @@ public class ArduinoDispatcher {
     }
     eventsToHandlers.get(l).add(s);
   }
-
-  void registerSliderEvent(List<ArduinoSensor> l, UIAction s) {
-    ArduinoSlider slider = new ArduinoSlider(l);
-    ArduinoSetup.addSlider(slider);
-    if (!slidersToHandlers.containsKey(l)) {
-      slidersToHandlers.put(slider, new ArrayList<UIAction>());
+  
+  void unregisterEvent(List<ArduinoEvent> l, UIAction s) {
+    if (!eventsToHandlers.containsKey(l)) {
+       return;
     }
-    slidersToHandlers.get(slider).add(s);
+    eventsToHandlers.get(l).remove(s);
   }
+
+  private ArduinoSlider registerSliderIfNecessary(List<ArduinoSensor> l) {
+    ArduinoSlider slider = null;
+    for (ArduinoSensor sensor : l) {
+      if ((slider = ArduinoSetup.isPartOfSlider(sensor)) == null) {
+        slider = new ArduinoSlider(l);
+        ArduinoSetup.addSlider(slider);
+      }
+    }
+    return slider;
+  }
+
+  void registerSliderAscendingEvent(List<ArduinoSensor> l, UIAction s) {
+    ArduinoSlider slider = registerSliderIfNecessary(l);
+    if (!slidersToAscHandlers.containsKey(slider)) {
+      slidersToAscHandlers.put(slider, new ArrayList<UIAction>());
+    }
+    slidersToAscHandlers.get(slider).add(s);
+  }
+  
+  void unregisterSliderAscendingEvent(List<ArduinoSensor> l, UIAction s) {
+    ArduinoSlider slider = registerSliderIfNecessary(l);
+    if (!slidersToAscHandlers.containsKey(slider)) {
+      return;
+    }
+    slidersToAscHandlers.get(slider).remove(s);
+  }
+
+  void registerSliderDescendingEvent(List<ArduinoSensor> l, UIAction s) {
+    ArduinoSlider slider = registerSliderIfNecessary(l);
+    if (!slidersToDescHandlers.containsKey(slider)) {
+      slidersToDescHandlers.put(slider, new ArrayList<UIAction>());
+    }
+    slidersToDescHandlers.get(slider).add(s);
+  }
+  
+  void unregisterSliderDescendingEvent(List<ArduinoSensor> l, UIAction s) {
+    ArduinoSlider slider = registerSliderIfNecessary(l);
+    if (!slidersToDescHandlers.containsKey(slider)) {
+      return;
+    }
+    slidersToDescHandlers.get(slider).remove(s);
+  }
+  
+  
 }

@@ -8,6 +8,6 @@ public class ArduinoSensor {
   }
   
   public String toString() {
-    return "sensor " + which;
+    return "" + which;
   }
 }
