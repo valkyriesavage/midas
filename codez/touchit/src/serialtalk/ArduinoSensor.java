@@ -1,6 +1,6 @@
 package serialtalk;
 
-public class ArduinoSensor {
+public class ArduinoSensor implements ArduinoObject {
   public int which;
   
   public ArduinoSensor(int which) {

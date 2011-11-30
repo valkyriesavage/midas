@@ -1,8 +1,7 @@
 package serialtalk;
 
-import java.util.List;
 
-public class ArduinoEvent {
+public class ArduinoEvent implements ArduinoObject {
   TouchDirection touchDirection;
   ArduinoSensor whichSensor;
   long timestamp = System.currentTimeMillis();

@@ -207,8 +207,16 @@ public class SerialCommunication implements SerialPortEventListener {
     }
   }
   
-  public void unregisterEvent(List<ArduinoEvent> l, UIAction s) {
-    dispatcher.unregisterEvent(l, s);
+  public void unregisterEvent(List<ArduinoEvent> l, UIAction a) {
+    dispatcher.unregisterEvent(l, a);
+  }
+  
+  public void unregisterSliderAscEvent(ArduinoSlider s, UIAction a) {
+    dispatcher.unregisterSliderAscendingEvent(s, a);
+  }
+  
+  public void unregisterSliderDescEvent(ArduinoSlider s, UIAction a) {
+    dispatcher.unregisterSliderDescendingEvent(s, a);
   }
   
   public void clearAllInteractions() {

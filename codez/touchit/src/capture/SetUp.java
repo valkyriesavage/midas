@@ -29,13 +29,13 @@ public class SetUp extends JFrame implements ActionListener {
 
   SerialCommunication serialCommunication;
 
-  JTextArea listOfThingsHappening;
-  
+  JPanel listOfThingsHappening;
+
   JPanel input = new JPanel();
   JTextField whenIDo = new JTextField("when i do...");
   JButton captureIn = new JButton("capture touch interaction");
   JButton registerSlider = new JButton("register a slider");
-  
+
   JPanel output = new JPanel();
   JPanel selectSliderActionsPanel = new JPanel();
   SikuliScript outputAction;
@@ -100,7 +100,7 @@ public class SetUp extends JFrame implements ActionListener {
         }
       }
     });
-    
+
     selectOutputAction.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent A) {
         JFileChooser chooser = new JFileChooser(
@@ -153,7 +153,7 @@ public class SetUp extends JFrame implements ActionListener {
     output.setLayout(new BorderLayout());
     output.add(captureOut, BorderLayout.NORTH);
     output.add(itDoes, BorderLayout.CENTER);
-    
+
     selectSliderActionsPanel.setLayout(new BorderLayout());
     selectSliderActionsPanel.add(selectAscendingAction, BorderLayout.WEST);
     selectSliderActionsPanel.add(selectDescendingAction, BorderLayout.EAST);
@@ -164,7 +164,8 @@ public class SetUp extends JFrame implements ActionListener {
         whenIDo.setText("when i do...");
         itDoes.setText("it does...");
         if (ascendingAction != null && descendingAction != null) {
-          serialCommunication.registerCurrentCapture(ascendingAction, descendingAction);
+          serialCommunication.registerCurrentCapture(ascendingAction,
+              descendingAction);
           ascendingAction = null;
           descendingAction = null;
           output.remove(selectSliderActionsPanel);
@@ -186,9 +187,8 @@ public class SetUp extends JFrame implements ActionListener {
       }
     });
 
-    listOfThingsHappening = new JTextArea();
-    listOfThingsHappening.setText("recorded interactions will appear here");
-    listOfThingsHappening.setEditable(false);
+    listOfThingsHappening = new JPanel();
+    setListOfThingsHappening();
 
     contentPane.setLayout(new FlowLayout());
     contentPane.add(input);
@@ -203,28 +203,80 @@ public class SetUp extends JFrame implements ActionListener {
   public void actionPerformed(ActionEvent evt) {
 
   }
-  
+
   private void setListOfThingsHappening() {
-    String allTheThings = "";
-    for(Entry<List<ArduinoEvent>, List<UIAction>> interaction : serialCommunication.eventsToHandlers().entrySet()) {
-      allTheThings.concat(interaction.getKey().toString() + " -> " + interaction.getValue().toString() + "\n");
+    listOfThingsHappening.setVisible(false);
+    listOfThingsHappening.removeAll();
+    for (Entry<List<ArduinoEvent>, List<UIAction>> interaction : serialCommunication
+        .eventsToHandlers().entrySet()) {
+      for (UIAction uia : interaction.getValue()) {
+        String label = new String(interaction.getKey().toString() + " -> "
+            + interaction.getValue().toString() + "\n");
+        JPanel holder = new JPanel();
+        holder.setLayout(new BorderLayout());
+        holder.add(new JLabel(label), BorderLayout.WEST);
+        JButton remove = new ArduinoJButton("remove", interaction.getKey(), uia);
+        remove.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent A) {
+            ArduinoJButton button = (ArduinoJButton) A.getSource();
+            serialCommunication.unregisterEvent(button.arduinoEvent,
+                button.uiAction);
+            setListOfThingsHappening();
+          }
+        });
+        holder.add(remove, BorderLayout.EAST);
+        listOfThingsHappening.add(holder, BorderLayout.AFTER_LAST_LINE);
+      }
     }
-    for(Entry<ArduinoSlider, List<UIAction>> interaction : serialCommunication.slidersToAscHandlers().entrySet()) {
-      allTheThings.concat(interaction.getKey() + " -> " + interaction.getValue() + "\n");
+    for (Entry<ArduinoSlider, List<UIAction>> interaction : serialCommunication
+        .slidersToAscHandlers().entrySet()) {
+      ArduinoSlider slider = interaction.getKey();
+      for (UIAction uia : interaction.getValue()) {
+        String label = new String(slider + " -> " + uia + "\n");
+        JPanel holder = new JPanel();
+        holder.setLayout(new BorderLayout());
+        holder.add(new JLabel(label), BorderLayout.WEST);
+        JButton remove = new ArduinoJButton("remove", slider, uia);
+        remove.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent A) {
+            ArduinoJButton button = (ArduinoJButton) A.getSource();
+            serialCommunication.unregisterSliderAscEvent(button.arduinoSlider, button.uiAction);
+            setListOfThingsHappening();
+          }
+        });
+        holder.add(remove, BorderLayout.EAST);
+        listOfThingsHappening.add(holder, BorderLayout.AFTER_LAST_LINE);
+      }
+      // now do the descending one right underneath it
+      for (UIAction uia : serialCommunication.slidersToDescHandlers().get(slider)) {
+        String label = new String(slider + " -> " + uia + "\n");
+        JPanel holder = new JPanel();
+        holder.setLayout(new BorderLayout());
+        holder.add(new JLabel(label), BorderLayout.WEST);
+        JButton remove = new ArduinoJButton("remove", slider, uia);
+        remove.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent A) {
+            ArduinoJButton button = (ArduinoJButton) A.getSource();
+            serialCommunication.unregisterSliderDescEvent(button.arduinoSlider, button.uiAction);
+            setListOfThingsHappening();
+          }
+        });
+        holder.add(remove, BorderLayout.EAST);
+        listOfThingsHappening.add(holder, BorderLayout.AFTER_LAST_LINE);
+      }
     }
-    for(Entry<ArduinoSlider, List<UIAction>> interaction : serialCommunication.slidersToDescHandlers().entrySet()) {
-      allTheThings.concat(interaction.getKey() + " -> " + interaction.getValue() + "\n");
-    }
-    System.out.println(allTheThings);
-    listOfThingsHappening.setText(allTheThings);
+    listOfThingsHappening.setVisible(true);
   }
-  
+
   private String ascendingAndDescending() {
     if (ascendingAction != null && descendingAction != null) {
-      return "asc : " + ascendingAction.toString() + " ; desc : " + descendingAction.toString();
-    } if (ascendingAction != null) {
+      return "asc : " + ascendingAction.toString() + " ; desc : "
+          + descendingAction.toString();
+    }
+    if (ascendingAction != null) {
       return "asc : " + ascendingAction.toString() + " ; desc : ?";
-    } return "asc : ? ; desc : " + descendingAction.toString();
+    }
+    return "asc : ? ; desc : " + descendingAction.toString();
   }
 
   public static void main(String[] args) {

@@ -84,6 +84,13 @@ public class ArduinoDispatcher {
     }
     eventsToHandlers.get(l).remove(s);
   }
+  
+  void unregisterAllForSensor(ArduinoEvent sensor) {
+    if (!eventsToHandlers.containsKey(sensor)) {
+      return;
+   }
+   eventsToHandlers.remove(sensor);
+  }
 
   private ArduinoSlider registerSliderIfNecessary(List<ArduinoSensor> l) {
     ArduinoSlider slider = null;
@@ -104,8 +111,7 @@ public class ArduinoDispatcher {
     slidersToAscHandlers.get(slider).add(s);
   }
   
-  void unregisterSliderAscendingEvent(List<ArduinoSensor> l, UIAction s) {
-    ArduinoSlider slider = registerSliderIfNecessary(l);
+  void unregisterSliderAscendingEvent(ArduinoSlider slider, UIAction s) {
     if (!slidersToAscHandlers.containsKey(slider)) {
       return;
     }
@@ -120,8 +126,7 @@ public class ArduinoDispatcher {
     slidersToDescHandlers.get(slider).add(s);
   }
   
-  void unregisterSliderDescendingEvent(List<ArduinoSensor> l, UIAction s) {
-    ArduinoSlider slider = registerSliderIfNecessary(l);
+  void unregisterSliderDescendingEvent(ArduinoSlider slider, UIAction s) {
     if (!slidersToDescHandlers.containsKey(slider)) {
       return;
     }

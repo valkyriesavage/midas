@@ -2,7 +2,7 @@ package serialtalk;
 
 import java.util.List;
 
-public class ArduinoSlider {
+public class ArduinoSlider implements ArduinoObject {
   private List<ArduinoSensor> sensors;
   
   public ArduinoSlider(List<ArduinoSensor> sensors) {
