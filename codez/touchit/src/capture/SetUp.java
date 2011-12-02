@@ -1,5 +1,14 @@
 package capture;
 
+/**
+ * 
+ * Okay, VLKR, TODO:
+ * ***fix the sensitivities (in the arduino code)
+ * consider correcting to new slider design
+ * **add feedback for what's registering in general
+ * ****check logic on sliders (up is down and down is down?)
+ */
+
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -32,7 +41,6 @@ public class SetUp extends JFrame implements ActionListener {
 	JPanel listOfThingsHappening;
 
 	JPanel input = new JPanel();
-	JTextField whenIDo = new JTextField("when i do...");
 	JButton captureIn = new JButton("capture touch interaction");
 	JButton registerSlider = new JButton("register a slider");
 
@@ -59,8 +67,7 @@ public class SetUp extends JFrame implements ActionListener {
 				if (serialCommunication.isCapturing()) {
 					((JButton) A.getSource())
 							.setText("capture touch interaction");
-					whenIDo.setText(serialCommunication
-							.currentCaptureToString());
+					serialCommunication.updateWhenIDo();
 					output.add(itDoes, BorderLayout.CENTER);
 					output.add(selectOutputAction, BorderLayout.SOUTH);
 				} else {
@@ -70,35 +77,28 @@ public class SetUp extends JFrame implements ActionListener {
 						try {
 							Thread.sleep(100);
 						} catch (InterruptedException e) {}
-						whenIDo.setText(serialCommunication.currentCaptureToString());
+						serialCommunication.updateWhenIDo();
 					}
 				}
 				serialCommunication.toggleCapturing();
 			}
 		});
-		whenIDo.setEditable(false);
+		serialCommunication.whenIDo.setEditable(false);
 		registerSlider.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent A) {
-				if (serialCommunication.isCapturingSlider()) {
+				serialCommunication.toggleCapturingSlider();
+				if (!serialCommunication.isCapturingSlider()) {
 					((JButton) A.getSource()).setText("register a slider");
-					whenIDo.setText(serialCommunication
-							.currentSliderCaptureToString());
+					serialCommunication.updateWhenIDo();
 					output.add(selectSliderActionsPanel, BorderLayout.SOUTH);
 				} else {
 					((JButton) A.getSource()).setText("done");
 					captureIn.setEnabled(false);
-					while(serialCommunication.isCapturingSlider()) {
-						try {
-							Thread.sleep(100);
-						} catch (InterruptedException e) {}
-						whenIDo.setText(serialCommunication.currentSliderCaptureToString());
-					}
 				}
-				serialCommunication.toggleCapturingSlider();
 			}
 		});
 		input.setLayout(new BorderLayout());
-		input.add(whenIDo, BorderLayout.NORTH);
+		input.add(serialCommunication.whenIDo, BorderLayout.NORTH);
 		input.add(captureIn, BorderLayout.CENTER);
 		input.add(registerSlider, BorderLayout.SOUTH);
 
@@ -179,6 +179,7 @@ public class SetUp extends JFrame implements ActionListener {
 		contentPane.add(input);
 		contentPane.add(output);
 		contentPane.add(saveInteraction);
+		contentPane.add(pauseInteraction);
 		contentPane.add(clearInteractions);
 		contentPane.add(listOfThingsHappening);
 
@@ -204,11 +205,11 @@ public class SetUp extends JFrame implements ActionListener {
 	}
 	
 	private void refreshInterface() {
-		whenIDo.setText("when i do...");
 		itDoes.setText("it does...");
 		setListOfThingsHappening();
 		captureIn.setEnabled(true);
 		registerSlider.setEnabled(true);
+		serialCommunication.updateWhenIDo();
 	}
 
 	private SikuliScript getSikuliScriptFromFileDialog(ActionEvent A) {

@@ -13,9 +13,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.JTextField;
 
 import capture.UIAction;
 
@@ -51,6 +52,8 @@ public class SerialCommunication implements SerialPortEventListener {
   private String currentSerialInfo = new String();
 
   private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
+  
+  public JTextField whenIDo = new JTextField("when i do...");
 
   public void initialize() throws AWTException {
     CommPortIdentifier portId = null;
@@ -112,6 +115,7 @@ public class SerialCommunication implements SerialPortEventListener {
   public synchronized void toggleCapturing() {
     if (!capturing) {
       currentCapture = new ArrayList<ArduinoEvent>();
+      currentSliderCapture = null;
     }
     capturing = !capturing;
   }
@@ -119,6 +123,7 @@ public class SerialCommunication implements SerialPortEventListener {
   public synchronized void toggleCapturingSlider() {
     if (!capturingSlider) {
       currentSliderCapture = new ArrayList<ArduinoSensor>();
+      currentCapture = null;
     }
     capturingSlider = !capturingSlider;
   }
@@ -213,13 +218,15 @@ public class SerialCommunication implements SerialPortEventListener {
 	}
     if (capturing) {
       currentCapture.add(e);
-    } else {
-      if (capturingSlider) {
-        currentSliderCapture.add(e.whichSensor);
-      } else {
-        dispatcher.handleEvent(e);
-      }
+      updateWhenIDo();
+      return;
     }
+    if (capturingSlider) {
+      currentSliderCapture.add(e.whichSensor);
+      updateWhenIDo();
+      return;
+    }
+    dispatcher.handleEvent(e);
   }
   
   public void unregisterEvent(List<ArduinoEvent> l, UIAction a) {
@@ -246,5 +253,17 @@ public class SerialCommunication implements SerialPortEventListener {
   }
   public HashMap<ArduinoSlider, List<UIAction>> slidersToDescHandlers() {
     return dispatcher.slidersToDescHandlers;
+  }
+  
+  public void updateWhenIDo() {
+	  if (currentCapture != null && currentCapture.size() > 0) {
+		  whenIDo.setText(currentCaptureToString());
+		  return;
+	  }
+	  if (currentSliderCapture != null && currentSliderCapture.size() > 0) {
+		  whenIDo.setText(currentSliderCaptureToString());
+		  return;
+	  }
+	  whenIDo.setText("when i do...");
   }
 }
