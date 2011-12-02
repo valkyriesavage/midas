@@ -7,8 +7,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 public class SikuliScript implements UIAction {
-  public static final String SIKULI = "/home/valkyrie/src/Sikuli-X-1.0rc3/Sikuli-IDE/sikuli-ide.sh";
-  public static final String SIKULI_SCRIPT_DIRECTORY = "/home/valkyrie/other/touch-it-data/";
+  public static final String SIKULI = "/Applications/Sikuli-IDE.app/sikuli-ide.sh";
+  public static final String SIKULI_SCRIPT_DIRECTORY = "/Users/taska/ValkyrieStudy";
 
   private String scriptPath;
   private String myDescription = new String();

@@ -26,9 +26,10 @@ import capture.UIAction;
 public class SerialCommunication implements SerialPortEventListener {
   SerialPort serialPort;
   /** The port we're normally going to use. */
-  private static final String PORT_NAMES[] = { "/dev/tty.usbserial-A9007UX1", // Mac
+  private static final String PORT_NAMES[] = {
+	  "/dev/tty.usbmodem411", // Mac, Arduino Uno
       "/dev/ttyACM0", // Linux, specifically for Arduino Uno
-      "COM3", // Windows
+      //"COM3", // Windows
   };
   /** Buffered input stream from the port */
   private InputStream input;
@@ -52,6 +53,7 @@ public class SerialCommunication implements SerialPortEventListener {
 
   public void initialize() throws AWTException {
     CommPortIdentifier portId = null;
+    //System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     dispatcher = new ArduinoDispatcher();
     currentCapture = new ArrayList<ArduinoEvent>();
@@ -89,6 +91,8 @@ public class SerialCommunication implements SerialPortEventListener {
       // add event listeners
       serialPort.addEventListener(this);
       serialPort.notifyOnDataAvailable(true);
+      
+      System.out.println("serialPort seems to be " + serialPort);
     } catch (Exception e) {
       System.err.println(e.toString());
     }

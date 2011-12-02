@@ -42,4 +42,14 @@ public class ArduinoSlider implements ArduinoObject {
     }
     return false;
   }
+  
+  public String backwardsToString() {
+	  String ret = "slider : [";
+	  for(int i=sensors.size() - 1; i >= 0; i--) {
+		  ret += sensors.get(i) + ", ";
+	  }
+	  ret = ret.substring(0, ret.length() - 2); //get rid of trailing comma
+	  ret += "]";
+	  return ret;
+  }
 }

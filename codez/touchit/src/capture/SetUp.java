@@ -10,13 +10,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -111,8 +111,13 @@ public class SetUp extends JFrame implements ActionListener {
         int returnVal = chooser.showOpenDialog(((JButton) A.getSource())
             .getParent());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-          outputAction = new SikuliScript(chooser.getCurrentDirectory()
-              .getAbsolutePath());
+            if(chooser.getCurrentDirectory().getAbsolutePath().endsWith(".sikuli")) {
+          	  outputAction = new SikuliScript(chooser.getCurrentDirectory()
+          		.getAbsolutePath());
+          	}
+          	else {
+          	  outputAction = new SikuliScript(chooser.getSelectedFile().getAbsolutePath());
+            }
           itDoes.setText(outputAction.toString());
         }
       }
@@ -127,8 +132,13 @@ public class SetUp extends JFrame implements ActionListener {
         int returnVal = chooser.showOpenDialog(((JButton) A.getSource())
             .getParent());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-          ascendingAction = new SikuliScript(chooser.getCurrentDirectory()
-              .getAbsolutePath());
+        	if(chooser.getCurrentDirectory().getAbsolutePath().endsWith(".sikuli")) {
+          	  ascendingAction = new SikuliScript(chooser.getCurrentDirectory()
+          		.getAbsolutePath());
+          	}
+          	else {
+          	  ascendingAction = new SikuliScript(chooser.getSelectedFile().getAbsolutePath());
+            }
           itDoes.setText(ascendingAndDescending());
         }
       }
@@ -143,8 +153,13 @@ public class SetUp extends JFrame implements ActionListener {
         int returnVal = chooser.showOpenDialog(((JButton) A.getSource())
             .getParent());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-          descendingAction = new SikuliScript(chooser.getCurrentDirectory()
-              .getAbsolutePath());
+        	if(chooser.getCurrentDirectory().getAbsolutePath().endsWith(".sikuli")) {
+        	  descendingAction = new SikuliScript(chooser.getCurrentDirectory()
+        		.getAbsolutePath());
+        	}
+        	else {
+        	  descendingAction = new SikuliScript(chooser.getSelectedFile().getAbsolutePath());
+            }
           itDoes.setText(ascendingAndDescending());
         }
       }
@@ -188,6 +203,7 @@ public class SetUp extends JFrame implements ActionListener {
     });
 
     listOfThingsHappening = new JPanel();
+    listOfThingsHappening.setLayout(new BoxLayout(listOfThingsHappening, BoxLayout.PAGE_AXIS));
     setListOfThingsHappening();
 
     contentPane.setLayout(new FlowLayout());
@@ -225,7 +241,7 @@ public class SetUp extends JFrame implements ActionListener {
           }
         });
         holder.add(remove, BorderLayout.EAST);
-        listOfThingsHappening.add(holder, BorderLayout.AFTER_LAST_LINE);
+        listOfThingsHappening.add(holder);
       }
     }
     for (Entry<ArduinoSlider, List<UIAction>> interaction : serialCommunication
@@ -245,11 +261,11 @@ public class SetUp extends JFrame implements ActionListener {
           }
         });
         holder.add(remove, BorderLayout.EAST);
-        listOfThingsHappening.add(holder, BorderLayout.AFTER_LAST_LINE);
+        listOfThingsHappening.add(holder);
       }
       // now do the descending one right underneath it
       for (UIAction uia : serialCommunication.slidersToDescHandlers().get(slider)) {
-        String label = new String(slider + " -> " + uia + "\n");
+        String label = new String(slider.backwardsToString() + " -> " + uia + "\n");
         JPanel holder = new JPanel();
         holder.setLayout(new BorderLayout());
         holder.add(new JLabel(label), BorderLayout.WEST);
@@ -262,7 +278,7 @@ public class SetUp extends JFrame implements ActionListener {
           }
         });
         holder.add(remove, BorderLayout.EAST);
-        listOfThingsHappening.add(holder, BorderLayout.AFTER_LAST_LINE);
+        listOfThingsHappening.add(holder);
       }
     }
     listOfThingsHappening.setVisible(true);
