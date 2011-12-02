@@ -266,4 +266,8 @@ public class SerialCommunication implements SerialPortEventListener {
 	  }
 	  whenIDo.setText("when i do...");
   }
+  
+  public JTextField getWhatISee() {
+	  return dispatcher.whatISee;
+  }
 }

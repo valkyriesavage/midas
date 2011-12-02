@@ -4,7 +4,8 @@ import java.awt.AWTException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
+
+import javax.swing.JTextField;
 
 import capture.UIAction;
 
@@ -17,12 +18,16 @@ public class ArduinoDispatcher {
 
   // we want to phase out old events since they won't be part of the same gesture
   private static final int TIMEOUT_FOR_INSTRUCTION = 2000;
+  
+  public JTextField whatISee = new JTextField("what i see is...                                                                        ");
 
   public ArduinoDispatcher() throws AWTException {
     this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<UIAction>>();
     this.slidersToAscHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.slidersToDescHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.recentEvents = new ArrayList<ArduinoEvent>();
+    
+    whatISee.setSize(120, 2);
   }
   
   public void clearAllInteractions() {
@@ -39,6 +44,7 @@ public class ArduinoDispatcher {
     }
 
     recentEvents.add(e);
+    updateWhatISee();
     ArduinoSlider slider;
 
     if ((slider = ArduinoSetup.isPartOfSlider(e.whichSensor)) != null) {
@@ -133,5 +139,7 @@ public class ArduinoDispatcher {
     slidersToDescHandlers.get(slider).remove(s);
   }
   
-  
+  void updateWhatISee() {
+	  whatISee.setText("what i see is... " + recentEvents);
+  }
 }

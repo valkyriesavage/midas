@@ -26,7 +26,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import serialtalk.ArduinoEvent;
@@ -182,6 +184,10 @@ public class SetUp extends JFrame implements ActionListener {
 		contentPane.add(pauseInteraction);
 		contentPane.add(clearInteractions);
 		contentPane.add(listOfThingsHappening);
+		
+		JPanel specialContainer = new JPanel();
+		specialContainer.add(serialCommunication.getWhatISee());
+		contentPane.add(specialContainer);
 
 		contentPane.setVisible(true);
 	}
