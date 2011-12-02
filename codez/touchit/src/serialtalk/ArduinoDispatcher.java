@@ -26,14 +26,13 @@ public class ArduinoDispatcher {
     this.slidersToAscHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.slidersToDescHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.recentEvents = new ArrayList<ArduinoEvent>();
-    
-    whatISee.setSize(120, 2);
   }
   
   public void clearAllInteractions() {
     this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<UIAction>>();
     this.slidersToAscHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.slidersToDescHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
+    ArduinoSetup.resetSliders();
   }
 
   void handleEvent(ArduinoEvent e) {
@@ -46,31 +45,35 @@ public class ArduinoDispatcher {
     recentEvents.add(e);
     updateWhatISee();
     ArduinoSlider slider;
+    ArduinoSensor current = e.whichSensor;
 
-    if ((slider = ArduinoSetup.isPartOfSlider(e.whichSensor)) != null) {
-      if (recentEvents.size() > 1
-          && ArduinoSetup
-              .isPartOfSlider(recentEvents.get(recentEvents.size() - 1).whichSensor) == slider) {
-        ArduinoSensor previous = recentEvents.get(recentEvents.size() - 1).whichSensor;
-        if (slider.ascOrDesc(previous, e.whichSensor) == Direction.ASCENDING) {
-          List<UIAction> toDo = this.slidersToAscHandlers.get(slider);
-          for (UIAction action : toDo) {
-            action.doAction();
-          }
-        } else {
-          List<UIAction> toDo = this.slidersToDescHandlers.get(slider);
-          for (UIAction action : toDo) {
-            action.doAction();
+    if ((slider = ArduinoSetup.isPartOfSlider(current)) != null) {
+      if (recentEvents.size() > 1) {
+    	  ArduinoSensor previous = recentEvents.get(recentEvents.size() - 2).whichSensor;
+        if (ArduinoSetup.isPartOfSlider(previous) == slider) {
+          if (slider.ascOrDesc(previous, current) == Direction.ASCENDING) {
+            List<UIAction> toDo = this.slidersToAscHandlers.get(slider);
+            for (UIAction action : toDo) {
+              System.out.println("ascending : " + action);
+              action.doAction();
+            }
+          } else {
+            List<UIAction> toDo = this.slidersToDescHandlers.get(slider);
+            for (UIAction action : toDo) {
+              System.out.println("descending : " + action);
+              action.doAction();
+            }
           }
         }
       }
     } else {
-      for (int i = 0; i <= recentEvents.size(); i++) {
+      for (int i = 1; i <= recentEvents.size(); i++) {
         List<ArduinoEvent> iLengthList = recentEvents.subList(
             recentEvents.size() - i, recentEvents.size());
         if (eventsToHandlers.containsKey(iLengthList)) {
-          for (UIAction s : eventsToHandlers.get(iLengthList)) {
-            s.doAction();
+          for (UIAction action : eventsToHandlers.get(iLengthList)) {
+            action.doAction();
+        	System.out.println("doing a thing : " + action);
           }
         }
       }
@@ -104,6 +107,9 @@ public class ArduinoDispatcher {
       if ((slider = ArduinoSetup.isPartOfSlider(sensor)) == null) {
         slider = new ArduinoSlider(l);
         ArduinoSetup.addSlider(slider);
+      }
+      if (slider != null) {
+    	  break;
       }
     }
     return slider;

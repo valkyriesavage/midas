@@ -24,10 +24,6 @@ public class ArduinoSlider implements ArduinoObject {
     return Math.abs(sensors.indexOf(sensorsTouched.get(0)) - sensors.indexOf(sensorsTouched.get(sensorsTouched.size())));
   }
   
-  public String toString() {
-    return "slider : " + sensors.toString();
-  }
-  
   public int hashCode() {
     String allSensors = "";
     for (ArduinoSensor as : sensors) {
@@ -51,5 +47,9 @@ public class ArduinoSlider implements ArduinoObject {
 	  ret = ret.substring(0, ret.length() - 2); //get rid of trailing comma
 	  ret += "]";
 	  return ret;
+  }
+  
+  public String toString() {
+    return "slider : " + sensors.toString();
   }
 }

@@ -5,7 +5,6 @@ package capture;
  * Okay, VLKR, TODO:
  * ***fix the sensitivities (in the arduino code)
  * consider correcting to new slider design
- * **add feedback for what's registering in general
  * ****check logic on sliders (up is down and down is down?)
  */
 
