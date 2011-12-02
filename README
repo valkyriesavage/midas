@@ -1,9 +1,8 @@
-Touchit is a small program designed to work with an Arduino connected
-to a serial port which communicates with a Java program.  It isn't done yet,
-but when it is, the idea is this:
+ghoti (pronounced "fish") is a small program designed to work with an Arduino connected to a serial port.
 
 1. connect the Arduino to an MPR121 capacitive touch board
-2. add some touch sensors
-3. use the Java Robot-driven interface to assign those touch inputs
-   to actions on-screen (e.g. typing, pressing buttons, opening programs...)
-4. repeat
+2. add some touch sensors to whatever you want (as long as it's not conductive!)
+3. use Sikuli to create visual scripts
+4. tie the scripts to the interactions via demonstration
+5. repeat
+6. watch your purdy interface make the sensors do everything you ever dreamed of!
