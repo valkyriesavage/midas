@@ -5,7 +5,6 @@ package capture;
  * Okay, VLKR, TODO:
  * ***fix the sensitivities (in the arduino code)
  * consider correcting to new slider design
- * ****check logic on sliders (up is down and down is down?)
  */
 
 import java.awt.AWTException;
@@ -59,6 +58,7 @@ public class SetUp extends JFrame implements ActionListener {
 
 	public SetUp() throws AWTException {
 		setSize(530, 480);
+		setTitle("GHOTI");
 
 		serialCommunication = new SerialCommunication();
 		serialCommunication.initialize();

@@ -72,8 +72,8 @@ public class ArduinoDispatcher {
             recentEvents.size() - i, recentEvents.size());
         if (eventsToHandlers.containsKey(iLengthList)) {
           for (UIAction action : eventsToHandlers.get(iLengthList)) {
+          	System.out.println("doing a thing : " + action);
             action.doAction();
-        	System.out.println("doing a thing : " + action);
           }
         }
       }

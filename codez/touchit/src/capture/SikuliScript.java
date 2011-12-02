@@ -27,10 +27,6 @@ public class SikuliScript implements UIAction {
       sikuliProc.waitFor();
     } catch (IOException e) {
       e.printStackTrace();
-      JFrame errorPop = new JFrame("problems!");
-      errorPop.add(new JLabel(
-          "there was a problem with that sikuli script. did you save it?"));
-      errorPop.setVisible(true);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
