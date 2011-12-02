@@ -45,6 +45,7 @@ public class SerialCommunication implements SerialPortEventListener {
   // are we saving events?
   boolean capturing = false;
   boolean capturingSlider = false;
+  boolean paused = false;
   List<ArduinoEvent> currentCapture = null;
   List<ArduinoSensor> currentSliderCapture = null;
   private String currentSerialInfo = new String();
@@ -92,7 +93,6 @@ public class SerialCommunication implements SerialPortEventListener {
       serialPort.addEventListener(this);
       serialPort.notifyOnDataAvailable(true);
       
-      System.out.println("serialPort seems to be " + serialPort);
     } catch (Exception e) {
       System.err.println(e.toString());
     }
@@ -129,6 +129,14 @@ public class SerialCommunication implements SerialPortEventListener {
 
   public synchronized boolean isCapturingSlider() {
     return capturingSlider;
+  }
+  
+  public synchronized boolean isPaused() {
+	  return paused;
+  }
+  
+  public void togglePaused() {
+	  paused = !paused;
   }
 
   /**
@@ -200,6 +208,9 @@ public class SerialCommunication implements SerialPortEventListener {
   }
 
   public synchronized void handleCompleteEvent(ArduinoEvent e) {
+    if (paused) {
+	  return;
+	}
     if (capturing) {
       currentCapture.add(e);
     } else {

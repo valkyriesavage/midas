@@ -5,6 +5,8 @@
 *.dvi
 *.blg
 *.log
+*.out
+*.jpg
 codez/touchit/bin/*
 codez/cad/*
 codez/touchit/src/examples/*
