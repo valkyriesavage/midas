@@ -19,13 +19,14 @@ public class ArduinoDispatcher {
   // we want to phase out old events since they won't be part of the same gesture
   private static final int TIMEOUT_FOR_INSTRUCTION = 2000;
   
-  public JTextField whatISee = new JTextField("what i see is...                                                                        ");
+  public JTextField whatISee = new JTextField("what it sees is...                                                                        ");
 
   public ArduinoDispatcher() throws AWTException {
     this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<UIAction>>();
     this.slidersToAscHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.slidersToDescHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.recentEvents = new ArrayList<ArduinoEvent>();
+    whatISee.setEditable(false);
   }
   
   public void clearAllInteractions() {
@@ -146,6 +147,6 @@ public class ArduinoDispatcher {
   }
   
   void updateWhatISee() {
-	  whatISee.setText("what i see is... " + recentEvents);
+	  whatISee.setText("what it sees is... " + recentEvents);
   }
 }
