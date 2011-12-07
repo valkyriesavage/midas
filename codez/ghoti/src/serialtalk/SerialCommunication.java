@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import capture.UIAction;
@@ -57,7 +58,7 @@ public class SerialCommunication implements SerialPortEventListener {
 
   public void initialize() throws AWTException {
     CommPortIdentifier portId = null;
-    //System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
+    System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     dispatcher = new ArduinoDispatcher();
     currentCapture = new ArrayList<ArduinoEvent>();
@@ -214,6 +215,7 @@ public class SerialCommunication implements SerialPortEventListener {
 
   public synchronized void handleCompleteEvent(ArduinoEvent e) {
     if (paused) {
+      dispatcher.clearRecentEvents();
 	  return;
 	}
     if (capturing) {
@@ -267,7 +269,7 @@ public class SerialCommunication implements SerialPortEventListener {
 	  whenIDo.setText("when i do...");
   }
   
-  public JTextField getWhatISee() {
+  public JTextArea getWhatISee() {
 	  return dispatcher.whatISee;
   }
 }

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 
 import capture.UIAction;
 
@@ -19,7 +19,7 @@ public class ArduinoDispatcher {
   // we want to phase out old events since they won't be part of the same gesture
   private static final int TIMEOUT_FOR_INSTRUCTION = 2000;
   
-  public JTextField whatISee = new JTextField("what it sees is...                                                                        ");
+  public JTextArea whatISee = new JTextArea("what it sees is...");
 
   public ArduinoDispatcher() throws AWTException {
     this.eventsToHandlers = new HashMap<List<ArduinoEvent>, List<UIAction>>();
@@ -27,6 +27,7 @@ public class ArduinoDispatcher {
     this.slidersToDescHandlers = new HashMap<ArduinoSlider, List<UIAction>>();
     this.recentEvents = new ArrayList<ArduinoEvent>();
     whatISee.setEditable(false);
+    whatISee.setSize(100, 5);
   }
   
   public void clearAllInteractions() {
@@ -49,6 +50,11 @@ public class ArduinoDispatcher {
     ArduinoSensor current = e.whichSensor;
 
     if ((slider = ArduinoSetup.isPartOfSlider(current)) != null) {
+      if (e.touchDirection == TouchDirection.UP) { 
+    	  // ignore the release events, since they won't necessarily be in order
+    	  recentEvents.remove(e);
+    	  return;
+      }
       if (recentEvents.size() > 1) {
     	  ArduinoSensor previous = recentEvents.get(recentEvents.size() - 2).whichSensor;
         if (ArduinoSetup.isPartOfSlider(previous) == slider) {
@@ -148,5 +154,9 @@ public class ArduinoDispatcher {
   
   void updateWhatISee() {
 	  whatISee.setText("what it sees is... " + recentEvents);
+  }
+  
+  void clearRecentEvents() {
+	  recentEvents = new ArrayList<ArduinoEvent>();
   }
 }

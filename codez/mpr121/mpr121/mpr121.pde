@@ -1,4 +1,3 @@
-
 #include "mpr121.h"
 #include <Wire.h>
 
@@ -17,21 +16,21 @@ void setup(){
 
 void loop(){
   readTouchInputs();
+  mpr121_setup();
 }
 
 
 void readTouchInputs(){
   if(!checkInterrupt()){
-    
+
     //read the touch state from the MPR121
     Wire.requestFrom(0x5A,2);
-    
+
     byte LSB = Wire.receive();
     byte MSB = Wire.receive();
-    
+
     uint16_t touched = ((MSB << 8) | LSB); //16bits that make up the touch states
 
-    
     for (int i=0; i < 12; i++){  // Check what electrodes were pressed
       if(touched & (1<<i)){
         if(touchStates[i] == 0){
@@ -51,14 +50,10 @@ void readTouchInputs(){
           char buffer[4];
           sprintf(buffer, "%02dU", i);
           Serial.print(buffer);
-          mpr121_setup();
-       }
-        
+         }   
         touchStates[i] = 0;
       }
-    
     }
-    
   }
 }
 

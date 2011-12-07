@@ -3,7 +3,6 @@ package capture;
 /**
  * 
  * Okay, VLKR, TODO:
- * ***fix the sensitivities (in the arduino code)
  * consider correcting to new slider design
  */
 

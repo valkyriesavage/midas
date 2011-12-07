@@ -7,10 +7,11 @@
 *.log
 *.out
 *.jpg
-codez/touchit/bin/*
+codez/ghoti/bin/*
 codez/cad/*
-codez/touchit/src/examples/*
+codez/ghoti/src/examples/*
 *.metadata
 *.classpath
 *.project*
 *.settings*
+testdata/*
