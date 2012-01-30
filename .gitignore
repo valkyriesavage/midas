@@ -7,9 +7,10 @@
 *.log
 *.out
 *.jpg
-codez/ghoti/bin/*
+*.pdf
+codez/midas_cu/bin/*
 codez/cad/*
-codez/ghoti/src/examples/*
+codez/midas_cu/src/examples/*
 *.metadata
 *.classpath
 *.project*
