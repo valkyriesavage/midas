@@ -24,18 +24,18 @@ public class ArduinoEvent implements ArduinoObject {
   }
   
   public int hashCode() {
-    return this.whichSensor.which.height + 100*this.whichSensor.which.width + 1000*this.touchDirection.ordinal();
+    return this.whichSensor.location.x + 100*this.whichSensor.location.y + 1000*this.touchDirection.ordinal();
   }
   
   @Override
   public String toString() {
     String retVal = new String();
-    if (touchDirection == TouchDirection.UP){
+    if (touchDirection == TouchDirection.TOUCH){
       retVal += "release ";
-    } else if (touchDirection == TouchDirection.DOWN) {
+    } else if (touchDirection == TouchDirection.RELEASE) {
       retVal += "touch ";
     }
-    retVal += whichSensor.which;
+    retVal += whichSensor.location;
     return retVal;
   }
   

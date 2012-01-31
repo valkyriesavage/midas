@@ -1,6 +1,7 @@
 package capture;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -14,17 +15,26 @@ public class SensorButtonGroup extends JPanel {
   private ArduinoJButton triggerButton;
   private JButton rotateLeft = new JButton("rotate left");
   private JButton rotateRight = new JButton("rotate right");
+  private JButton larger = new JButton("+");
+  private JButton smaller = new JButton("-");
   private JButton delete = new JButton("x");
   private JButton name = new JButton("set name");
-  private JCheckBox verified = new JCheckBox("Verified location?");
+  private JCheckBox verified = new JCheckBox("location?");
   
   public SensorButtonGroup(Icon icon, ArduinoSensor sensor) {
     triggerButton = new ArduinoJButton(icon, sensor);
     this.setLayout(new BorderLayout());
-    this.add(name, BorderLayout.NORTH);
-    this.add(rotateLeft, BorderLayout.WEST);
-    this.add(triggerButton, BorderLayout.CENTER);
-    this.add(rotateRight, BorderLayout.EAST);
+    
+    add(name, BorderLayout.NORTH);
+    add(triggerButton, BorderLayout.CENTER);
+  
+    JPanel turnAndSize = new JPanel();
+    turnAndSize.setLayout(new GridLayout(2,2));
+    turnAndSize.add(rotateLeft);
+    turnAndSize.add(rotateRight);
+    turnAndSize.add(smaller);
+    turnAndSize.add(larger);
+    add(turnAndSize, BorderLayout.EAST);
     
     JPanel verifyAndDeletePanel = new JPanel();
     verifyAndDeletePanel.add(verified);

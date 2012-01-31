@@ -1,20 +1,25 @@
 package serialtalk;
 
-import java.awt.Dimension;
+import java.awt.Point;
 
 public class ArduinoSensor implements ArduinoObject {
-  public Dimension which;
+  public Point location;
   
   private String name;
   
-  public ArduinoSensor(Dimension which) {
-    this.which = which;
-    this.name = "" + which;
+  public ArduinoSensor(Point location) {
+    this.location = location;
+    this.name = "" + location;
   }
   
   public ArduinoSensor(int x, int y) {
-    this.which = new Dimension(x,y);
-    this.name = "" + which;
+    this.location = new Point(x,y);
+    this.name = "" + location;
+  }
+  
+  public ArduinoSensor(String name) {
+    this.name = name;
+    this.location = new Point(-1,-1);
   }
   
   public void setName(String name) {

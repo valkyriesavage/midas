@@ -2,10 +2,10 @@ package capture;
 
 /**
  * 
- * Okay, VLKR, TODO:
+ * TODO:
  *  hella updated interface
- * 	grid thing for layout of sensors
- * 	combo/slider/pad/button differentiation
+ *    add functionality for updating button names/actions
+ * 	  grid thing for layout of sensors
  */
 
 import java.awt.AWTException;
@@ -22,6 +22,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
@@ -105,7 +106,7 @@ public class SetUp extends JFrame implements ActionListener {
 		ArduinoSensor[] listOfButtons = {};
 		buttonMappings.setLayout(new GridLayout(0, 3));
 		for (Map.Entry<ArduinoSensor, UIScript> e : serialCommunication.buttonsToHandlers().entrySet()) {
-	    buttonMappings.add(new JLabel(e.getKey().toString()));
+	    buttonMappings.add(new JTextField(e.getKey().toString()));
 	    listOfButtons[listOfButtons.length] = e.getKey();
 	    buttonMappings.add(new JLabel(e.getValue().toString()));
 	    buttonMappings.add(new JButton("x"));
@@ -121,7 +122,7 @@ public class SetUp extends JFrame implements ActionListener {
     ArduinoSlider[] listOfSliders = {};
     sliderMappings.setLayout(new GridLayout(0, 4));
     for (Map.Entry<ArduinoSlider, List<UIScript>> e : serialCommunication.slidersToHandlers().entrySet()) {
-      sliderMappings.add(new JLabel(e.getKey().toString()));
+      sliderMappings.add(new JTextField(e.getKey().toString()));
       listOfSliders[listOfSliders.length] = e.getKey(); 
       for(UIScript s : e.getValue()) {
         sliderMappings.add(new JLabel(s.toString()));
@@ -141,9 +142,10 @@ public class SetUp extends JFrame implements ActionListener {
     comboSection.setLayout(new BorderLayout());
     comboSection.add(new JLabel("combos"), BorderLayout.NORTH);
     JPanel comboMappings = new JPanel();
-    comboMappings.setLayout(new GridLayout(0, 3));
+    comboMappings.setLayout(new GridLayout(0, 4));
     for (Map.Entry<List<ArduinoEvent>, UIScript> e : serialCommunication.combosToHandlers().entrySet()) {
       comboMappings.add(new JLabel(e.getKey().toString()));
+      comboMappings.add(new JButton("change"));
       comboMappings.add(new JLabel(e.getValue().toString()));
       comboMappings.add(new JButton("x"));
     }

@@ -27,7 +27,7 @@ public class ArduinoSlider implements ArduinoObject {
   public int hashCode() {
     String allSensors = "";
     for (ArduinoSensor as : sensors) {
-      allSensors += as.which;
+      allSensors += as.location;
     }
     return Integer.parseInt(allSensors);
   }

@@ -1,6 +1,6 @@
 package serialtalk;
 
 public enum TouchDirection {
-  UP,
-  DOWN,
+  TOUCH,
+  RELEASE,
 }

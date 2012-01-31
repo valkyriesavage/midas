@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import capture.UIScript;
 
 /**
- * This code was inspired by the internet.
+ * This code was inspired by the Internet.
  */
 
 public class SerialCommunication implements SerialPortEventListener {
@@ -33,6 +33,7 @@ public class SerialCommunication implements SerialPortEventListener {
   /** Buffered input stream from the port */
   private InputStream input;
   /** The output stream to the port */
+  @SuppressWarnings("unused")
   private OutputStream output;
   /** Milliseconds to block while waiting for port open */
   private static final int TIME_OUT = 2000;
@@ -44,18 +45,21 @@ public class SerialCommunication implements SerialPortEventListener {
   boolean paused = false;
   private String currentSerialInfo = new String();
 
-  private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
+  //private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
+  private Pattern matchOneArduino2DMessage = Pattern.compile("((\\d{2})(U|D)){2}");
   
   public void initialize() throws AWTException {
+    ArduinoSetup.initialize();
+    
     CommPortIdentifier portId = null;
-    System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
+    //System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
+    @SuppressWarnings("rawtypes")
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     dispatcher = new ArduinoDispatcher();
 
     // iterate through, looking for the port
     while (portEnum.hasMoreElements()) {
-      CommPortIdentifier currPortId = (CommPortIdentifier) portEnum
-          .nextElement();
+      CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
       for (String portName : PORT_NAMES) {
         if (currPortId.getName().equals(portName)) {
           portId = currPortId;
@@ -126,19 +130,20 @@ public class SerialCommunication implements SerialPortEventListener {
 
       currentSerialInfo = currentSerialInfo + new String(touched).trim();
 
-      Matcher oneMessage;
+      Matcher one2DMessage;
 
-      while ((oneMessage = matchOneArduinoMessage.matcher(currentSerialInfo))
+      while ((one2DMessage = matchOneArduino2DMessage.matcher(currentSerialInfo))
           .lookingAt()) {
-        currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
+        System.out.println(one2DMessage.group());
+        currentSerialInfo = currentSerialInfo.substring(one2DMessage.end());
         TouchDirection direction;
-        if (oneMessage.group(2).equals("U")) {
-          direction = TouchDirection.UP;
+        if (one2DMessage.group(2).equals("U") && one2DMessage.group(2).equals(one2DMessage.group(4))) {
+          direction = TouchDirection.TOUCH;
         } else {
-          direction = TouchDirection.DOWN;
+          direction = TouchDirection.RELEASE;
         }
         ArduinoEvent currentEvent = new ArduinoEvent(
-            ArduinoSetup.sensors[Integer.parseInt(oneMessage.group(1))],
+            ArduinoSetup.sensors[Integer.parseInt(one2DMessage.group(1))][Integer.parseInt(one2DMessage.group(3))],
             direction);
         handleCompleteEvent(currentEvent);
       }
@@ -161,6 +166,7 @@ public class SerialCommunication implements SerialPortEventListener {
   public Map<ArduinoSensor, UIScript> buttonsToHandlers() {
     return dispatcher.buttonsToHandlers;
   }
+
   /*
    * This effectively zips the lists of ascending and descending handlers for sliders.
    * 
@@ -188,6 +194,15 @@ public class SerialCommunication implements SerialPortEventListener {
     }
     return slidersToHandlers;
   }
+  
+  public Map<ArduinoSlider, UIScript> slidersToAscHandlers() {
+    return dispatcher.slidersToAscHandlers;
+  }
+  
+  public Map<ArduinoSlider, UIScript> slidersToDescHandlers() {
+    return dispatcher.slidersToDescHandlers;
+  }
+
   public Map<ArduinoSensor, UIScript> padsToHandlers() {
     return dispatcher.padsToHandlers;
   }

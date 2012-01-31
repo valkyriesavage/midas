@@ -23,14 +23,14 @@ public class ArduinoJButton extends JButton {
     this.addMouseListener(new MouseListener() {
       public void mousePressed(MouseEvent event) {
         ArduinoEvent triggered = new ArduinoEvent(((ArduinoJButton)event.getComponent()).sensor,
-                                                  TouchDirection.DOWN);
+                                                  TouchDirection.RELEASE);
         SetUp.serialCommunication.handleCompleteEvent(triggered);
         activate();
       }
 
       public void mouseReleased(MouseEvent event) {
         ArduinoEvent triggered = new ArduinoEvent(((ArduinoJButton)event.getComponent()).sensor,
-                                                  TouchDirection.UP);
+                                                  TouchDirection.TOUCH);
         SetUp.serialCommunication.handleCompleteEvent(triggered);
         deactivate();
       }

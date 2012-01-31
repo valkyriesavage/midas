@@ -2,7 +2,6 @@ package capture;
 
 import java.awt.AWTException;
 import java.awt.Point;
-import java.awt.Robot;
 
 public class DragAction extends RobotAction implements UIAction {
   
