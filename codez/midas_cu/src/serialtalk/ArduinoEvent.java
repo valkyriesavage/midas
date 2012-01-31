@@ -24,7 +24,7 @@ public class ArduinoEvent implements ArduinoObject {
   }
   
   public int hashCode() {
-    return this.whichSensor.which + 100*this.touchDirection.ordinal();
+    return this.whichSensor.which.height + 100*this.whichSensor.which.width + 1000*this.touchDirection.ordinal();
   }
   
   @Override

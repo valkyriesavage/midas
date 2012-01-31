@@ -1,11 +1,19 @@
 package serialtalk;
 
+import java.awt.Dimension;
+
 public class ArduinoSensor implements ArduinoObject {
-  public int which;
+  public Dimension which;
+  
   private String name;
   
-  public ArduinoSensor(int which) {
+  public ArduinoSensor(Dimension which) {
     this.which = which;
+    this.name = "" + which;
+  }
+  
+  public ArduinoSensor(int x, int y) {
+    this.which = new Dimension(x,y);
     this.name = "" + which;
   }
   
