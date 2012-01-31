@@ -1,8 +1,20 @@
-ghoti (pronounced "fish") is a small program designed to work with an Arduino connected to a serial port.
+Midas Cu is exploring how to support designers in rapidly creating and
+iterating on interaction ideas for objects.  We are moving increasingly
+towards a world where we can print any object we dream of in any material
+we like, and electronics and circuits should be no exception.  By using
+some sheets of copper foil and vinyl along with a vinyl cutter and an Arduino,
+the interface and components contained in this repository permits a person
+to create capacitive touch sensors in any desired shape and affix them to any
+object.  The "capturing" interface then allows them to "program" an action
+on the computer by demonstrating it, which will then be parroted back on the
+assigned trigger.
 
-1. connect the Arduino to an MPR121 capacitive touch board
-2. add some touch sensors to whatever you want (as long as it's not conductive!)
-3. use Sikuli to create visual scripts
-4. tie the scripts to the interactions via demonstration
-5. repeat
-6. watch your purdy interface make the sensors do everything you ever dreamed of!
+Components of the system:
+
+codez/
+  mpr_121/
+    This directory contains code to be loaded onto an Arduino.
+  midas_cu/
+    This directory contains Java Swing code that makes the interface run.
+paper/
+  This directory contains the TeX source for the paper on Midas Cu.
