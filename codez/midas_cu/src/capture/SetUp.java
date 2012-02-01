@@ -10,12 +10,16 @@ package capture;
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +31,13 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.apache.batik.dom.svg.SVGDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.batik.swing.JSVGCanvas;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Element;
+import org.w3c.dom.svg.SVGDocument;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
@@ -40,6 +51,9 @@ public class SetUp extends JFrame implements ActionListener {
 	public static String PROJ_HOME = "/Users/valkyriesavage/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
+  JSVGCanvas svgCanvas = new JSVGCanvas();
+  SVGGraphics2D g;
+  SVGDocument doc;
 	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
@@ -71,12 +85,39 @@ public class SetUp extends JFrame implements ActionListener {
 	}
 	
 	private void setUpTheGrid() {
+	  setUpSVGCanvas();
+	  
     buttonDisplayGrid.setPreferredSize(new Dimension(300,600));
     buttonDisplayGrid.setLayout(new BorderLayout());
-    buttonDisplayGrid.add(new JLabel("Hullo from THE GRID"), BorderLayout.NORTH);
+    buttonDisplayGrid.add(svgCanvas, BorderLayout.NORTH);
     
     setUpButtonCreator();
     buttonDisplayGrid.add(buttonCreatorPanel, BorderLayout.SOUTH);
+	}
+	
+	private void setUpSVGCanvas() {
+	   svgCanvas.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
+	   svgCanvas.setSize(300,300);
+	   DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
+     String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+     doc = (SVGDocument) impl.createDocument(svgNS, "svg", null);
+     g = new SVGGraphics2D(doc);
+     g.setSVGCanvasSize(new Dimension(300, 300));
+     svgCanvas.setSVGDocument(doc);
+	}
+	
+	public void paint() {
+	  for (SensorButtonGroup sbg : displayedButtons) {
+	    sbg.paint(g);
+	  }
+	  Shape circle = new Ellipse2D.Double(0, 0, 50, 50);
+    g.setPaint(Color.red);
+    g.fill(circle);
+    g.translate(60, 0);
+    
+
+    Element root = doc.getDocumentElement();
+    g.getRoot(root);
 	}
 
 	private void setUpButtonCreator() {
@@ -88,6 +129,9 @@ public class SetUp extends JFrame implements ActionListener {
 	    public void itemStateChanged(ItemEvent event) {
 	      if (event.getStateChange() == ItemEvent.SELECTED) {
 	        queuedIconLocation = ((JComboBox)event.getSource()).getSelectedItem().toString();
+	        if (queuedIconLocation.equals("slider")) {
+	          //TODO activate something which permits choosing the length of the slider
+	        }
 	      }
 	    }
 	  });
@@ -97,6 +141,8 @@ public class SetUp extends JFrame implements ActionListener {
 	    public void actionPerformed(ActionEvent event) {
 	      SensorButtonGroup newButton = new SensorButtonGroup(queuedIconLocation);
 	      displayedButtons.add(newButton);
+	      paint();
+	      //svgCanvas.setURI("file:///Users/valkyriesavage/projects/midas_cu/codez/midas_cu/src/images/"+queuedIconLocation+".svg");
 	      cleanUpDeletions();
 	    }
 	  });
@@ -114,6 +160,7 @@ public class SetUp extends JFrame implements ActionListener {
 	    public void actionPerformed(ActionEvent event) {
 	      cleanUpDeletions();
         if(displayedButtons.size() > 0) {
+          //TODO
           System.out.println("once this is hooked up for it, we will print copper shapes here!");
         } else {
           JOptionPane.showMessageDialog(buttonDisplayGrid, "there are no shapes to print!");
@@ -125,6 +172,7 @@ public class SetUp extends JFrame implements ActionListener {
 	    public void actionPerformed(ActionEvent event) {
 	      cleanUpDeletions();
 	      if(displayedButtons.size() > 0) {
+	        //TODO
 	        System.out.println("once this is hooked up for it, we will print vinyl shapes here!");
 	      } else {
 	        JOptionPane.showMessageDialog(buttonDisplayGrid, "there are no shapes to print!");
@@ -147,10 +195,12 @@ public class SetUp extends JFrame implements ActionListener {
 	    displayedButtons.remove(deleteable);
 	  }
 	  generatePathways();
+	  paint();
 	}
 	
 	private void generatePathways() {
-	  System.out.println("TODO: include a way to generate these.  :)");
+	  //TODO
+	  System.out.println("we would be generating pathways now.  :)");
 	}
 	
 	private void setListsOfThingsHappening() {

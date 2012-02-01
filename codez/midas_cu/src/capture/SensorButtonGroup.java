@@ -1,6 +1,7 @@
 package capture;
 
 import java.awt.BorderLayout;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +15,7 @@ import util.ImageIconUtil;
 
 public class SensorButtonGroup extends JPanel {
   private static final long serialVersionUID = -3154036436928212098L;
-  private ArduinoJButton triggerButton;
+  private ArduinoSensorButton triggerButton;
   private JButton rotateLeft = new JButton("<");
   private JButton rotateRight = new JButton(">");
   private JButton larger = new JButton("+");
@@ -27,7 +28,7 @@ public class SensorButtonGroup extends JPanel {
   
   public SensorButtonGroup(String shape) {
     Icon icon = ImageIconUtil.createImageIcon("/images/"+shape+".png", shape);
-    triggerButton = new ArduinoJButton(icon);
+    triggerButton = new ArduinoSensorButton(icon);
     this.setLayout(new BorderLayout());
     
     initializeButtons();
@@ -78,6 +79,10 @@ public class SensorButtonGroup extends JPanel {
         deleteMe = true;
       }
     });
+  }
+  
+  public void paint(Graphics2D g) {
+    triggerButton.paint(g);
   }
   
   public String getName() {
