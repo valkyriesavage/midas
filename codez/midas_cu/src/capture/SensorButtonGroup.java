@@ -2,6 +2,8 @@ package capture;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -13,18 +15,22 @@ import util.ImageIconUtil;
 public class SensorButtonGroup extends JPanel {
   private static final long serialVersionUID = -3154036436928212098L;
   private ArduinoJButton triggerButton;
-  private JButton rotateLeft = new JButton("rotate left");
-  private JButton rotateRight = new JButton("rotate right");
+  private JButton rotateLeft = new JButton("<");
+  private JButton rotateRight = new JButton(">");
   private JButton larger = new JButton("+");
   private JButton smaller = new JButton("-");
   private JButton delete = new JButton("x");
   private JButton name = new JButton("set name");
   private JCheckBox verified = new JCheckBox("location?");
   
+  public boolean deleteMe = false;
+  
   public SensorButtonGroup(String shape) {
     Icon icon = ImageIconUtil.createImageIcon("/images/"+shape+".png", shape);
     triggerButton = new ArduinoJButton(icon);
     this.setLayout(new BorderLayout());
+    
+    initializeButtons();
     
     add(name, BorderLayout.NORTH);
     add(triggerButton, BorderLayout.CENTER);
@@ -42,6 +48,36 @@ public class SensorButtonGroup extends JPanel {
     verifyAndDeletePanel.add(delete);
     this.add(verifyAndDeletePanel, BorderLayout.SOUTH);
     
+  }
+  
+  private void initializeButtons() {
+    verified.setEnabled(false);
+    rotateLeft.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        triggerButton.rotateLeft();
+      }
+    });
+    rotateRight.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        triggerButton.rotateRight();
+      }
+    });
+    smaller.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        triggerButton.smaller();
+      }
+    });
+    larger.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        triggerButton.larger();
+      }
+    });
+    delete.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        setVisible(false);
+        deleteMe = true;
+      }
+    });
   }
   
   public String getName() {

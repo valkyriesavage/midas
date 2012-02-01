@@ -60,6 +60,12 @@ public class ArduinoJButton extends JButton {
   public void rotateRight() {
     
   }
+  public void smaller() {
+    
+  }
+  public void larger() {
+    
+  }
   public void activate() {
     setBackground(Color.orange);
   }

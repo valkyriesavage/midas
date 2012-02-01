@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -38,6 +40,7 @@ public class SetUp extends JFrame implements ActionListener {
 	public static String PROJ_HOME = "/Users/valkyriesavage/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
+	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
 	
@@ -93,7 +96,8 @@ public class SetUp extends JFrame implements ActionListener {
 	  addStock.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent event) {
 	      SensorButtonGroup newButton = new SensorButtonGroup(queuedIconLocation);
-	      System.out.println(newButton.getName());
+	      displayedButtons.add(newButton);
+	      cleanUpDeletions();
 	    }
 	  });
 	  addStockButtonPanel.add(addStock);
@@ -106,10 +110,47 @@ public class SetUp extends JFrame implements ActionListener {
 	  
 	  JPanel printingPanel = new JPanel();
 	  JButton printCopper = new JButton("print copper");
+	  printCopper.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent event) {
+	      cleanUpDeletions();
+        if(displayedButtons.size() > 0) {
+          System.out.println("once this is hooked up for it, we will print copper shapes here!");
+        } else {
+          JOptionPane.showMessageDialog(buttonDisplayGrid, "there are no shapes to print!");
+        }
+      }
+	  });
 	  JButton printVinyl = new JButton("print vinyl");
+	  printVinyl.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent event) {
+	      cleanUpDeletions();
+	      if(displayedButtons.size() > 0) {
+	        System.out.println("once this is hooked up for it, we will print vinyl shapes here!");
+	      } else {
+	        JOptionPane.showMessageDialog(buttonDisplayGrid, "there are no shapes to print!");
+	      }
+	    }
+	  });
 	  printingPanel.add(printCopper);
 	  printingPanel.add(printVinyl);
 	  buttonCreatorPanel.add(printingPanel);
+	}
+	
+	private void cleanUpDeletions() {
+	  List<SensorButtonGroup> toDelete = new ArrayList<SensorButtonGroup>();
+	  for (SensorButtonGroup sbg : displayedButtons) {
+	    if (sbg.deleteMe) {
+	      toDelete.add(sbg);
+	    }
+	  }
+	  for (SensorButtonGroup deleteable : toDelete) {
+	    displayedButtons.remove(deleteable);
+	  }
+	  generatePathways();
+	}
+	
+	private void generatePathways() {
+	  System.out.println("TODO: include a way to generate these.  :)");
 	}
 	
 	private void setListsOfThingsHappening() {
