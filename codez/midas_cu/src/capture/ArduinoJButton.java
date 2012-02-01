@@ -19,6 +19,7 @@ public class ArduinoJButton extends JButton {
   
   public ArduinoJButton(Icon shape) {
     super(shape);
+    this.name = shape.toString();
     addMouseListener(new MouseListener() {
       public void mousePressed(MouseEvent event) {
         ArduinoEvent triggered = new ArduinoEvent(((ArduinoJButton)event.getComponent()).sensor,

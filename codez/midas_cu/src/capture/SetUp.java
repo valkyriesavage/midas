@@ -19,7 +19,6 @@ import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -31,19 +30,18 @@ import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
 import serialtalk.SerialCommunication;
-import util.ImageIconUtil;
 
 public class SetUp extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -7176602414855781819L;
 
 	static SerialCommunication serialCommunication;
-	static ImageIconUtil imageIconUtil = new ImageIconUtil();
+	public static String PROJ_HOME = "/Users/valkyriesavage/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
 	
-	SensorButtonGroup queuedButton;
+	String queuedIconLocation;
 
 	public SetUp() throws AWTException {
 		setSize(880, 600);
@@ -86,9 +84,7 @@ public class SetUp extends JFrame implements ActionListener {
 	  shapeChooser.addItemListener(new ItemListener() {
 	    public void itemStateChanged(ItemEvent event) {
 	      if (event.getStateChange() == ItemEvent.SELECTED) {
-	        String shape = ((JComboBox)event.getSource()).getSelectedItem().toString();
-	        ImageIcon desiredIcon = imageIconUtil.createImageIcon("images/"+shape+".png", shape);
-	        queuedButton = new SensorButtonGroup(desiredIcon);
+	        queuedIconLocation = ((JComboBox)event.getSource()).getSelectedItem().toString();
 	      }
 	    }
 	  });
@@ -96,7 +92,8 @@ public class SetUp extends JFrame implements ActionListener {
 	  JButton addStock = new JButton("+");
 	  addStock.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent event) {
-	      System.out.println(queuedButton.getName());
+	      SensorButtonGroup newButton = new SensorButtonGroup(queuedIconLocation);
+	      System.out.println(newButton.getName());
 	    }
 	  });
 	  addStockButtonPanel.add(addStock);

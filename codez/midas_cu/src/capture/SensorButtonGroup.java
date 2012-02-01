@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import serialtalk.ArduinoSensor;
+import util.ImageIconUtil;
 
 public class SensorButtonGroup extends JPanel {
   private static final long serialVersionUID = -3154036436928212098L;
@@ -21,7 +21,8 @@ public class SensorButtonGroup extends JPanel {
   private JButton name = new JButton("set name");
   private JCheckBox verified = new JCheckBox("location?");
   
-  public SensorButtonGroup(Icon icon) {
+  public SensorButtonGroup(String shape) {
+    Icon icon = ImageIconUtil.createImageIcon("/images/"+shape+".png", shape);
     triggerButton = new ArduinoJButton(icon);
     this.setLayout(new BorderLayout());
     
