@@ -2,7 +2,7 @@ package util;
 
 import javax.swing.ImageIcon;
 
-import capture.SetUp;
+import display.SetUp;
 
 public class ImageIconUtil {
   /** Returns an ImageIcon, or null if the path was invalid. 

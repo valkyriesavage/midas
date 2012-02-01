@@ -1,4 +1,4 @@
-package capture;
+package display;
 
 /**
  * 
@@ -12,7 +12,6 @@ import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -43,6 +42,7 @@ import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
 import serialtalk.SerialCommunication;
+import capture.UIScript;
 
 public class SetUp extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -7176602414855781819L;
@@ -58,7 +58,9 @@ public class SetUp extends JFrame implements ActionListener {
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
 	
-	String queuedIconLocation;
+	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator();
+	
+	SensorShape.shapes queuedIconLocation;
 
 	public SetUp() throws AWTException {
 		setSize(880, 600);
@@ -110,6 +112,7 @@ public class SetUp extends JFrame implements ActionListener {
 	  for (SensorButtonGroup sbg : displayedButtons) {
 	    sbg.paint(g);
 	  }
+	  pathwaysGenerator.paint(g);
 	  Shape circle = new Ellipse2D.Double(0, 0, 50, 50);
     g.setPaint(Color.red);
     g.fill(circle);
@@ -124,11 +127,11 @@ public class SetUp extends JFrame implements ActionListener {
 	  buttonCreatorPanel.setLayout(new GridLayout(3,2));
 	  
 	  JPanel addStockButtonPanel = new JPanel();
-	  JComboBox shapeChooser = new JComboBox(SensorShape.shapes);
+	  JComboBox shapeChooser = new JComboBox(SensorShape.shapesList);
 	  shapeChooser.addItemListener(new ItemListener() {
 	    public void itemStateChanged(ItemEvent event) {
 	      if (event.getStateChange() == ItemEvent.SELECTED) {
-	        queuedIconLocation = ((JComboBox)event.getSource()).getSelectedItem().toString();
+	        queuedIconLocation = ((SensorShape)((JComboBox)event.getSource()).getSelectedItem()).shape;
 	        if (queuedIconLocation.equals("slider")) {
 	          //TODO activate something which permits choosing the length of the slider
 	        }
@@ -199,8 +202,7 @@ public class SetUp extends JFrame implements ActionListener {
 	}
 	
 	private void generatePathways() {
-	  //TODO
-	  System.out.println("we would be generating pathways now.  :)");
+	  pathwaysGenerator.generatePathways(displayedButtons);
 	}
 	
 	private void setListsOfThingsHappening() {

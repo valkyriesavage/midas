@@ -8,6 +8,7 @@ import java.util.Map;
 
 import capture.UIScript;
 
+
 public class ArduinoDispatcher {
   private List<ArduinoEvent> recentEvents = new ArrayList<ArduinoEvent>();
   

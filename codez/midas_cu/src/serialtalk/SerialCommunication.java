@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import capture.UIScript;
 
+
 /**
  * This code was inspired by the Internet.
  */

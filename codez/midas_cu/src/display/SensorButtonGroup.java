@@ -1,4 +1,4 @@
-package capture;
+package display;
 
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
@@ -6,12 +6,9 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
-
-import util.ImageIconUtil;
 
 public class SensorButtonGroup extends JPanel {
   private static final long serialVersionUID = -3154036436928212098L;
@@ -21,19 +18,20 @@ public class SensorButtonGroup extends JPanel {
   private JButton larger = new JButton("+");
   private JButton smaller = new JButton("-");
   private JButton delete = new JButton("x");
-  private JButton name = new JButton("set name");
+  private JButton nameIt = new JButton("set name");
   private JCheckBox verified = new JCheckBox("location?");
+  
+  private String name;
   
   public boolean deleteMe = false;
   
-  public SensorButtonGroup(String shape) {
-    Icon icon = ImageIconUtil.createImageIcon("/images/"+shape+".png", shape);
-    triggerButton = new ArduinoSensorButton(icon);
+  public SensorButtonGroup(SensorShape.shapes shape) {
+    triggerButton = new ArduinoSensorButton(shape);
     this.setLayout(new BorderLayout());
     
     initializeButtons();
     
-    add(name, BorderLayout.NORTH);
+    add(nameIt, BorderLayout.NORTH);
     add(triggerButton, BorderLayout.CENTER);
   
     JPanel turnAndSize = new JPanel();
@@ -86,9 +84,9 @@ public class SensorButtonGroup extends JPanel {
   }
   
   public String getName() {
-    return triggerButton.name;
+    return name;
   }
   public void setName(String name) {
-    triggerButton.name(name);
+    this.name = name;
   }
 }
