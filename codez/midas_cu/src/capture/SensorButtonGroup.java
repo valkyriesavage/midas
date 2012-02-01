@@ -21,8 +21,8 @@ public class SensorButtonGroup extends JPanel {
   private JButton name = new JButton("set name");
   private JCheckBox verified = new JCheckBox("location?");
   
-  public SensorButtonGroup(Icon icon, ArduinoSensor sensor) {
-    triggerButton = new ArduinoJButton(icon, sensor);
+  public SensorButtonGroup(Icon icon) {
+    triggerButton = new ArduinoJButton(icon);
     this.setLayout(new BorderLayout());
     
     add(name, BorderLayout.NORTH);
@@ -41,10 +41,12 @@ public class SensorButtonGroup extends JPanel {
     verifyAndDeletePanel.add(delete);
     this.add(verifyAndDeletePanel, BorderLayout.SOUTH);
     
-    setButtonActions();
   }
   
-  private void setButtonActions() {
-    
+  public String getName() {
+    return triggerButton.name;
+  }
+  public void setName(String name) {
+    triggerButton.name(name);
   }
 }

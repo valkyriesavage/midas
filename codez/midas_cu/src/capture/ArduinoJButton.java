@@ -17,10 +17,9 @@ public class ArduinoJButton extends JButton {
   String name = null;
   boolean locationChecked = false;
   
-  public ArduinoJButton(Icon shape, ArduinoSensor sensor) {
+  public ArduinoJButton(Icon shape) {
     super(shape);
-    this.sensor = sensor;
-    this.addMouseListener(new MouseListener() {
+    addMouseListener(new MouseListener() {
       public void mousePressed(MouseEvent event) {
         ArduinoEvent triggered = new ArduinoEvent(((ArduinoJButton)event.getComponent()).sensor,
                                                   TouchDirection.RELEASE);
@@ -36,14 +35,22 @@ public class ArduinoJButton extends JButton {
       }
       
       public void mouseClicked(MouseEvent event) {
-        this.mousePressed(event);
-        this.mouseReleased(event);
+        mousePressed(event);
+        mouseReleased(event);
       }
 
       public void mouseEntered(MouseEvent event) {}
       public void mouseExited(MouseEvent event) {}
 
     });
+  }
+  
+  public void setSensor(ArduinoSensor sensor) {
+    this.sensor = sensor;
+  }
+  
+  public ArduinoSensor getSensor() {
+    return sensor;
   }
   
   public void rotateLeft() {

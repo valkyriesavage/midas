@@ -14,9 +14,12 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -28,18 +31,22 @@ import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
 import serialtalk.SerialCommunication;
+import util.ImageIconUtil;
 
 public class SetUp extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -7176602414855781819L;
 
 	static SerialCommunication serialCommunication;
+	static ImageIconUtil imageIconUtil = new ImageIconUtil();
 	
 	JPanel buttonDisplayGrid = new JPanel();
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
+	
+	SensorButtonGroup queuedButton;
 
 	public SetUp() throws AWTException {
-		setSize(800, 600);
+		setSize(880, 600);
 		setTitle("Midas Cu");
 
 		serialCommunication = new SerialCommunication();
@@ -75,8 +82,23 @@ public class SetUp extends JFrame implements ActionListener {
 	  buttonCreatorPanel.setLayout(new GridLayout(3,2));
 	  
 	  JPanel addStockButtonPanel = new JPanel();
-	  addStockButtonPanel.add(new JComboBox(SensorShape.shapes));
+	  JComboBox shapeChooser = new JComboBox(SensorShape.shapes);
+	  shapeChooser.addItemListener(new ItemListener() {
+	    public void itemStateChanged(ItemEvent event) {
+	      if (event.getStateChange() == ItemEvent.SELECTED) {
+	        String shape = ((JComboBox)event.getSource()).getSelectedItem().toString();
+	        ImageIcon desiredIcon = imageIconUtil.createImageIcon("images/"+shape+".png", shape);
+	        queuedButton = new SensorButtonGroup(desiredIcon);
+	      }
+	    }
+	  });
+	  addStockButtonPanel.add(shapeChooser);
 	  JButton addStock = new JButton("+");
+	  addStock.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent event) {
+	      System.out.println(queuedButton.getName());
+	    }
+	  });
 	  addStockButtonPanel.add(addStock);
 	  buttonCreatorPanel.add(addStockButtonPanel);
 	  

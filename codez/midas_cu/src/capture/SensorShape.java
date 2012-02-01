@@ -5,7 +5,8 @@ import java.awt.Graphics;
 
 public class SensorShape {
 
-  public static final SensorShape[] shapes = {new SensorShape("circle"), new SensorShape("square"),
+  public static final SensorShape[] shapes = {new SensorShape("-----"),
+                                              new SensorShape("circle"), new SensorShape("square"),
                                               new SensorShape("star"), new SensorShape("slider"),
                                               new SensorShape("pad")};
   private String shape;
