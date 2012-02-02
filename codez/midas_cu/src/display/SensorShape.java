@@ -1,8 +1,5 @@
 package display;
 
-import java.awt.Graphics;
-
-
 public class SensorShape {
 
   public static final SensorShape[] shapesList = {new SensorShape(),
@@ -17,7 +14,7 @@ public class SensorShape {
     SLIDER,
     PAD,
   }
-  public shapes shape = null;
+  public shapes shape = shapes.CIRCLE;
 
   private SensorShape() {}
   private SensorShape(shapes shape) {this.shape = shape;}
