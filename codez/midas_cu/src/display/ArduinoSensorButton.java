@@ -8,12 +8,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Random;
 
 import javax.swing.JButton;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.TouchDirection;
+import sl.shapes.StarPolygon;
 
 public class ArduinoSensorButton extends JButton {
   private static final long serialVersionUID = -5603499266721585353L;
@@ -22,6 +24,7 @@ public class ArduinoSensorButton extends JButton {
   boolean locationChecked = false;
   
   private Point upperLeft;
+  private int size;
   
   public ArduinoSensorButton(SensorShape.shapes shape) {
     this.shape = shape;
@@ -49,6 +52,9 @@ public class ArduinoSensorButton extends JButton {
       public void mouseExited(MouseEvent event) {}
 
     });
+    Random random = new Random();
+    upperLeft = new Point(random.nextInt(SetUp.CANVAS_X), random.nextInt(SetUp.CANVAS_Y));
+    size = random.nextInt(10) * 10;
   }
   
   public void setSensor(ArduinoSensor sensor) {
@@ -89,7 +95,6 @@ public class ArduinoSensorButton extends JButton {
     Shape drawShape = getShape();
     g.setPaint(Color.gray);
     g.fill(drawShape);
-    g.translate(60, 0);
   }
   
   private Shape getShape() {
@@ -106,16 +111,16 @@ public class ArduinoSensorButton extends JButton {
   }
   
   private Shape circle() {
-    return new Ellipse2D.Double(0,0,50,50);
+    return new Ellipse2D.Double(upperLeft.x, upperLeft.y,size,size);
   }
   
   private Shape square() {
-    return new Rectangle2D.Double(0,0,50,50);
+    return new Rectangle2D.Double(upperLeft.x, upperLeft.y,size,size);
   }
   
   private Shape star() {
-    //TODO
-    return square();
+    //I have no freaking clue why I have to put int int there.
+    return new StarPolygon(upperLeft.x, upperLeft.y, size, (int)((int)size*.6), 5);
   }
   
   private Shape slider() {

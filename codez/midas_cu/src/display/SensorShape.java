@@ -14,11 +14,14 @@ public class SensorShape {
     SLIDER,
     PAD,
   }
-  public shapes shape = shapes.CIRCLE;
+  public shapes shape = null;
 
   private SensorShape() {}
   private SensorShape(shapes shape) {this.shape = shape;}
   public String toString() {
+    if (shape == null) {
+      return "------";
+    }
     return shape.name();
   }
 }

@@ -5,20 +5,20 @@ package display;
  * TODO:
  *  hella updated interface
  *    add functionality for updating button names/actions
+ *    AUTOSAVE
  * 	  grid thing for layout of sensors
+ *      get comfortable with batik
+ *    
  */
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +46,12 @@ import capture.UIScript;
 
 public class SetUp extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -7176602414855781819L;
+	
+	public static final int CANVAS_X = 150;
+	public static final int CANVAS_Y = 150;
 
 	static SerialCommunication serialCommunication;
-	public static String PROJ_HOME = "/Users/valkyriesavage/projects/midas_cu/codez/midas_cu/src/";
+	public static String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
   JSVGCanvas svgCanvas = new JSVGCanvas();
@@ -60,7 +63,7 @@ public class SetUp extends JFrame implements ActionListener {
 	
 	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator();
 	
-	SensorShape.shapes queuedIconLocation;
+	SensorShape.shapes queuedShape;
 
 	public SetUp() throws AWTException {
 		setSize(880, 600);
@@ -99,7 +102,7 @@ public class SetUp extends JFrame implements ActionListener {
 	
 	private void setUpSVGCanvas() {
 	   svgCanvas.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
-	   svgCanvas.setSize(300,300);
+	   svgCanvas.setSize(CANVAS_X,CANVAS_Y);
 	   DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
      String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
      doc = (SVGDocument) impl.createDocument(svgNS, "svg", null);
@@ -113,14 +116,11 @@ public class SetUp extends JFrame implements ActionListener {
 	    sbg.paint(g);
 	  }
 	  pathwaysGenerator.paint(g);
-	  Shape circle = new Ellipse2D.Double(0, 0, 50, 50);
-    g.setPaint(Color.red);
-    g.fill(circle);
-    g.translate(60, 0);
-    
 
     Element root = doc.getDocumentElement();
     g.getRoot(root);
+    
+    repaint();
 	}
 
 	private void setUpButtonCreator() {
@@ -131,8 +131,8 @@ public class SetUp extends JFrame implements ActionListener {
 	  shapeChooser.addItemListener(new ItemListener() {
 	    public void itemStateChanged(ItemEvent event) {
 	      if (event.getStateChange() == ItemEvent.SELECTED) {
-	        queuedIconLocation = ((SensorShape)((JComboBox)event.getSource()).getSelectedItem()).shape;
-	        if (queuedIconLocation.equals("slider")) {
+	        queuedShape = ((SensorShape)((JComboBox)event.getSource()).getSelectedItem()).shape;
+	        if (queuedShape.equals("slider")) {
 	          //TODO activate something which permits choosing the length of the slider
 	        }
 	      }
@@ -142,7 +142,7 @@ public class SetUp extends JFrame implements ActionListener {
 	  JButton addStock = new JButton("+");
 	  addStock.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent event) {
-	      SensorButtonGroup newButton = new SensorButtonGroup(queuedIconLocation);
+	      SensorButtonGroup newButton = new SensorButtonGroup(queuedShape);
 	      displayedButtons.add(newButton);
 	      paint();
 	      //svgCanvas.setURI("file:///Users/valkyriesavage/projects/midas_cu/codez/midas_cu/src/images/"+queuedIconLocation+".svg");

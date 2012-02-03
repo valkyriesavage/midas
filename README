@@ -18,3 +18,11 @@ codez/
     This directory contains Java Swing code that makes the interface run.
 paper/
   This directory contains the TeX source for the paper on Midas Cu.
+
+
+Other required things:
+  I link these into my build in Eclipse, since they aren't mine and I don't
+want to include their code in my project:
+  Batik -- 
+      http://mirror.atlanticmetro.net/apache//xmlgraphics/batik/batik-1.7.zip
+  jshapes.jar -- http://java-sl.com/download/jshapes.jar

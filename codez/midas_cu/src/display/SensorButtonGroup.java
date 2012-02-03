@@ -74,13 +74,16 @@ public class SensorButtonGroup extends JPanel {
     delete.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         setVisible(false);
+        
         deleteMe = true;
       }
     });
   }
   
   public void paint(Graphics2D g) {
-    triggerButton.paint(g);
+    if (!deleteMe) {
+      triggerButton.paint(g);
+    }
   }
   
   public String getName() {
