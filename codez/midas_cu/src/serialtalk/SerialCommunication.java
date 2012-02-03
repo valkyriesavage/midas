@@ -149,7 +149,6 @@ public class SerialCommunication implements SerialPortEventListener {
         handleCompleteEvent(currentEvent);
       }
     }
-    // Ignore all the other eventTypes, but you should consider the other ones.
   }
 
   public synchronized void handleCompleteEvent(ArduinoEvent e) {

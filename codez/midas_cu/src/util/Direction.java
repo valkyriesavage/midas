@@ -1,4 +1,4 @@
-package serialtalk;
+package util;
 
 public enum Direction {
   ASCENDING,

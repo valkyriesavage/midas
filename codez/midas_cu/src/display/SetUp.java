@@ -142,11 +142,12 @@ public class SetUp extends JFrame implements ActionListener {
 	  JButton addStock = new JButton("+");
 	  addStock.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent event) {
+	      cleanUpDeletions();
 	      SensorButtonGroup newButton = new SensorButtonGroup(queuedShape);
 	      displayedButtons.add(newButton);
 	      paint();
+	      
 	      //svgCanvas.setURI("file:///Users/valkyriesavage/projects/midas_cu/codez/midas_cu/src/images/"+queuedIconLocation+".svg");
-	      cleanUpDeletions();
 	    }
 	  });
 	  addStockButtonPanel.add(addStock);
