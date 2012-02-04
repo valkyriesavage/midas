@@ -42,6 +42,7 @@ import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
 import serialtalk.SerialCommunication;
+import bridge.ArduinoToInterfaceBridge;
 import capture.UIScript;
 
 public class SetUp extends JFrame implements ActionListener {
@@ -58,6 +59,7 @@ public class SetUp extends JFrame implements ActionListener {
   SVGGraphics2D g;
   SVGDocument doc;
 	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
+	List<ArduinoToInterfaceBridge> bridgeObjects = new ArrayList<ArduinoToInterfaceBridge>();
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
 	
@@ -120,6 +122,8 @@ public class SetUp extends JFrame implements ActionListener {
     Element root = doc.getDocumentElement();
     g.getRoot(root);
     
+    setListsOfThingsHappening();
+    
     repaint();
 	}
 
@@ -145,9 +149,10 @@ public class SetUp extends JFrame implements ActionListener {
 	      cleanUpDeletions();
 	      SensorButtonGroup newButton = new SensorButtonGroup(queuedShape);
 	      displayedButtons.add(newButton);
+	      ArduinoToInterfaceBridge newBridge = new ArduinoToInterfaceBridge();
+	      newBridge.interfacePiece = newButton;
+	      bridgeObjects.add(newBridge);
 	      paint();
-	      
-	      //svgCanvas.setURI("file:///Users/valkyriesavage/projects/midas_cu/codez/midas_cu/src/images/"+queuedIconLocation+".svg");
 	    }
 	  });
 	  addStockButtonPanel.add(addStock);
@@ -216,12 +221,12 @@ public class SetUp extends JFrame implements ActionListener {
 		buttonSection.setLayout(new BorderLayout());
 		buttonSection.add(new JLabel("buttons"), BorderLayout.NORTH);
 		JPanel buttonMappings = new JPanel();
-		ArduinoSensor[] listOfButtons = {};
+		SensorButtonGroup[] listOfButtons = new SensorButtonGroup[36];
 		buttonMappings.setLayout(new GridLayout(0, 3));
-		for (Map.Entry<ArduinoSensor, UIScript> e : serialCommunication.buttonsToHandlers().entrySet()) {
-	    buttonMappings.add(new JTextField(e.getKey().toString()));
-	    listOfButtons[listOfButtons.length] = e.getKey();
-	    buttonMappings.add(new JLabel(e.getValue().toString()));
+		for (ArduinoToInterfaceBridge bridge : bridgeObjects) {
+		  if (bridge.interfacePiece.isSlider || bridge.interfacePiece.isPad) { continue; }
+	    buttonMappings.add(new JTextField(bridge.interfacePiece.name));
+	    buttonMappings.add(new JLabel(bridge.interactivePiece.toString()));
 	    buttonMappings.add(new JButton("x"));
 		}
 		buttonMappings.add(new JComboBox(listOfButtons));
@@ -232,15 +237,18 @@ public class SetUp extends JFrame implements ActionListener {
 		sliderSection.setLayout(new BorderLayout());
 		sliderSection.add(new JLabel("sliders"), BorderLayout.NORTH);
     JPanel sliderMappings = new JPanel();
-    ArduinoSlider[] listOfSliders = {};
+    SensorButtonGroup[] listOfSliders = new SensorButtonGroup[36];
     sliderMappings.setLayout(new GridLayout(0, 4));
-    for (Map.Entry<ArduinoSlider, List<UIScript>> e : serialCommunication.slidersToHandlers().entrySet()) {
-      sliderMappings.add(new JTextField(e.getKey().toString()));
-      listOfSliders[listOfSliders.length] = e.getKey(); 
-      for(UIScript s : e.getValue()) {
-        sliderMappings.add(new JLabel(s.toString()));
-      }
-      sliderMappings.add(new JButton("x"));
+    int stupidArrayIndex=0;
+    for (ArduinoToInterfaceBridge bridge : bridgeObjects) {
+      if (!(bridge.interfacePiece.isSlider)) { continue; }
+      buttonMappings.add(new JTextField(bridge.interfacePiece.name));
+      listOfSliders[stupidArrayIndex++] = bridge.interfacePiece;
+      buttonMappings.add(new JLabel(bridge.interactivePiece.toString()));
+      //FIXME : Sliders have TWO UIActions associated with them... one for up and one for down.  Shall we put them
+      // on the same line or different lines?  it's hax to put them on the same one unless we change the structure
+      // of the Bridge object to accommodate multiple scripts... but that seems silly.
+      buttonMappings.add(new JButton("x"));
     }
     sliderMappings.add(new JComboBox(listOfSliders));
     sliderMappings.add(new JButton("up action"));
@@ -257,6 +265,8 @@ public class SetUp extends JFrame implements ActionListener {
     JPanel comboMappings = new JPanel();
     comboMappings.setLayout(new GridLayout(0, 4));
     for (Map.Entry<List<ArduinoEvent>, UIScript> e : serialCommunication.combosToHandlers().entrySet()) {
+      //FIXME : does this make sense?  should combos be treated differently from sliders and buttons entirely?
+      // ???????  since they involve a button combo, and it seems silly to make a combo an ArduinoObject, maybe so...
       comboMappings.add(new JLabel(e.getKey().toString()));
       comboMappings.add(new JButton("change"));
       comboMappings.add(new JLabel(e.getValue().toString()));

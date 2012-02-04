@@ -1,5 +1,3 @@
 package serialtalk;
 
-public interface ArduinoObject {
-
-}
+public interface ArduinoObject {}

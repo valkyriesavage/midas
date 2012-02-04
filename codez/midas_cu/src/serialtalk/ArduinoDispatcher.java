@@ -83,6 +83,7 @@ public class ArduinoDispatcher {
           if(buttonsToHandlers.containsKey(singleEvent.whichSensor)) {
             System.out.println("single button");
             buttonsToHandlers.get(singleEvent.whichSensor).execute();
+            break;
           }
         }
       }

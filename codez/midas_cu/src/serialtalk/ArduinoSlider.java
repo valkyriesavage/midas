@@ -1,5 +1,6 @@
 package serialtalk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import util.Direction;
@@ -9,6 +10,13 @@ public class ArduinoSlider implements ArduinoObject {
   
   public ArduinoSlider(List<ArduinoSensor> sensors) {
     this.sensors = sensors;
+  }
+  
+  public ArduinoSlider(ArduinoSensor[] sensors) {
+    this.sensors = new ArrayList<ArduinoSensor>();
+    for(int i=0; i<sensors.length; i++) {
+      this.sensors.add(sensors[i]);
+    }
   }
   
   public boolean isPartOfSlider(ArduinoSensor sensor) {

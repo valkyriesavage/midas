@@ -4,17 +4,23 @@ import java.awt.Point;
 
 public class ConnectorJunction {
   
-  public Point location;
-  public boolean connectRight;
-  public boolean connectLeft;
-  public boolean connectDown;
-  public boolean connectUp;
+  //note that we only move right and up, because if we were able to move in all 4 directions from each point
+  //we would find ourselves in nasty infinite loops
   
-  public ConnectorJunction(Point location, boolean connectRight, boolean connectLeft, boolean connectUp, boolean connectDown) {
+  public Point location;
+  public ConnectorJunction connectRight = null;
+  public ConnectorJunction connectUp = null;
+  
+  public boolean isTerminal = true;
+  
+  public ConnectorJunction(Point location) {
     this.location = location;
-    this.connectRight = connectRight;
-    this.connectLeft = connectLeft;
-    this.connectUp = connectUp;
-    this.connectDown = connectDown;
+  }
+  
+  public void connectJunctionRight(ConnectorJunction junction) {
+    connectRight = junction;
+  }
+  public void connectJunctionUp(ConnectorJunction junction) {
+    connectUp = junction;
   }
 }
