@@ -43,10 +43,7 @@ public class ArduinoSlider implements ArduinoObject {
   }
   
   public boolean equals(Object o) {
-    if (o.getClass() == ArduinoSlider.class && o.hashCode() == this.hashCode()) {
-      return true;
-    }
-    return false;
+    return (o.getClass() == ArduinoSlider.class && o.hashCode() == this.hashCode());
   }
   
   public String backwardsToString() {

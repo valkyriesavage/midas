@@ -42,7 +42,7 @@ import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
 import serialtalk.SerialCommunication;
-import bridge.ArduinoToInterfaceBridge;
+import bridge.ArduinoToButtonBridge;
 import capture.UIScript;
 
 public class SetUp extends JFrame implements ActionListener {
@@ -52,14 +52,14 @@ public class SetUp extends JFrame implements ActionListener {
 	public static final int CANVAS_Y = 150;
 
 	static SerialCommunication serialCommunication;
-	public static String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
+	public static final String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
   JSVGCanvas svgCanvas = new JSVGCanvas();
   SVGGraphics2D g;
   SVGDocument doc;
 	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
-	List<ArduinoToInterfaceBridge> bridgeObjects = new ArrayList<ArduinoToInterfaceBridge>();
+	List<ArduinoToButtonBridge> bridgeObjects = new ArrayList<ArduinoToButtonBridge>();
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
 	
@@ -149,7 +149,7 @@ public class SetUp extends JFrame implements ActionListener {
 	      cleanUpDeletions();
 	      SensorButtonGroup newButton = new SensorButtonGroup(queuedShape);
 	      displayedButtons.add(newButton);
-	      ArduinoToInterfaceBridge newBridge = new ArduinoToInterfaceBridge();
+	      ArduinoToButtonBridge newBridge = new ArduinoToButtonBridge();
 	      newBridge.interfacePiece = newButton;
 	      bridgeObjects.add(newBridge);
 	      paint();
@@ -223,14 +223,12 @@ public class SetUp extends JFrame implements ActionListener {
 		JPanel buttonMappings = new JPanel();
 		SensorButtonGroup[] listOfButtons = new SensorButtonGroup[36];
 		buttonMappings.setLayout(new GridLayout(0, 3));
-		for (ArduinoToInterfaceBridge bridge : bridgeObjects) {
+		for (ArduinoToButtonBridge bridge : bridgeObjects) {
 		  if (bridge.interfacePiece.isSlider || bridge.interfacePiece.isPad) { continue; }
 	    buttonMappings.add(new JTextField(bridge.interfacePiece.name));
 	    buttonMappings.add(new JLabel(bridge.interactivePiece.toString()));
 	    buttonMappings.add(new JButton("x"));
 		}
-		buttonMappings.add(new JComboBox(listOfButtons));
-		buttonMappings.add(new JButton("action"));
 		buttonSection.add(buttonMappings, BorderLayout.SOUTH);
 
 		JPanel sliderSection = new JPanel();
@@ -240,7 +238,7 @@ public class SetUp extends JFrame implements ActionListener {
     SensorButtonGroup[] listOfSliders = new SensorButtonGroup[36];
     sliderMappings.setLayout(new GridLayout(0, 4));
     int stupidArrayIndex=0;
-    for (ArduinoToInterfaceBridge bridge : bridgeObjects) {
+    for (ArduinoToButtonBridge bridge : bridgeObjects) {
       if (!(bridge.interfacePiece.isSlider)) { continue; }
       buttonMappings.add(new JTextField(bridge.interfacePiece.name));
       listOfSliders[stupidArrayIndex++] = bridge.interfacePiece;
@@ -250,9 +248,6 @@ public class SetUp extends JFrame implements ActionListener {
       // of the Bridge object to accommodate multiple scripts... but that seems silly.
       buttonMappings.add(new JButton("x"));
     }
-    sliderMappings.add(new JComboBox(listOfSliders));
-    sliderMappings.add(new JButton("up action"));
-    sliderMappings.add(new JButton("down action"));
     sliderSection.add(sliderMappings, BorderLayout.SOUTH);    
 
     JPanel padSection = new JPanel();

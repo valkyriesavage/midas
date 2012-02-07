@@ -1,23 +1,24 @@
 package bridge;
 
+import java.util.ArrayList;
+
 import serialtalk.ArduinoObject;
+import serialtalk.ArduinoPad;
 import serialtalk.ArduinoSensor;
 import capture.UIScript;
 import display.SensorButtonGroup;
 import display.SensorShape;
 
-public class ArduinoToInterfaceBridge {
+public class ArduinoToPadBridge {
   private static final SensorButtonGroup nullInterface = new SensorButtonGroup(SensorShape.shapes.SQUARE);
-  private static final ArduinoSensor nullSensor = new ArduinoSensor(-1,-1);
-  //FIXME: private static final ArduinoSlider nullSlider = new ArduinoSlider([nullSensor]);
-  //TODO: deal with pads and combos?
+  private static final ArduinoPad nullPad = new ArduinoPad(new ArrayList<ArduinoSensor>());
   private static final UIScript nullScript = new UIScript();
   
   public SensorButtonGroup interfacePiece = nullInterface;
-  public ArduinoObject arduinoPiece = nullSensor;
+  public ArduinoObject arduinoPiece = nullPad;
   public UIScript interactivePiece = nullScript;
     
-  public ArduinoToInterfaceBridge() {}
+  public ArduinoToPadBridge() {}
     
   public String toString() {
     if (interfacePiece.name != null) {
