@@ -21,4 +21,10 @@ public class ArduinoToComboBridge {
     }
     return "unknown";
   }
+  
+  public void executeScript() {
+    if (interactivePiece != nullScript) {
+      interactivePiece.execute();
+    }
+  }
 }

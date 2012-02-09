@@ -39,11 +39,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.svg.SVGDocument;
 
 import serialtalk.ArduinoEvent;
-import serialtalk.ArduinoSensor;
-import serialtalk.ArduinoSlider;
 import serialtalk.SerialCommunication;
 import bridge.ArduinoToButtonBridge;
+import bridge.ArduinoToDisplayBridge;
+import bridge.ArduinoToPadBridge;
+import bridge.ArduinoToSliderBridge;
 import capture.UIScript;
+import display.SensorShape.shapes;
 
 public class SetUp extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -7176602414855781819L;
@@ -59,7 +61,7 @@ public class SetUp extends JFrame implements ActionListener {
   SVGGraphics2D g;
   SVGDocument doc;
 	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
-	List<ArduinoToButtonBridge> bridgeObjects = new ArrayList<ArduinoToButtonBridge>();
+	List<ArduinoToDisplayBridge> bridgeObjects = new ArrayList<ArduinoToDisplayBridge>();
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
 	
@@ -148,9 +150,20 @@ public class SetUp extends JFrame implements ActionListener {
 	    public void actionPerformed(ActionEvent event) {
 	      cleanUpDeletions();
 	      SensorButtonGroup newButton = new SensorButtonGroup(queuedShape);
+	      ArduinoToDisplayBridge newBridge;
+	      if (queuedShape == shapes.SLIDER) {
+	        newButton.isSlider = true;
+          newBridge = new ArduinoToSliderBridge();
+	      }
+	      else if (queuedShape == shapes.PAD) {
+	        newButton.isPad = true;
+	        newBridge = new ArduinoToPadBridge();
+	      }
+	      else { // it is a button
+	        newBridge = new ArduinoToButtonBridge();
+	      }
 	      displayedButtons.add(newButton);
-	      ArduinoToButtonBridge newBridge = new ArduinoToButtonBridge();
-	      newBridge.interfacePiece = newButton;
+	      newBridge.setInterfacePiece(newButton);
 	      bridgeObjects.add(newBridge);
 	      paint();
 	    }
@@ -221,10 +234,10 @@ public class SetUp extends JFrame implements ActionListener {
 		buttonSection.setLayout(new BorderLayout());
 		buttonSection.add(new JLabel("buttons"), BorderLayout.NORTH);
 		JPanel buttonMappings = new JPanel();
-		SensorButtonGroup[] listOfButtons = new SensorButtonGroup[36];
 		buttonMappings.setLayout(new GridLayout(0, 3));
-		for (ArduinoToButtonBridge bridge : bridgeObjects) {
-		  if (bridge.interfacePiece.isSlider || bridge.interfacePiece.isPad) { continue; }
+		for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
+		  if (genericBridge.interfacePiece().isSlider || genericBridge.interfacePiece().isPad) { continue; }
+		  ArduinoToButtonBridge bridge = (ArduinoToButtonBridge) genericBridge;
 	    buttonMappings.add(new JTextField(bridge.interfacePiece.name));
 	    buttonMappings.add(new JLabel(bridge.interactivePiece.toString()));
 	    buttonMappings.add(new JButton("x"));
@@ -235,24 +248,29 @@ public class SetUp extends JFrame implements ActionListener {
 		sliderSection.setLayout(new BorderLayout());
 		sliderSection.add(new JLabel("sliders"), BorderLayout.NORTH);
     JPanel sliderMappings = new JPanel();
-    SensorButtonGroup[] listOfSliders = new SensorButtonGroup[36];
     sliderMappings.setLayout(new GridLayout(0, 4));
-    int stupidArrayIndex=0;
-    for (ArduinoToButtonBridge bridge : bridgeObjects) {
-      if (!(bridge.interfacePiece.isSlider)) { continue; }
+    for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
+      if (!(genericBridge.interfacePiece().isSlider)) { continue; }
+      ArduinoToSliderBridge bridge = (ArduinoToSliderBridge) genericBridge;
       buttonMappings.add(new JTextField(bridge.interfacePiece.name));
-      listOfSliders[stupidArrayIndex++] = bridge.interfacePiece;
-      buttonMappings.add(new JLabel(bridge.interactivePiece.toString()));
-      //FIXME : Sliders have TWO UIActions associated with them... one for up and one for down.  Shall we put them
-      // on the same line or different lines?  it's hax to put them on the same one unless we change the structure
-      // of the Bridge object to accommodate multiple scripts... but that seems silly.
+      buttonMappings.add(new JLabel(bridge.interactivePieceAsc.toString() + " ;; " + bridge.interactivePieceDesc.toString()));
       buttonMappings.add(new JButton("x"));
     }
-    sliderSection.add(sliderMappings, BorderLayout.SOUTH);    
+    sliderSection.add(sliderMappings, BorderLayout.SOUTH);
 
     JPanel padSection = new JPanel();
     padSection.setLayout(new BorderLayout());
-    padSection.add(new JLabel("pads"), BorderLayout.NORTH);  
+    padSection.add(new JLabel("pads"), BorderLayout.NORTH);
+    JPanel padMappings = new JPanel();
+    padMappings.setLayout(new GridLayout(0, 4));
+    for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
+      if (!(genericBridge.interfacePiece().isPad)) { continue; }
+      ArduinoToPadBridge bridge = (ArduinoToPadBridge) genericBridge;
+      buttonMappings.add(new JTextField(bridge.interfacePiece.name));
+      buttonMappings.add(new JLabel(bridge.interactivePiece.toString()));
+      buttonMappings.add(new JButton("x"));
+    }
+    sliderSection.add(padMappings, BorderLayout.SOUTH);    
     
     JPanel comboSection = new JPanel();
     comboSection.setLayout(new BorderLayout());
