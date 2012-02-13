@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JLabel;
+
 import capture.UIScript;
 
 
@@ -27,7 +29,7 @@ public class SerialCommunication implements SerialPortEventListener {
   SerialPort serialPort;
   /** The port we're normally going to use. */
   private static final String PORT_NAMES[] = {
-	   "/dev/tty.usbmodem411", // Mac, Arduino Uno
+	   "/dev/tty.usbmodemfa131", // Mac, Arduino Uno, works for Ragnarok
      "/dev/ttyACM0", // Linux, specifically for Arduino Uno
      //"COM3", // Windows
   };
@@ -128,14 +130,13 @@ public class SerialCommunication implements SerialPortEventListener {
         System.err.println(e.toString());
         return;
       }
-
+      
       currentSerialInfo = currentSerialInfo + new String(touched).trim();
 
       Matcher one2DMessage;
 
       while ((one2DMessage = matchOneArduino2DMessage.matcher(currentSerialInfo))
           .lookingAt()) {
-        System.out.println(one2DMessage.group());
         currentSerialInfo = currentSerialInfo.substring(one2DMessage.end());
         TouchDirection direction;
         if (one2DMessage.group(2).equals("U") && one2DMessage.group(2).equals(one2DMessage.group(4))) {
@@ -208,5 +209,9 @@ public class SerialCommunication implements SerialPortEventListener {
   }
   public Map<List<ArduinoEvent>, UIScript> combosToHandlers() {
     return dispatcher.combosToHandlers;
+  }
+  
+  public JLabel whatItSees() {
+    return dispatcher.whatItSees;
   }
 }

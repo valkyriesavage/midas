@@ -3,8 +3,6 @@ package serialtalk;
 import java.util.ArrayList;
 import java.util.List;
 
-import util.Direction;
-
 public class ArduinoPad implements ArduinoObject {
   private List<ArduinoSensor> sensors;
   

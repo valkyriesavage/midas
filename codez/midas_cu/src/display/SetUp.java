@@ -225,7 +225,7 @@ public class SetUp extends JFrame implements ActionListener {
 	}
 	
 	private void setListsOfThingsHappening() {
-    listsOfThingsHappening.setLayout(new GridLayout(4, 1));
+    listsOfThingsHappening.setLayout(new GridLayout(0, 1));
 
 	  listsOfThingsHappening.setVisible(false);
     listsOfThingsHappening.removeAll();
@@ -234,13 +234,12 @@ public class SetUp extends JFrame implements ActionListener {
 		buttonSection.setLayout(new BorderLayout());
 		buttonSection.add(new JLabel("buttons"), BorderLayout.NORTH);
 		JPanel buttonMappings = new JPanel();
-		buttonMappings.setLayout(new GridLayout(0, 3));
+		buttonMappings.setLayout(new GridLayout(0, 2));
 		for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
 		  if (genericBridge.interfacePiece().isSlider || genericBridge.interfacePiece().isPad) { continue; }
 		  ArduinoToButtonBridge bridge = (ArduinoToButtonBridge) genericBridge;
 	    buttonMappings.add(new JTextField(bridge.interfacePiece.name));
-	    buttonMappings.add(new JLabel(bridge.interactivePiece.toString()));
-	    buttonMappings.add(new JButton("x"));
+	    buttonMappings.add(bridge.interactionButton());
 		}
 		buttonSection.add(buttonMappings, BorderLayout.SOUTH);
 
@@ -248,13 +247,13 @@ public class SetUp extends JFrame implements ActionListener {
 		sliderSection.setLayout(new BorderLayout());
 		sliderSection.add(new JLabel("sliders"), BorderLayout.NORTH);
     JPanel sliderMappings = new JPanel();
-    sliderMappings.setLayout(new GridLayout(0, 4));
+    sliderMappings.setLayout(new GridLayout(0, 3));
     for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
       if (!(genericBridge.interfacePiece().isSlider)) { continue; }
       ArduinoToSliderBridge bridge = (ArduinoToSliderBridge) genericBridge;
-      buttonMappings.add(new JTextField(bridge.interfacePiece.name));
-      buttonMappings.add(new JLabel(bridge.interactivePieceAsc.toString() + " ;; " + bridge.interactivePieceDesc.toString()));
-      buttonMappings.add(new JButton("x"));
+      sliderMappings.add(new JTextField(bridge.interfacePiece.name));
+      sliderMappings.add(bridge.interactionButtonAsc());
+      sliderMappings.add(bridge.interactionButtonAsc());
     }
     sliderSection.add(sliderMappings, BorderLayout.SOUTH);
 
@@ -262,15 +261,14 @@ public class SetUp extends JFrame implements ActionListener {
     padSection.setLayout(new BorderLayout());
     padSection.add(new JLabel("pads"), BorderLayout.NORTH);
     JPanel padMappings = new JPanel();
-    padMappings.setLayout(new GridLayout(0, 4));
+    padMappings.setLayout(new GridLayout(0, 3));
     for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
       if (!(genericBridge.interfacePiece().isPad)) { continue; }
       ArduinoToPadBridge bridge = (ArduinoToPadBridge) genericBridge;
-      buttonMappings.add(new JTextField(bridge.interfacePiece.name));
-      buttonMappings.add(new JLabel(bridge.interactivePiece.toString()));
-      buttonMappings.add(new JButton("x"));
+      padMappings.add(new JTextField(bridge.interfacePiece.name));
+      padMappings.add(new JLabel(bridge.interactivePiece.toString()));
     }
-    sliderSection.add(padMappings, BorderLayout.SOUTH);    
+    padSection.add(padMappings, BorderLayout.SOUTH);    
     
     JPanel comboSection = new JPanel();
     comboSection.setLayout(new BorderLayout());
@@ -289,6 +287,7 @@ public class SetUp extends JFrame implements ActionListener {
     comboMappings.add(new JButton("select action"));
     comboSection.add(comboMappings, BorderLayout.SOUTH);
     
+    listsOfThingsHappening.add(serialCommunication.whatItSees());
     listsOfThingsHappening.add(buttonSection);
     listsOfThingsHappening.add(sliderSection);
     listsOfThingsHappening.add(padSection);

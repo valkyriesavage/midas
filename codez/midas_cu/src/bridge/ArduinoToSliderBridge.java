@@ -1,6 +1,10 @@
 package bridge;
 
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
 
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
@@ -46,5 +50,25 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
   
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
     this.interfacePiece = interfacePiece;
+  }
+  
+  public JButton interactionButtonAsc() {
+    JButton change = new JButton(interactivePieceAsc.toString() + "\n(change)");
+    change.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        interactivePieceAsc.replace();
+      }
+    });
+    return change;
+  }
+  
+  public JButton interactionButtonDesc() {
+    JButton change = new JButton(interactivePieceDesc.toString() + "\n(change)");
+    change.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        interactivePieceDesc.replace();
+      }
+    });
+    return change;
   }
 }

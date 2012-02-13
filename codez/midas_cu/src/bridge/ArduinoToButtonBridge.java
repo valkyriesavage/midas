@@ -1,6 +1,10 @@
 package bridge;
 
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
 
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
@@ -17,7 +21,7 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   public ArduinoObject arduinoPiece = nullSensor;
   public UIScript interactivePiece = nullScript;
     
-  public ArduinoToButtonBridge() {System.out.println("made a button bridge");}
+  public ArduinoToButtonBridge() {}
     
   public String toString() {
     if (interfacePiece.name != null) {
@@ -48,5 +52,15 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
     this.interfacePiece = interfacePiece;
+  }
+  
+  public JButton interactionButton() {
+    JButton change = new JButton(interactivePiece.toString() + "\n(change)");
+    change.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        interactivePiece.replace();
+      }
+    });
+    return change;
   }
 }

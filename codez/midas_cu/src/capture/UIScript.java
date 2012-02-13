@@ -17,4 +17,8 @@ public class UIScript {
   public String toString() {
     return "Hi, I am a UIScript";
   }
+  
+  public void replace() {
+    //here we capture! 
+  }
 }

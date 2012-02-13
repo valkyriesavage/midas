@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import util.Direction;
+import javax.swing.JLabel;
 
+import util.Direction;
 import capture.UIScript;
 
 
@@ -19,6 +20,8 @@ public class ArduinoDispatcher {
   public Map<ArduinoSlider, UIScript> slidersToDescHandlers;
   public Map<ArduinoSensor, UIScript> padsToHandlers;
   public Map<List<ArduinoEvent>, UIScript> combosToHandlers;
+  
+  public JLabel whatItSees = new JLabel();
 
   // we want to phase out old events since they won't be part of the same gesture
   private static final int TIMEOUT_FOR_INSTRUCTION = 2000;
@@ -45,6 +48,7 @@ public class ArduinoDispatcher {
       }
     }
     recentEvents = recentEvents.subList(newestReasonableEvent, recentEvents.size()-1);
+    whatItSees.setText(recentEvents.toString());
 
     recentEvents.add(e);
     ArduinoSlider slider;
