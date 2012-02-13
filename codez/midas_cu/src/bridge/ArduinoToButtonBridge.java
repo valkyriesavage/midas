@@ -55,10 +55,16 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   }
   
   public JButton interactionButton() {
-    JButton change = new JButton(interactivePiece.toString() + "\n(change)");
+    JButton change = new JButton("record interaction");
     change.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        interactivePiece.replace();
+        if (!interactivePiece.isRecording) {
+          interactivePiece.record();
+          ((JButton)event.getSource()).setText("stop recording");
+        } else {
+          interactivePiece.stopRecording();
+          ((JButton)event.getSource()).setText(interactivePiece.toString() + " (change)");
+        }
       }
     });
     return change;

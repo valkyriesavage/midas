@@ -2,6 +2,8 @@ package capture;
 
 import java.awt.AWTException;
 
+import javax.swing.KeyStroke;
+
 public class TypeAction extends RobotAction implements UIAction {
   
   int keyCode;
@@ -15,5 +17,8 @@ public class TypeAction extends RobotAction implements UIAction {
     robot.keyPress(keyCode);
     robot.keyRelease(keyCode);
   }
-
+  
+  public String toString() {
+    return "" + KeyStroke.getKeyStroke(keyCode, 0).getKeyChar();
+  }
 }

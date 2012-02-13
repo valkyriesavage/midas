@@ -56,7 +56,7 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
     JButton change = new JButton(interactivePieceAsc.toString() + "\n(change)");
     change.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        interactivePieceAsc.replace();
+        interactivePieceAsc.record();
       }
     });
     return change;
@@ -66,7 +66,7 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
     JButton change = new JButton(interactivePieceDesc.toString() + "\n(change)");
     change.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        interactivePieceDesc.replace();
+        interactivePieceDesc.record();
       }
     });
     return change;
