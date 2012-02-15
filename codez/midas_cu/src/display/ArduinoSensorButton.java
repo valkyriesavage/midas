@@ -48,8 +48,12 @@ public class ArduinoSensorButton extends JButton {
         mouseReleased(event);
       }
 
-      public void mouseEntered(MouseEvent event) {}
-      public void mouseExited(MouseEvent event) {}
+      public void mouseEntered(MouseEvent event) {
+        //TODO:  consider whether hover here should be doing something nice like highlighting the appropriate interaction line on the right
+      }
+      public void mouseExited(MouseEvent event) {
+        deactivate();
+      }
 
     });
     Random random = new Random();
@@ -72,10 +76,14 @@ public class ArduinoSensorButton extends JButton {
     
   }
   public void smaller() {
-    
+    size -= 4;
+    upperLeft.x += 2;
+    upperLeft.y += 2;
   }
   public void larger() {
-    
+    size += 4;
+    upperLeft.x -= 2;
+    upperLeft.y -= 2;
   }
   public void activate() {
     setBackground(Color.orange);

@@ -11,6 +11,14 @@ import display.SensorButtonGroup;
 import display.SensorShape;
 
 public class ArduinoToPadBridge implements ArduinoToDisplayBridge {
+  /* TODO
+   * pads should have one UIAction per square of sensor
+   * they should correspond to absolute location on a pad
+   * the pad should be determined by clicking in the four corners of the pad thing the user wants controlled
+   * 
+   * TODO also: we need an example of this to test it for the user study!!
+   */
+  
   private static final SensorButtonGroup nullInterface = new SensorButtonGroup(SensorShape.shapes.SQUARE);
   private static final ArduinoPad nullPad = new ArduinoPad(new ArrayList<ArduinoSensor>());
   private static final UIScript nullScript = new UIScript();

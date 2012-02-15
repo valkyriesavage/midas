@@ -6,7 +6,7 @@ import java.util.List;
 import org.jnativehook.GlobalScreen;
 
 public class UIScript {
-  private List<UIAction> actions = new ArrayList<UIAction>();
+  public List<UIAction> actions = new ArrayList<UIAction>();
   private InputCapturer capturer;
   
   public boolean isRecording = false;
@@ -25,7 +25,9 @@ public class UIScript {
       if (action instanceof MouseReleaseAction) { continue; }
       ret += action + ", ";
     }
-    ret = ret.substring(0, ret.length() - 2);
+    if (ret.length() > 2) {
+      ret = ret.substring(0, ret.length() - 2);
+    }
     return ret;
   }
   

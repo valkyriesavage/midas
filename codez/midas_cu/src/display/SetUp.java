@@ -52,11 +52,18 @@ public class SetUp extends JFrame implements ActionListener {
 	
 	public static final int CANVAS_X = 150;
 	public static final int CANVAS_Y = 150;
+	
+	private static final Integer[] SLIDER_SENSITIVITIES = {3,4,5,6,7,8};
+	private static final Integer[] PAD_SENSITIVITIES = {4,9,16,25,36};
 
 	static SerialCommunication serialCommunication;
 	public static final String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
+	JComboBox sliderSensitivity = new JComboBox(SLIDER_SENSITIVITIES);
+	private boolean doingSlider = false;
+	JComboBox padSensitivity = new JComboBox(PAD_SENSITIVITIES);
+	private boolean doingPad = false;
   JSVGCanvas svgCanvas = new JSVGCanvas();
   SVGGraphics2D g;
   SVGDocument doc;
@@ -130,6 +137,7 @@ public class SetUp extends JFrame implements ActionListener {
 	}
 
 	private void setUpButtonCreator() {
+	  buttonCreatorPanel.removeAll();
 	  buttonCreatorPanel.setLayout(new GridLayout(3,2));
 	  
 	  JPanel addStockButtonPanel = new JPanel();
@@ -138,12 +146,20 @@ public class SetUp extends JFrame implements ActionListener {
 	    public void itemStateChanged(ItemEvent event) {
 	      if (event.getStateChange() == ItemEvent.SELECTED) {
 	        queuedShape = ((SensorShape)((JComboBox)event.getSource()).getSelectedItem()).shape;
+          doingSlider = false;
+          doingPad = false;
 	        if (queuedShape.equals("slider")) {
-	          //TODO activate something which permits choosing the length of the slider
+	          doingSlider = true;
+	          setUpButtonCreator();
+	        } else if (queuedShape.equals("pad")) {
+	          doingPad = true;
+	          setUpButtonCreator();
 	        }
 	      }
 	    }
 	  });
+	  if(doingSlider) { addStockButtonPanel.add(sliderSensitivity); }
+	  if(doingPad) { addStockButtonPanel.add(padSensitivity); }
 	  addStockButtonPanel.add(shapeChooser);
 	  JButton addStock = new JButton("+");
 	  addStock.addActionListener(new ActionListener() {
@@ -154,10 +170,12 @@ public class SetUp extends JFrame implements ActionListener {
 	      if (queuedShape == shapes.SLIDER) {
 	        newButton.isSlider = true;
           newBridge = new ArduinoToSliderBridge();
+          newButton.setSensitivity(((Integer)sliderSensitivity.getSelectedItem()).intValue());
 	      }
 	      else if (queuedShape == shapes.PAD) {
 	        newButton.isPad = true;
 	        newBridge = new ArduinoToPadBridge();
+          newButton.setSensitivity(((Integer)padSensitivity.getSelectedItem()).intValue());
 	      }
 	      else { // it is a button
 	        newBridge = new ArduinoToButtonBridge();
@@ -240,6 +258,7 @@ public class SetUp extends JFrame implements ActionListener {
 		  ArduinoToButtonBridge bridge = (ArduinoToButtonBridge) genericBridge;
 	    buttonMappings.add(new JTextField(bridge.interfacePiece.name));
 	    buttonMappings.add(bridge.interactionButton());
+	    buttonMappings.add(bridge.goButton());
 		}
 		buttonSection.add(buttonMappings, BorderLayout.SOUTH);
 
@@ -252,8 +271,7 @@ public class SetUp extends JFrame implements ActionListener {
       if (!(genericBridge.interfacePiece().isSlider)) { continue; }
       ArduinoToSliderBridge bridge = (ArduinoToSliderBridge) genericBridge;
       sliderMappings.add(new JTextField(bridge.interfacePiece.name));
-      sliderMappings.add(bridge.interactionButtonAsc());
-      sliderMappings.add(bridge.interactionButtonAsc());
+      sliderMappings.add(bridge.captureSliderButton());
     }
     sliderSection.add(sliderMappings, BorderLayout.SOUTH);
 

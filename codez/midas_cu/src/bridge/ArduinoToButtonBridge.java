@@ -15,11 +15,10 @@ import display.SensorShape;
 public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   private static final SensorButtonGroup nullInterface = new SensorButtonGroup(SensorShape.shapes.SQUARE);
   private static final ArduinoSensor nullSensor = new ArduinoSensor(-1,-1);
-  private static final UIScript nullScript = new UIScript();
   
   public SensorButtonGroup interfacePiece = nullInterface;
   public ArduinoObject arduinoPiece = nullSensor;
-  public UIScript interactivePiece = nullScript;
+  public UIScript interactivePiece = new UIScript();
     
   public ArduinoToButtonBridge() {}
     
@@ -45,9 +44,7 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   }
   
   public void executeScript() {
-    if (interactivePiece != nullScript) {
-      interactivePiece.execute();
-    }
+    interactivePiece.execute();
   }
   
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
@@ -55,7 +52,13 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   }
   
   public JButton interactionButton() {
-    JButton change = new JButton("record interaction");
+    JButton change;
+    if (interactivePiece.actions.size() > 0) {
+      change = new JButton(interactivePiece.toString() + " (change)");
+    }
+    else {
+      change = new JButton("record interaction");
+    }
     change.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         if (!interactivePiece.isRecording) {
@@ -65,6 +68,22 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
           interactivePiece.stopRecording();
           ((JButton)event.getSource()).setText(interactivePiece.toString() + " (change)");
         }
+      }
+    });
+    return change;
+  }
+  
+  public JButton goButton() {
+    JButton change;
+    if (interactivePiece.actions.size() > 0) {
+      change = new JButton("go");
+    }
+    else {
+      change = new JButton("can't go");
+    }
+    change.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        interactivePiece.execute();
       }
     });
     return change;

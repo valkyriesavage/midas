@@ -9,19 +9,18 @@ import javax.swing.JButton;
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
-import capture.UIScript;
+import capture.UISlider;
 import display.SensorButtonGroup;
 import display.SensorShape;
 
 public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
+  
   private static final SensorButtonGroup nullInterface = new SensorButtonGroup(SensorShape.shapes.SQUARE);
   private static final ArduinoSlider nullSlider = new ArduinoSlider(new ArduinoSensor[0]);
-  private static final UIScript nullScript = new UIScript();
   
   public SensorButtonGroup interfacePiece = nullInterface;
   public ArduinoObject arduinoPiece = nullSlider;
-  public UIScript interactivePieceAsc = nullScript;
-  public UIScript interactivePieceDesc = nullScript;
+  public UISlider interactivePiece = new UISlider();
     
   public ArduinoToSliderBridge() {
     nullInterface.isSlider = true;
@@ -52,23 +51,19 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
     this.interfacePiece = interfacePiece;
   }
   
-  public JButton interactionButtonAsc() {
-    JButton change = new JButton(interactivePieceAsc.toString() + "\n(change)");
-    change.addActionListener(new ActionListener() {
+  public JButton captureSliderButton() {
+    JButton captureSlider = new JButton(interactivePiece.toString());
+    captureSlider.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        interactivePieceAsc.record();
+        if (!interactivePiece.isRecording) {
+          interactivePiece.record();
+          ((JButton)event.getSource()).setText("stop recording");
+        } else {
+          interactivePiece.stopRecording();
+          ((JButton)event.getSource()).setText(interactivePiece.toString() + " (change)");
+        }
       }
     });
-    return change;
-  }
-  
-  public JButton interactionButtonDesc() {
-    JButton change = new JButton(interactivePieceDesc.toString() + "\n(change)");
-    change.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) {
-        interactivePieceDesc.record();
-      }
-    });
-    return change;
+    return captureSlider;
   }
 }

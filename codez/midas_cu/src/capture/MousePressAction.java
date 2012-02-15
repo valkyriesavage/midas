@@ -11,7 +11,7 @@ public class MousePressAction extends RobotAction implements UIAction {
   public MousePressAction(Point p, int buttons) throws AWTException {
     super();
     this.p = p;
-    this.buttons = buttons;
+    this.buttons = RobotAction.cleanMouseButtons(buttons);
   }
 
   public void doAction() {
@@ -20,7 +20,7 @@ public class MousePressAction extends RobotAction implements UIAction {
   }
   
   public String toString() {
-    return "click at " + p.x + "," + p.y;
+    return "click @ " + p.x + "," + p.y;
   }
 
 }

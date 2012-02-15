@@ -8,9 +8,7 @@ import gnu.io.SerialPortEventListener;
 import java.awt.AWTException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -19,6 +17,7 @@ import java.util.regex.Pattern;
 import javax.swing.JLabel;
 
 import capture.UIScript;
+import capture.UISlider;
 
 
 /**
@@ -167,46 +166,15 @@ public class SerialCommunication implements SerialPortEventListener {
   public Map<ArduinoSensor, UIScript> buttonsToHandlers() {
     return dispatcher.buttonsToHandlers;
   }
-
-  /*
-   * This effectively zips the lists of ascending and descending handlers for sliders.
-   * 
-   * If a slider is missing an ascending or descending action, a null holds its place.
-   */
-  public Map<ArduinoSlider, List<UIScript>> slidersToHandlers() {
-    Map<ArduinoSlider, List<UIScript>> slidersToHandlers = new HashMap<ArduinoSlider, List<UIScript>>();
-    for (Map.Entry<ArduinoSlider, UIScript> e : dispatcher.slidersToAscHandlers.entrySet()) {
-      List<UIScript> handlers = new ArrayList<UIScript>();
-      handlers.add(e.getValue());
-      handlers.add(null);
-      slidersToHandlers.put(e.getKey(), handlers);
-    }
-    for (Map.Entry<ArduinoSlider, UIScript> e : dispatcher.slidersToDescHandlers.entrySet()) {
-      if(slidersToHandlers.containsKey(e.getKey())) {
-        slidersToHandlers.get(e.getKey()).remove(null);
-        slidersToHandlers.get(e.getKey()).add(e.getValue());
-      }
-      else {
-        List<UIScript> handlers = new ArrayList<UIScript>();
-        handlers.add(null);
-        handlers.add(e.getValue());
-        slidersToHandlers.put(e.getKey(), handlers);
-      }
-    }
-    return slidersToHandlers;
-  }
   
-  public Map<ArduinoSlider, UIScript> slidersToAscHandlers() {
-    return dispatcher.slidersToAscHandlers;
-  }
-  
-  public Map<ArduinoSlider, UIScript> slidersToDescHandlers() {
-    return dispatcher.slidersToDescHandlers;
+  public Map<ArduinoSlider, UISlider> slidersToHandlers() {
+    return dispatcher.slidersToHandlers;
   }
 
   public Map<ArduinoSensor, UIScript> padsToHandlers() {
     return dispatcher.padsToHandlers;
   }
+  
   public Map<List<ArduinoEvent>, UIScript> combosToHandlers() {
     return dispatcher.combosToHandlers;
   }

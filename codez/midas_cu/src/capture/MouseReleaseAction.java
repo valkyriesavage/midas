@@ -11,7 +11,7 @@ public class MouseReleaseAction extends RobotAction implements UIAction {
   public MouseReleaseAction(Point p, int buttons) throws AWTException {
     super();
     this.p = p;
-    this.buttons = buttons;
+    this.buttons = RobotAction.cleanMouseButtons(buttons);
   }
 
   public void doAction() {

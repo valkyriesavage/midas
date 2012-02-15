@@ -8,16 +8,15 @@ import java.util.Map;
 
 import javax.swing.JLabel;
 
-import util.Direction;
 import capture.UIScript;
+import capture.UISlider;
 
 
 public class ArduinoDispatcher {
   private List<ArduinoEvent> recentEvents = new ArrayList<ArduinoEvent>();
   
   public Map<ArduinoSensor, UIScript> buttonsToHandlers;
-  public Map<ArduinoSlider, UIScript> slidersToAscHandlers;
-  public Map<ArduinoSlider, UIScript> slidersToDescHandlers;
+  public Map<ArduinoSlider, UISlider> slidersToHandlers;
   public Map<ArduinoSensor, UIScript> padsToHandlers;
   public Map<List<ArduinoEvent>, UIScript> combosToHandlers;
   
@@ -32,8 +31,7 @@ public class ArduinoDispatcher {
   
   public void clearAllInteractions() {
     buttonsToHandlers = new HashMap<ArduinoSensor, UIScript>();
-    slidersToAscHandlers = new HashMap<ArduinoSlider, UIScript>();
-    slidersToDescHandlers = new HashMap<ArduinoSlider, UIScript>();
+    slidersToHandlers = new HashMap<ArduinoSlider, UISlider>();
     padsToHandlers = new HashMap<ArduinoSensor, UIScript>();
     combosToHandlers = new HashMap<List<ArduinoEvent>, UIScript>();
     ArduinoSetup.resetSliders();
@@ -64,13 +62,7 @@ public class ArduinoDispatcher {
       if (recentEvents.size() > 1) {
     	  ArduinoSensor previous = recentEvents.get(recentEvents.size() - 2).whichSensor;
         if (ArduinoSetup.isPartOfSlider(previous) == slider) {
-          if (slider.ascOrDesc(previous, current) == Direction.ASCENDING) {
-            System.out.println("ascending...");
-            slidersToAscHandlers.get(slider).execute();
-          } else {
-            System.out.println("descending...");
-            slidersToDescHandlers.get(slider).execute();
-          }
+          
         }
       }
     } else {
