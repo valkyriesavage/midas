@@ -11,7 +11,7 @@ public class RobotAction {
   protected RobotAction() throws AWTException {
     if (robot == null) {
       robot = new Robot();
-      robot.setAutoDelay(50);
+      robot.setAutoDelay(500);
     }
   }
   

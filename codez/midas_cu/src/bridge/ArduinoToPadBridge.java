@@ -1,12 +1,17 @@
 package bridge;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+
+import javax.swing.JButton;
 
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoPad;
 import serialtalk.ArduinoSensor;
-import capture.UIScript;
+import capture.UIPad;
 import display.SensorButtonGroup;
 import display.SensorShape;
 
@@ -21,14 +26,17 @@ public class ArduinoToPadBridge implements ArduinoToDisplayBridge {
   
   private static final SensorButtonGroup nullInterface = new SensorButtonGroup(SensorShape.shapes.SQUARE);
   private static final ArduinoPad nullPad = new ArduinoPad(new ArrayList<ArduinoSensor>());
-  private static final UIScript nullScript = new UIScript();
   
   public SensorButtonGroup interfacePiece = nullInterface;
   public ArduinoObject arduinoPiece = nullPad;
-  public UIScript interactivePiece = nullScript;
+  public UIPad interactivePiece;
+  
+  public Integer sensitivity = 0;
     
-  public ArduinoToPadBridge() {
+  public ArduinoToPadBridge(int sensitivity) {
     nullInterface.isPad = true;
+    this.sensitivity = sensitivity;
+    interactivePiece = new UIPad(sensitivity);
   }
     
   public String toString() {
@@ -54,5 +62,37 @@ public class ArduinoToPadBridge implements ArduinoToDisplayBridge {
   
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
     this.interfacePiece = interfacePiece;
+    interfacePiece.isPad = true;
+    this.interfacePiece.setSensitivity(this.sensitivity);
+  }
+  
+  public JButton capturePadButton() {
+    JButton capturePad = new JButton(interactivePiece.toString());
+    capturePad.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        if (!interactivePiece.isRecording) {
+          interactivePiece.record();
+          ((JButton)event.getSource()).setText("stop recording");
+        } else {
+          interactivePiece.stopRecording();
+          ((JButton)event.getSource()).setText(interactivePiece.toString() + " (change)");
+        }
+      }
+    });
+    return capturePad;
+  }
+  
+  public JButton showTestPositionsButton() {
+    JButton show = new JButton("test positions");
+    show.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        for(int i=(int)Math.sqrt(sensitivity)-1; i>=0; i--) {
+          for(int j=0; j<Math.sqrt(sensitivity); j++) {
+            interactivePiece.execute(new Point(j, i));
+          }
+        }
+      }
+    });
+    return show;
   }
 }

@@ -26,7 +26,7 @@ public class SensorButtonGroup extends JPanel {
   public boolean deleteMe = false;
   public boolean isSlider;
   public boolean isPad;
-  public int sensitivity = 1; // TODO (xiaohan) : sensitivity here means the number of buttons that make it up
+  public Integer sensitivity; // TODO (xiaohan) : sensitivity here means the number of buttons that make it up
   
   public SensorButtonGroup(SensorShape.shapes shape) {
     triggerButton = new ArduinoSensorButton(shape);
@@ -56,7 +56,7 @@ public class SensorButtonGroup extends JPanel {
     name = shape.name().toLowerCase();
   }
   
-  public void setSensitivity(int sensitivity) {
+  public void setSensitivity(Integer sensitivity) {
     this.sensitivity = sensitivity;
     name = name + "(" + sensitivity + ")";
   }

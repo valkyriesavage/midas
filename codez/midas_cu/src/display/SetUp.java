@@ -169,13 +169,11 @@ public class SetUp extends JFrame implements ActionListener {
 	      ArduinoToDisplayBridge newBridge;
 	      if (queuedShape == shapes.SLIDER) {
 	        newButton.isSlider = true;
-          newBridge = new ArduinoToSliderBridge();
-          newButton.setSensitivity(((Integer)sliderSensitivity.getSelectedItem()).intValue());
+          newBridge = new ArduinoToSliderBridge(((Integer)sliderSensitivity.getSelectedItem()).intValue());
 	      }
 	      else if (queuedShape == shapes.PAD) {
 	        newButton.isPad = true;
-	        newBridge = new ArduinoToPadBridge();
-          newButton.setSensitivity(((Integer)padSensitivity.getSelectedItem()).intValue());
+	        newBridge = new ArduinoToPadBridge(((Integer)padSensitivity.getSelectedItem()).intValue());
 	      }
 	      else { // it is a button
 	        newBridge = new ArduinoToButtonBridge();
@@ -272,6 +270,7 @@ public class SetUp extends JFrame implements ActionListener {
       ArduinoToSliderBridge bridge = (ArduinoToSliderBridge) genericBridge;
       sliderMappings.add(new JTextField(bridge.interfacePiece.name));
       sliderMappings.add(bridge.captureSliderButton());
+      sliderMappings.add(bridge.showTestPositionsButton());
     }
     sliderSection.add(sliderMappings, BorderLayout.SOUTH);
 
@@ -284,7 +283,8 @@ public class SetUp extends JFrame implements ActionListener {
       if (!(genericBridge.interfacePiece().isPad)) { continue; }
       ArduinoToPadBridge bridge = (ArduinoToPadBridge) genericBridge;
       padMappings.add(new JTextField(bridge.interfacePiece.name));
-      padMappings.add(new JLabel(bridge.interactivePiece.toString()));
+      padMappings.add(bridge.capturePadButton());
+      padMappings.add(bridge.showTestPositionsButton());
     }
     padSection.add(padMappings, BorderLayout.SOUTH);    
     

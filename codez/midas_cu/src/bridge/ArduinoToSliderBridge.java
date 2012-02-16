@@ -11,26 +11,24 @@ import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
 import capture.UISlider;
 import display.SensorButtonGroup;
-import display.SensorShape;
 
 public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
   
-  private static final SensorButtonGroup nullInterface = new SensorButtonGroup(SensorShape.shapes.SQUARE);
   private static final ArduinoSlider nullSlider = new ArduinoSlider(new ArduinoSensor[0]);
   
-  public SensorButtonGroup interfacePiece = nullInterface;
+  public SensorButtonGroup interfacePiece;
   public ArduinoObject arduinoPiece = nullSlider;
-  public UISlider interactivePiece = new UISlider();
+  public UISlider interactivePiece;
+  
+  public Integer sensitivity = 1;
     
-  public ArduinoToSliderBridge() {
-    nullInterface.isSlider = true;
+  public ArduinoToSliderBridge(int sensitivity) {
+    this.sensitivity = sensitivity;
+    interactivePiece = new UISlider(sensitivity);
   }
     
   public String toString() {
-    if (interfacePiece.name != null) {
-      return interfacePiece.name;
-    }
-    return "unknown";
+    return interfacePiece.name;
   }
   
   public ArduinoObject arduinoPiece() {
@@ -42,13 +40,13 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
   }
   
   public void paint(Graphics2D g) {
-    if (interfacePiece != nullInterface) {
-      interfacePiece.paint(g);
-    }
+    interfacePiece.paint(g);
   }
   
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
     this.interfacePiece = interfacePiece;
+    interfacePiece.isSlider = true;
+    this.interfacePiece.setSensitivity(this.sensitivity);
   }
   
   public JButton captureSliderButton() {
@@ -65,5 +63,17 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
       }
     });
     return captureSlider;
+  }
+  
+  public JButton showTestPositionsButton() {
+    JButton show = new JButton("test positions");
+    show.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        for(int i=0; i<sensitivity; i++) {
+          interactivePiece.execute(i);
+        }
+      }
+    });
+    return show;
   }
 }
