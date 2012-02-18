@@ -4,14 +4,14 @@ import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 
-public class RobotAction {
+public abstract class RobotAction {
 
   static protected Robot robot;
   
   protected RobotAction() throws AWTException {
     if (robot == null) {
       robot = new Robot();
-      robot.setAutoDelay(500);
+      robot.setAutoDelay(400);
     }
   }
   

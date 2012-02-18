@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoPad;
@@ -14,15 +15,10 @@ import serialtalk.ArduinoSensor;
 import capture.UIPad;
 import display.SensorButtonGroup;
 import display.SensorShape;
+import display.SetUp;
 
 public class ArduinoToPadBridge implements ArduinoToDisplayBridge {
-  /* TODO
-   * pads should have one UIAction per square of sensor
-   * they should correspond to absolute location on a pad
-   * the pad should be determined by clicking in the four corners of the pad thing the user wants controlled
-   * 
-   * TODO also: we need an example of this to test it for the user study!!
-   */
+  /* TODO also: we need an example of this to test it for the user study!! */
   
   private static final SensorButtonGroup nullInterface = new SensorButtonGroup(SensorShape.shapes.SQUARE);
   private static final ArduinoPad nullPad = new ArduinoPad(new ArrayList<ArduinoSensor>());
@@ -31,12 +27,21 @@ public class ArduinoToPadBridge implements ArduinoToDisplayBridge {
   public ArduinoObject arduinoPiece = nullPad;
   public UIPad interactivePiece;
   
-  public Integer sensitivity = 0;
+  public Integer sensitivity;
+  JComboBox padSensitivity = new JComboBox(SetUp.PAD_SENSITIVITIES);
     
   public ArduinoToPadBridge(int sensitivity) {
     nullInterface.isPad = true;
     this.sensitivity = sensitivity;
     interactivePiece = new UIPad(sensitivity);
+    
+    padSensitivity.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        JComboBox sensitivityBox = (JComboBox)event.getSource();
+        Integer newSensitivity = (Integer) sensitivityBox.getSelectedItem();
+        setSensitivity(newSensitivity);
+      }
+    });
   }
     
   public String toString() {
@@ -52,6 +57,12 @@ public class ArduinoToPadBridge implements ArduinoToDisplayBridge {
   
   public SensorButtonGroup interfacePiece() {
     return interfacePiece;
+  }
+  
+  public void setSensitivity(Integer sensitivity) {
+    this.sensitivity = sensitivity;
+    this.interactivePiece.sensitivity = sensitivity;
+    this.interfacePiece.setSensitivity(sensitivity);
   }
   
   public void paint(Graphics2D g) {
@@ -75,11 +86,15 @@ public class ArduinoToPadBridge implements ArduinoToDisplayBridge {
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setText(interactivePiece.toString() + " (change)");
+          ((JButton)event.getSource()).setText(interactivePiece.toString());
         }
       }
     });
     return capturePad;
+  }
+  
+  public JComboBox padSensitivityBox() {
+    return padSensitivity;
   }
   
   public JButton showTestPositionsButton() {

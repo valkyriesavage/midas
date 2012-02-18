@@ -19,15 +19,16 @@ public class UIPad {
   }
   
   public void execute(Point whichPad) {
-    MousePressAction action;
     // also no idea why this has to be cast to int twice...
     int clickX = (int) ((int)(bottomRightOfPad.x-topLeftOfPad.x)/(Math.sqrt(sensitivity)-1)*whichPad.x+topLeftOfPad.x);
     int clickY = (int) ((int)(topLeftOfPad.y - bottomRightOfPad.y)/(Math.sqrt(sensitivity)-1)*whichPad.y+bottomRightOfPad.y);
     
     Point clickPoint = new Point(clickX, clickY);
     try {
-      action = new MousePressAction(clickPoint, InputEvent.BUTTON1_MASK);
+      MousePressAction action = new MousePressAction(clickPoint, InputEvent.BUTTON1_MASK);
       action.doAction();
+      MouseReleaseAction unAction = new MouseReleaseAction(clickPoint, InputEvent.BUTTON1_MASK);
+      unAction.doAction();
     } catch (AWTException e) {
       e.printStackTrace();
     }
@@ -48,13 +49,13 @@ public class UIPad {
   
   public void stopRecording() {
     List<UIAction> actions = capturer.reportBack();
-    // be sure to pop off the last two events ; that's the click and release where they stopped recording.
-    actions.remove(actions.size() - 1);
-    actions.remove(actions.size() - 1);
     
-    // we want the locations of the clicks of the pad top left and bottom right.  we will assume that they were the first and last clicks.
+    if (actions.size() < 3) { System.out.println("not enough clicks!"); return; }
+    
+    // we want the locations of the clicks of the pad top left and bottom right.
+    // we will assume that they were the first and second click/release sets.
     MousePressAction oneClick = (MousePressAction)actions.get(0);
-    MousePressAction otherClick = (MousePressAction)actions.get(actions.size() - 2);
+    MousePressAction otherClick = (MousePressAction)actions.get(2);
     
     Point topClick;
     Point bottomClick;

@@ -58,7 +58,6 @@ public class SensorButtonGroup extends JPanel {
   
   public void setSensitivity(Integer sensitivity) {
     this.sensitivity = sensitivity;
-    name = name + "(" + sensitivity + ")";
   }
   
   private void initializeButtons() {

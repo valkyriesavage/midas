@@ -27,3 +27,6 @@ want to include their code in my project:
       http://mirror.atlanticmetro.net/apache//xmlgraphics/batik/batik-1.7.zip
   jshapes.jar -- http://java-sl.com/download/jshapes.jar
   jnativehook -- http://code.google.com/p/jnativehook/
+
+  Also, if you want to load up the Arduino, you naturally need the Arduino IDE
+or similar, from e.g. http://arduino.cc/hu/Main/Software

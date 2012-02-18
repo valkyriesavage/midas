@@ -28,9 +28,10 @@ public class SerialCommunication implements SerialPortEventListener {
   SerialPort serialPort;
   /** The port we're normally going to use. */
   private static final String PORT_NAMES[] = {
-	   "/dev/tty.usbmodemfa131", // Mac, Arduino Uno, works for Ragnarok
-     "/dev/ttyACM0", // Linux, specifically for Arduino Uno
-     //"COM3", // Windows
+    "/dev/tty.usbmodemfa131", // Mac, Arduino Uno, works for Ragnarok
+    "/dev/tty.usbmodemfa121", // Mac, Arduino Uno, works for Ragnarok
+    "/dev/ttyACM0", // Linux, specifically for Arduino Uno
+    "COM3", // Windows
   };
   /** Buffered input stream from the port */
   private InputStream input;
@@ -47,8 +48,10 @@ public class SerialCommunication implements SerialPortEventListener {
   boolean paused = false;
   private String currentSerialInfo = new String();
 
-  //private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
+  private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
   private Pattern matchOneArduino2DMessage = Pattern.compile("((\\d{2})(U|D)){2}");
+  
+  public boolean isGridded = false;
   
   public void initialize() throws AWTException {
     ArduinoSetup.initialize();
@@ -132,21 +135,38 @@ public class SerialCommunication implements SerialPortEventListener {
       
       currentSerialInfo = currentSerialInfo + new String(touched).trim();
 
-      Matcher one2DMessage;
+      Matcher oneMessage;
 
-      while ((one2DMessage = matchOneArduino2DMessage.matcher(currentSerialInfo))
-          .lookingAt()) {
-        currentSerialInfo = currentSerialInfo.substring(one2DMessage.end());
-        TouchDirection direction;
-        if (one2DMessage.group(2).equals("U") && one2DMessage.group(2).equals(one2DMessage.group(4))) {
-          direction = TouchDirection.TOUCH;
-        } else {
-          direction = TouchDirection.RELEASE;
+      if (isGridded) {
+        while ((oneMessage = matchOneArduino2DMessage.matcher(currentSerialInfo))
+            .lookingAt()) {
+          currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
+          TouchDirection direction;
+          if (oneMessage.group(2).equals("U") && oneMessage.group(2).equals(oneMessage.group(4))) {
+            direction = TouchDirection.TOUCH;
+          } else {
+            direction = TouchDirection.RELEASE;
+          }
+          ArduinoEvent currentEvent = new ArduinoEvent(
+              ArduinoSetup.gridSensors[Integer.parseInt(oneMessage.group(1))][Integer.parseInt(oneMessage.group(3))],
+              direction);
+          handleCompleteEvent(currentEvent);
         }
-        ArduinoEvent currentEvent = new ArduinoEvent(
-            ArduinoSetup.sensors[Integer.parseInt(one2DMessage.group(1))][Integer.parseInt(one2DMessage.group(3))],
-            direction);
-        handleCompleteEvent(currentEvent);
+      } else { //is not gridded
+        while ((oneMessage = matchOneArduinoMessage.matcher(currentSerialInfo))
+            .lookingAt()) {
+          currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
+          TouchDirection direction;
+          if (oneMessage.group(2).equals("U")) {
+            direction = TouchDirection.TOUCH;
+          } else {
+            direction = TouchDirection.RELEASE;
+          }
+          ArduinoEvent currentEvent = new ArduinoEvent(
+              ArduinoSetup.sensors[Integer.parseInt(oneMessage.group(1))],
+              direction);
+          handleCompleteEvent(currentEvent);
+        }
       }
     }
   }

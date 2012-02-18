@@ -13,10 +13,9 @@ import display.SensorButtonGroup;
 import display.SensorShape;
 
 public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
-  private static final SensorButtonGroup nullInterface = new SensorButtonGroup(SensorShape.shapes.SQUARE);
   private static final ArduinoSensor nullSensor = new ArduinoSensor(-1,-1);
   
-  public SensorButtonGroup interfacePiece = nullInterface;
+  public SensorButtonGroup interfacePiece = new SensorButtonGroup(SensorShape.shapes.SQUARE);
   public ArduinoObject arduinoPiece = nullSensor;
   public UIScript interactivePiece = new UIScript();
     
@@ -38,9 +37,7 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   }
   
   public void paint(Graphics2D g) {
-    if (interfacePiece != nullInterface) {
-      interfacePiece.paint(g);
-    }
+    interfacePiece.paint(g);
   }
   
   public void executeScript() {
@@ -54,7 +51,7 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   public JButton interactionButton() {
     JButton change;
     if (interactivePiece.actions.size() > 0) {
-      change = new JButton(interactivePiece.toString() + " (change)");
+      change = new JButton(interactivePiece.toString());
     }
     else {
       change = new JButton("record interaction");
@@ -66,7 +63,7 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setText(interactivePiece.toString() + " (change)");
+          ((JButton)event.getSource()).setText(interactivePiece.toString());
         }
       }
     });
@@ -74,13 +71,7 @@ public class ArduinoToButtonBridge implements ArduinoToDisplayBridge {
   }
   
   public JButton goButton() {
-    JButton change;
-    if (interactivePiece.actions.size() > 0) {
-      change = new JButton("go");
-    }
-    else {
-      change = new JButton("can't go");
-    }
+    JButton change = new JButton("replay");
     change.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         interactivePiece.execute();

@@ -24,7 +24,6 @@ public class UISlider {
   }
   
   public void execute(int whichPad) {
-    MousePressAction action;
     Point clickPoint;
     if (this.isHorizontal()) {
       clickPoint = new Point((highEndOfSlider.x-lowEndOfSlider.x)/(sensitivity-1)*whichPad + lowEndOfSlider.x, highEndOfSlider.y);
@@ -32,8 +31,10 @@ public class UISlider {
       clickPoint = new Point(highEndOfSlider.x, (highEndOfSlider.y-lowEndOfSlider.y)/(sensitivity-1)*whichPad + lowEndOfSlider.y);
     }
     try {
-      action = new MousePressAction(clickPoint, InputEvent.BUTTON1_MASK);
+      MousePressAction action = new MousePressAction(clickPoint, InputEvent.BUTTON1_MASK);
       action.doAction();
+      MouseReleaseAction unAction = new MouseReleaseAction(clickPoint, InputEvent.BUTTON1_MASK);
+      unAction.doAction();
     } catch (AWTException e) {
       e.printStackTrace();
     }
@@ -63,13 +64,13 @@ public class UISlider {
   
   public void stopRecording() {
     List<UIAction> actions = capturer.reportBack();
-    // be sure to pop off the last two events ; that's the click and release where they stopped recording.
-    actions.remove(actions.size() - 1);
-    actions.remove(actions.size() - 1);
+
+    if (actions.size() < 3) { System.out.println("not enough clicks!"); return; }
     
-    // we want the locations of the clicks of the slider top and bottom.  we will assume that they were the first and last clicks.
+    // we want the locations of the clicks of the slider top and bottom.
+    // we will assume that they were the first and second click/release sets.
     MousePressAction oneEndClick = (MousePressAction)actions.get(0);
-    MousePressAction otherEndClick = (MousePressAction)actions.get(actions.size() - 2);
+    MousePressAction otherEndClick = (MousePressAction)actions.get(2);
     
     if (firstIsLeftOrDownOfSecond(oneEndClick.p, otherEndClick.p)) {
       lowEndOfSlider = oneEndClick.p;

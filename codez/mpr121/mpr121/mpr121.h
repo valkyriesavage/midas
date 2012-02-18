@@ -54,9 +54,11 @@
 
 
 // Global Constants
-//from bildr
 #define TOU_THRESH	0x06
 #define REL_THRESH	0x0A
+//from bildr
+//#define TOU_THRESH	0x06
+//#define REL_THRESH	0x0A
 //from sparkfun
 //#define TOU_THRESH	0x0F
 //#define REL_THRESH	0x0A

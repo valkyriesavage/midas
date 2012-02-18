@@ -5,12 +5,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
 import capture.UISlider;
 import display.SensorButtonGroup;
+import display.SetUp;
 
 public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
   
@@ -20,11 +22,20 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
   public ArduinoObject arduinoPiece = nullSlider;
   public UISlider interactivePiece;
   
-  public Integer sensitivity = 1;
+  public Integer sensitivity;
+  private JComboBox sliderSensitivity = new JComboBox(SetUp.SLIDER_SENSITIVITIES);
     
   public ArduinoToSliderBridge(int sensitivity) {
     this.sensitivity = sensitivity;
     interactivePiece = new UISlider(sensitivity);
+    
+    sliderSensitivity.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        JComboBox sensitivityBox = (JComboBox)event.getSource();
+        Integer newSensitivity = (Integer) sensitivityBox.getSelectedItem();
+        setSensitivity(newSensitivity);
+      }
+    });
   }
     
   public String toString() {
@@ -43,6 +54,12 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
     interfacePiece.paint(g);
   }
   
+  public void setSensitivity(Integer sensitivity) {
+    this.sensitivity = sensitivity;
+    this.interactivePiece.sensitivity = sensitivity;
+    this.interfacePiece.setSensitivity(sensitivity);
+  }
+  
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
     this.interfacePiece = interfacePiece;
     interfacePiece.isSlider = true;
@@ -58,11 +75,15 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setText(interactivePiece.toString() + " (change)");
+          ((JButton)event.getSource()).setText(interactivePiece.toString());
         }
       }
     });
     return captureSlider;
+  }
+  
+  public JComboBox sliderSensitivityBox() {
+    return sliderSensitivity;
   }
   
   public JButton showTestPositionsButton() {

@@ -4,6 +4,7 @@ import java.awt.Point;
 
 public class ArduinoSensor implements ArduinoObject {
   public Point location;
+  // a y coordinate of -1 implies that this is a non-gridded sensor on pin #x
   
   private String name;
   
