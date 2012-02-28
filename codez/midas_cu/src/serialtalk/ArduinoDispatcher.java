@@ -2,40 +2,26 @@ package serialtalk;
 
 import java.awt.AWTException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.swing.JLabel;
+import javax.swing.JTextField;
 
-import capture.UIScript;
-import capture.UISlider;
+import bridge.ArduinoToDisplayBridge;
 
 
 public class ArduinoDispatcher {
   private List<ArduinoEvent> recentEvents = new ArrayList<ArduinoEvent>();
   
-  public Map<ArduinoSensor, UIScript> buttonsToHandlers;
-  public Map<ArduinoSlider, UISlider> slidersToHandlers;
-  public Map<ArduinoSensor, UIScript> padsToHandlers;
-  public Map<List<ArduinoEvent>, UIScript> combosToHandlers;
+  public List<ArduinoToDisplayBridge> bridgeObjects = new ArrayList<ArduinoToDisplayBridge>();
   
-  public JLabel whatItSees = new JLabel();
+  public ArduinoEvent lastEvent;
 
   // we want to phase out old events since they won't be part of the same gesture
   private static final int TIMEOUT_FOR_INSTRUCTION = 2000;
   
-  public ArduinoDispatcher() throws AWTException {
-     clearAllInteractions();
-  }
+  public JTextField whatISee = new JTextField("I see...");
   
-  public void clearAllInteractions() {
-    buttonsToHandlers = new HashMap<ArduinoSensor, UIScript>();
-    slidersToHandlers = new HashMap<ArduinoSlider, UISlider>();
-    padsToHandlers = new HashMap<ArduinoSensor, UIScript>();
-    combosToHandlers = new HashMap<List<ArduinoEvent>, UIScript>();
-    ArduinoSetup.resetSliders();
-  }
+  public ArduinoDispatcher() throws AWTException { }
 
   void handleEvent(ArduinoEvent e) {
     // phase out old events
@@ -45,48 +31,39 @@ public class ArduinoDispatcher {
         break;
       }
     }
-    recentEvents = recentEvents.subList(newestReasonableEvent, recentEvents.size()-1);
-    whatItSees.setText(recentEvents.toString());
-
+    recentEvents = recentEvents.subList(newestReasonableEvent, recentEvents.size());
+    lastEvent = e;
+    
     recentEvents.add(e);
-    ArduinoSlider slider;
-    //ArduinoPad pad;
-    ArduinoSensor current = e.whichSensor;
 
-    if ((slider = ArduinoSetup.isPartOfSlider(current)) != null) {
-      if (e.touchDirection == TouchDirection.TOUCH) { 
-    	  // ignore the release events, since they won't necessarily be in order
-    	  recentEvents.remove(e);
-    	  return;
-      }
-      if (recentEvents.size() > 1) {
-    	  ArduinoSensor previous = recentEvents.get(recentEvents.size() - 2).whichSensor;
-        if (ArduinoSetup.isPartOfSlider(previous) == slider) {
-          
-        }
-      }
-    } else {
-      for (int i = 1; i <= recentEvents.size(); i++) {
-        List<ArduinoEvent> iLengthList = recentEvents.subList(
-            recentEvents.size() - i, recentEvents.size());
-        if (combosToHandlers.containsKey(iLengthList)) {
-          System.out.println("combo!");
-          combosToHandlers.get(iLengthList).execute();
-        }
-        else if (i==1) {
-          ArduinoEvent singleEvent = iLengthList.get(0);
-          //we know that it's not part of a combo, it's just a plain single button being pushed
-          if(buttonsToHandlers.containsKey(singleEvent.whichSensor)) {
-            System.out.println("single button");
-            buttonsToHandlers.get(singleEvent.whichSensor).execute();
-            break;
-          }
-        }
+    ArduinoSensor sensor = e.whichSensor;
+
+    if (e.touchDirection == TouchDirection.RELEASE) { 
+    	// ignore the release events, since they aren't relevant until we make combos happen
+      // TODO : Make combos happen!
+      recentEvents.remove(e);
+   	  return;
+    }
+    
+    setWhatISee();
+    
+    for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+      if (bridge.contains(sensor)) {
+        bridge.execute(sensor);
       }
     }
   }
   
+  void setWhatISee() {
+    whatISee.setText(recentEvents.toString());
+  }
+  
   void clearRecentEvents() {
 	  recentEvents = new ArrayList<ArduinoEvent>();
+  }
+  
+  public List<ArduinoEvent> lastNEvents(int n) {
+    if(recentEvents.size() <= n) { return recentEvents; }
+    return recentEvents.subList(recentEvents.size() - n - 1, recentEvents.size() - 1);
   }
 }

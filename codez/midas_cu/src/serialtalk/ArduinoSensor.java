@@ -9,8 +9,7 @@ public class ArduinoSensor implements ArduinoObject {
   private String name;
   
   public ArduinoSensor(Point location) {
-    this.location = location;
-    this.name = "" + location;
+    register(location);
   }
   
   public ArduinoSensor(int x, int y) {
@@ -29,5 +28,22 @@ public class ArduinoSensor implements ArduinoObject {
   
   public String toString() {
     return name;
+  }
+  
+  public int hashCode() {
+    return Integer.parseInt(String.format("%02d%02d", location.x, location.y));
+  }
+  
+  public boolean equals(Object o) {
+    return (o instanceof ArduinoSensor) && (this.hashCode() == o.hashCode());
+  }
+
+  public boolean contains(ArduinoSensor sensor) {
+    return sensor.equals(this);
+  }
+  
+  public void register(Point newLocation) {
+    this.location = newLocation;
+    this.name = ""+ location;
   }
 }

@@ -11,20 +11,20 @@ public abstract class RobotAction {
   protected RobotAction() throws AWTException {
     if (robot == null) {
       robot = new Robot();
-      robot.setAutoDelay(400);
+      robot.setAutoDelay(150);
     }
   }
   
   protected static int cleanMouseButtons(int buttons) {
     int retButtons = 0;
     if((buttons&InputEvent.BUTTON1_DOWN_MASK) == InputEvent.BUTTON1_DOWN_MASK) {
-      retButtons |= InputEvent.BUTTON1_MASK;
+      retButtons = InputEvent.BUTTON1_MASK;
     }
-    if((buttons&InputEvent.BUTTON2_DOWN_MASK) == InputEvent.BUTTON2_DOWN_MASK) {
-      retButtons |= InputEvent.BUTTON2_MASK;
+    else if((buttons&InputEvent.BUTTON2_DOWN_MASK) == InputEvent.BUTTON2_DOWN_MASK) {
+      retButtons = InputEvent.BUTTON2_MASK;
     }
-    if((buttons&InputEvent.BUTTON3_DOWN_MASK) == InputEvent.BUTTON3_DOWN_MASK) {
-      retButtons |= InputEvent.BUTTON3_MASK;
+    else if((buttons&InputEvent.BUTTON3_DOWN_MASK) == InputEvent.BUTTON3_DOWN_MASK) {
+      retButtons = InputEvent.BUTTON3_MASK;
     }
     return retButtons;
   }

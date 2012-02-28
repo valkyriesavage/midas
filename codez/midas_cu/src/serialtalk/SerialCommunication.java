@@ -10,14 +10,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JLabel;
+import javax.swing.JTextField;
 
-import capture.UIScript;
-import capture.UISlider;
+import bridge.ArduinoToDisplayBridge;
 
 
 /**
@@ -26,7 +24,7 @@ import capture.UISlider;
 
 public class SerialCommunication implements SerialPortEventListener {
   SerialPort serialPort;
-  /** The port we're normally going to use. */
+
   private static final String PORT_NAMES[] = {
     "/dev/tty.usbmodemfa131", // Mac, Arduino Uno, works for Ragnarok
     "/dev/tty.usbmodemfa121", // Mac, Arduino Uno, works for Ragnarok
@@ -44,6 +42,7 @@ public class SerialCommunication implements SerialPortEventListener {
   private static final int DATA_RATE = 9600;
 
   private ArduinoDispatcher dispatcher;
+  public List<ArduinoToDisplayBridge> bridgeObjects;
 
   boolean paused = false;
   private String currentSerialInfo = new String();
@@ -53,14 +52,16 @@ public class SerialCommunication implements SerialPortEventListener {
   
   public boolean isGridded = false;
   
-  public void initialize() throws AWTException {
-    ArduinoSetup.initialize();
+  public void initialize(boolean test) throws AWTException {
+    ArduinoSetup.initialize(test);
     
     CommPortIdentifier portId = null;
+    // the following line is useful for computers with AMD processors.  it's stupid.
     //System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
     @SuppressWarnings("rawtypes")
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     dispatcher = new ArduinoDispatcher();
+    bridgeObjects = dispatcher.bridgeObjects;
 
     // iterate through, looking for the port
     while (portEnum.hasMoreElements()) {
@@ -75,6 +76,11 @@ public class SerialCommunication implements SerialPortEventListener {
 
     if (portId == null) {
       System.out.println("Could not find COM port.");
+      if (test) {
+        // we want to make a new window that we can use to inject ArduinoEvents
+        ArduinoTestWindow.setDispatcher(dispatcher);
+        new ArduinoTestWindow();
+      }
       return;
     }
 
@@ -174,32 +180,12 @@ public class SerialCommunication implements SerialPortEventListener {
   public synchronized void handleCompleteEvent(ArduinoEvent e) {
     if (paused) {
       dispatcher.clearRecentEvents();
-	  return;
-	}
+      return;
+    }
     dispatcher.handleEvent(e);
   }
   
-  public void clearAllInteractions() {
-    dispatcher.clearAllInteractions();
-  }
-
-  public Map<ArduinoSensor, UIScript> buttonsToHandlers() {
-    return dispatcher.buttonsToHandlers;
-  }
-  
-  public Map<ArduinoSlider, UISlider> slidersToHandlers() {
-    return dispatcher.slidersToHandlers;
-  }
-
-  public Map<ArduinoSensor, UIScript> padsToHandlers() {
-    return dispatcher.padsToHandlers;
-  }
-  
-  public Map<List<ArduinoEvent>, UIScript> combosToHandlers() {
-    return dispatcher.combosToHandlers;
-  }
-  
-  public JLabel whatItSees() {
-    return dispatcher.whatItSees;
+  public JTextField whatISee() {
+    return dispatcher.whatISee;
   }
 }

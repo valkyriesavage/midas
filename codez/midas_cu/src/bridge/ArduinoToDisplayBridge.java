@@ -1,16 +1,30 @@
 package bridge;
 
 import java.awt.Graphics2D;
+import java.util.List;
 
+import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoObject;
+import serialtalk.ArduinoSensor;
 import display.SensorButtonGroup;
 
-public interface ArduinoToDisplayBridge {
-  public ArduinoObject arduinoPiece();
-  public SensorButtonGroup interfacePiece();
-  public void setInterfacePiece(SensorButtonGroup interfacePiece);
-  public void paint(Graphics2D g);
-  //public void executeScript();
-  // we don't have that last one active because the execution of a script depends upon direction for the slider
-  // and the pad...
+public abstract class ArduinoToDisplayBridge {
+  public ArduinoObject arduinoPiece;
+  public SensorButtonGroup interfacePiece;
+  
+  public void setInterfacePiece(SensorButtonGroup interfacePiece) {
+    this.interfacePiece = interfacePiece;
+  }
+  
+  public void paint(Graphics2D g) {
+    interfacePiece.paint(g);
+  }
+  
+  public void execute(ArduinoSensor sensor) {};
+  
+  public boolean contains(ArduinoSensor sensor) {
+    return arduinoPiece.contains(sensor);
+  }
+  
+  public void setArduinoSequence(List<ArduinoEvent> events) {};
 }

@@ -2,8 +2,8 @@ package serialtalk;
 
 
 public class ArduinoEvent implements ArduinoObject {
-  TouchDirection touchDirection;
-  ArduinoSensor whichSensor;
+  public TouchDirection touchDirection;
+  public ArduinoSensor whichSensor;
   long timestamp = System.currentTimeMillis();
   
   public ArduinoEvent(ArduinoSensor whichSensor, TouchDirection touchDirection) {
@@ -29,13 +29,16 @@ public class ArduinoEvent implements ArduinoObject {
   
   @Override
   public String toString() {
-    String retVal = new String();
+    String retVal = "";
     if (touchDirection == TouchDirection.TOUCH){
-      retVal += "release ";
-    } else if (touchDirection == TouchDirection.RELEASE) {
       retVal += "touch ";
+    } else if (touchDirection == TouchDirection.RELEASE) {
+      retVal += "release ";
     }
-    retVal += whichSensor.location;
+    if (whichSensor != null && whichSensor.location != null) { 
+      retVal += whichSensor.location.x + ", " + whichSensor.location.y;
+    }
+
     return retVal;
   }
   
@@ -45,5 +48,9 @@ public class ArduinoEvent implements ArduinoObject {
       return true;
     }
     return false;
+  }
+
+  public boolean contains(ArduinoSensor sensor) {
+    return sensor.equals(whichSensor);
   }
 }

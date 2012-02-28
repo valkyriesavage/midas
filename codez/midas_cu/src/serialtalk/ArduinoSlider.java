@@ -30,6 +30,10 @@ public class ArduinoSlider implements ArduinoObject {
     return Direction.DESCENDING;
   }
   
+  public int whichInSlider(ArduinoSensor sensor) {
+    return sensors.indexOf(sensor);
+  }
+  
   public int howFar(List<ArduinoSensor> sensorsTouched) {
     return Math.abs(sensors.indexOf(sensorsTouched.get(0)) - sensors.indexOf(sensorsTouched.get(sensorsTouched.size())));
   }
@@ -58,5 +62,9 @@ public class ArduinoSlider implements ArduinoObject {
   
   public String toString() {
     return "slider : " + sensors.toString();
+  }
+
+  public boolean contains(ArduinoSensor sensor) {
+    return isPartOfSlider(sensor);
   }
 }

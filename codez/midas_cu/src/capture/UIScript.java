@@ -40,8 +40,7 @@ public class UIScript {
   
   public void stopRecording() {
     actions = capturer.reportBack();
-    // be sure to pop off the last event ; that's the click where they stopped recording.
-    actions.remove(actions.size() - 1);
+
     GlobalScreen.getInstance().removeNativeKeyListener(capturer);
     GlobalScreen.getInstance().removeNativeMouseListener(capturer);
     capturer = null;

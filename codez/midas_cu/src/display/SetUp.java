@@ -21,7 +21,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -38,13 +37,11 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Element;
 import org.w3c.dom.svg.SVGDocument;
 
-import serialtalk.ArduinoEvent;
 import serialtalk.SerialCommunication;
 import bridge.ArduinoToButtonBridge;
 import bridge.ArduinoToDisplayBridge;
 import bridge.ArduinoToPadBridge;
 import bridge.ArduinoToSliderBridge;
-import capture.UIScript;
 import display.SensorShape.shapes;
 
 public class SetUp extends JFrame implements ActionListener {
@@ -64,7 +61,7 @@ public class SetUp extends JFrame implements ActionListener {
   SVGGraphics2D g;
   SVGDocument doc;
 	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
-	List<ArduinoToDisplayBridge> bridgeObjects = new ArrayList<ArduinoToDisplayBridge>();
+	List<ArduinoToDisplayBridge> bridgeObjects;
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
 	
@@ -72,12 +69,13 @@ public class SetUp extends JFrame implements ActionListener {
 	
 	SensorShape.shapes queuedShape;
 
-	public SetUp() throws AWTException {
+	public SetUp(boolean test) throws AWTException {
 		setSize(880, 600);
 		setTitle("Midas Cu");
 
 		serialCommunication = new SerialCommunication();
-		serialCommunication.initialize();
+		serialCommunication.initialize(test);
+		bridgeObjects = serialCommunication.bridgeObjects;
 		
 		setLayout(new BorderLayout());
 
@@ -94,6 +92,8 @@ public class SetUp extends JFrame implements ActionListener {
 	  
 	  setListsOfThingsHappening();
 	  add(listsOfThingsHappening, BorderLayout.EAST);
+	  
+	  add(serialCommunication.whatISee(), BorderLayout.SOUTH);
 	}
 	
 	private void setUpTheGrid() {
@@ -238,7 +238,7 @@ public class SetUp extends JFrame implements ActionListener {
 		JPanel buttonMappings = new JPanel();
 		buttonMappings.setLayout(new GridLayout(0, 2));
 		for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
-		  if (genericBridge.interfacePiece().isSlider || genericBridge.interfacePiece().isPad) { continue; }
+		  if (genericBridge.interfacePiece.isSlider || genericBridge.interfacePiece.isPad) { continue; }
 		  ArduinoToButtonBridge bridge = (ArduinoToButtonBridge) genericBridge;
 	    buttonMappings.add(new JTextField(bridge.interfacePiece.name));
 	    buttonMappings.add(bridge.interactionButton());
@@ -252,7 +252,7 @@ public class SetUp extends JFrame implements ActionListener {
     JPanel sliderMappings = new JPanel();
     sliderMappings.setLayout(new GridLayout(0, 3));
     for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
-      if (!(genericBridge.interfacePiece().isSlider)) { continue; }
+      if (!(genericBridge.interfacePiece.isSlider)) { continue; }
       ArduinoToSliderBridge bridge = (ArduinoToSliderBridge) genericBridge;
       sliderMappings.add(new JTextField(bridge.interfacePiece.name));
       sliderMappings.add(bridge.captureSliderButton());
@@ -267,7 +267,7 @@ public class SetUp extends JFrame implements ActionListener {
     JPanel padMappings = new JPanel();
     padMappings.setLayout(new GridLayout(0, 3));
     for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
-      if (!(genericBridge.interfacePiece().isPad)) { continue; }
+      if (!(genericBridge.interfacePiece.isPad)) { continue; }
       ArduinoToPadBridge bridge = (ArduinoToPadBridge) genericBridge;
       padMappings.add(new JTextField(bridge.interfacePiece.name));
       padMappings.add(bridge.capturePadButton());
@@ -281,19 +281,11 @@ public class SetUp extends JFrame implements ActionListener {
     comboSection.add(new JLabel("combos"), BorderLayout.NORTH);
     JPanel comboMappings = new JPanel();
     comboMappings.setLayout(new GridLayout(0, 4));
-    for (Map.Entry<List<ArduinoEvent>, UIScript> e : serialCommunication.combosToHandlers().entrySet()) {
-      //FIXME : does this make sense?  should combos be treated differently from sliders and buttons entirely?
-      // ???????  since they involve a button combo, and it seems silly to make a combo an ArduinoObject, maybe so...
-      comboMappings.add(new JLabel(e.getKey().toString()));
-      comboMappings.add(new JButton("change"));
-      comboMappings.add(new JLabel(e.getValue().toString()));
-      comboMappings.add(new JButton("x"));
-    }
+    //FIXME : Add combo mappings!
     comboMappings.add(new JButton("capture combo"));
     comboMappings.add(new JButton("select action"));
     comboSection.add(comboMappings, BorderLayout.SOUTH);
     
-    listsOfThingsHappening.add(serialCommunication.whatItSees());
     listsOfThingsHappening.add(buttonSection);
     listsOfThingsHappening.add(sliderSection);
     listsOfThingsHappening.add(padSection);
@@ -304,8 +296,9 @@ public class SetUp extends JFrame implements ActionListener {
 
 	public static void main(String[] args) {
 		SetUp setup;
+		boolean test = true;
 		try {
-			setup = new SetUp();
+			setup = new SetUp(test);
 		} catch (AWTException e) {
 			e.printStackTrace();
 			return;

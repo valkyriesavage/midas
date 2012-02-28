@@ -1,12 +1,13 @@
 package bridge;
 
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
+import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSlider;
@@ -14,11 +15,10 @@ import capture.UISlider;
 import display.SensorButtonGroup;
 import display.SetUp;
 
-public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
+public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   
   private static final ArduinoSlider nullSlider = new ArduinoSlider(new ArduinoSensor[0]);
   
-  public SensorButtonGroup interfacePiece;
   public ArduinoObject arduinoPiece = nullSlider;
   public UISlider interactivePiece;
   
@@ -40,18 +40,6 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
     
   public String toString() {
     return interfacePiece.name;
-  }
-  
-  public ArduinoObject arduinoPiece() {
-    return arduinoPiece;
-  }
-  
-  public SensorButtonGroup interfacePiece() {
-    return interfacePiece;
-  }
-  
-  public void paint(Graphics2D g) {
-    interfacePiece.paint(g);
   }
   
   public void setSensitivity(Integer sensitivity) {
@@ -96,5 +84,13 @@ public class ArduinoToSliderBridge implements ArduinoToDisplayBridge {
       }
     });
     return show;
+  }
+  
+  public void execute(ArduinoSensor sensor) {
+    interactivePiece.execute(((ArduinoSlider)arduinoPiece).whichInSlider(sensor));
+  }
+  
+  public void setSequence(List<ArduinoEvent> events) {
+    // for a slider, we want to 
   }
 }

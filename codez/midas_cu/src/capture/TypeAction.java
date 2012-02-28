@@ -14,6 +14,7 @@ public class TypeAction extends RobotAction implements UIAction {
   }
   
   public void doAction() {
+    robot.setAutoDelay(200);
     robot.keyPress(keyCode);
     robot.keyRelease(keyCode);
   }
