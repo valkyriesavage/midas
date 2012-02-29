@@ -58,9 +58,11 @@ public class SerialCommunication implements SerialPortEventListener {
     CommPortIdentifier portId = null;
     // the following line is useful for computers with AMD processors.  it's stupid.
     //System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
+    
     @SuppressWarnings("rawtypes")
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     dispatcher = new ArduinoDispatcher();
+    ArduinoToDisplayBridge.setDispatcher(dispatcher);
     bridgeObjects = dispatcher.bridgeObjects;
 
     // iterate through, looking for the port

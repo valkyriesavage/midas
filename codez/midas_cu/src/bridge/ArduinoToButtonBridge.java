@@ -7,14 +7,12 @@ import java.util.List;
 import javax.swing.JButton;
 
 import serialtalk.ArduinoEvent;
-import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
 import capture.UIScript;
 
 public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   private static final ArduinoSensor nullSensor = new ArduinoSensor(-1,-1);
   
-  public ArduinoObject arduinoPiece = nullSensor;
   public UIScript interactivePiece = new UIScript();
     
   public ArduinoToButtonBridge() {}
@@ -23,7 +21,7 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
     if (interfacePiece.name != null) {
       return interfacePiece.name;
     }
-    return "unknown";
+    return "unnamed";
   }
   
   public void executeScript() {
@@ -67,7 +65,7 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
     if (arduinoPiece == nullSensor) {
       register = new JButton("register");
     } else {
-      register = new JButton("" + arduinoPiece.toString());
+      register = new JButton("" + arduinoPiece);
     }
     register.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
@@ -83,7 +81,8 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   }
   
   public void setArduinoSequence(List<ArduinoEvent> events) {
-    // since this is a single button, we will just take the first button that was pushed
+    // since this is a single button, we will just take the first button that was pushed or released
     arduinoPiece = events.get(0).whichSensor;
+    ((ArduinoSensor)arduinoPiece).setName(this.toString());
   }
 }

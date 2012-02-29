@@ -35,8 +35,11 @@ public class ArduinoEvent implements ArduinoObject {
     } else if (touchDirection == TouchDirection.RELEASE) {
       retVal += "release ";
     }
-    if (whichSensor != null && whichSensor.location != null) { 
-      retVal += whichSensor.location.x + ", " + whichSensor.location.y;
+    if (whichSensor != null && whichSensor.location != null) {
+      retVal += whichSensor.location.x;
+      if (whichSensor.location.y >= 0) {
+        retVal += ", " + whichSensor.location.y;
+      }
     }
 
     return retVal;

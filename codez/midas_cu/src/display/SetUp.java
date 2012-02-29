@@ -29,6 +29,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -240,7 +242,15 @@ public class SetUp extends JFrame implements ActionListener {
 		for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
 		  if (genericBridge.interfacePiece.isSlider || genericBridge.interfacePiece.isPad) { continue; }
 		  ArduinoToButtonBridge bridge = (ArduinoToButtonBridge) genericBridge;
-	    buttonMappings.add(new JTextField(bridge.interfacePiece.name));
+      JTextField name = new JTextField(genericBridge.interfacePiece.name);
+      name.getDocument().addDocumentListener(new DocumentListener() {
+        public void changedUpdate(DocumentEvent e) {
+          // now we have to figure out how to set the name of this guy...
+        }
+        public void removeUpdate(DocumentEvent e) {}
+        public void insertUpdate(DocumentEvent e) {}});
+      buttonMappings.add(name);
+	    buttonMappings.add(bridge.setArduinoSequenceButton());
 	    buttonMappings.add(bridge.interactionButton());
 	    buttonMappings.add(bridge.goButton());
 		}
@@ -255,6 +265,7 @@ public class SetUp extends JFrame implements ActionListener {
       if (!(genericBridge.interfacePiece.isSlider)) { continue; }
       ArduinoToSliderBridge bridge = (ArduinoToSliderBridge) genericBridge;
       sliderMappings.add(new JTextField(bridge.interfacePiece.name));
+      sliderMappings.add(bridge.setArduinoSequenceButton());
       sliderMappings.add(bridge.captureSliderButton());
       sliderMappings.add(bridge.sliderSensitivityBox());
       sliderMappings.add(bridge.showTestPositionsButton());
@@ -270,6 +281,7 @@ public class SetUp extends JFrame implements ActionListener {
       if (!(genericBridge.interfacePiece.isPad)) { continue; }
       ArduinoToPadBridge bridge = (ArduinoToPadBridge) genericBridge;
       padMappings.add(new JTextField(bridge.interfacePiece.name));
+      padMappings.add(bridge.setArduinoSequenceButton());
       padMappings.add(bridge.capturePadButton());
       padMappings.add(bridge.padSensitivityBox());
       padMappings.add(bridge.showTestPositionsButton());

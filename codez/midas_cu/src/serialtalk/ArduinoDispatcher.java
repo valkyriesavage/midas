@@ -17,13 +17,37 @@ public class ArduinoDispatcher {
   public ArduinoEvent lastEvent;
 
   // we want to phase out old events since they won't be part of the same gesture
-  private static final int TIMEOUT_FOR_INSTRUCTION = 2000;
+  private static final int TIMEOUT_FOR_INSTRUCTION = 8000;
+  
+  private boolean isCapturing = false;
+  private boolean isPaused = false;
+  
+  private List<ArduinoEvent> capturedEvents;
   
   public JTextField whatISee = new JTextField("I see...");
   
   public ArduinoDispatcher() throws AWTException { }
+  
+  public void beginCapturing() {
+    isCapturing = true;
+    capturedEvents = new ArrayList<ArduinoEvent>();
+  }
+  
+  public List<ArduinoEvent> endCaptureAndReport() {
+    isCapturing = false;
+    return capturedEvents;
+  }
 
   void handleEvent(ArduinoEvent e) {
+    if (isPaused) {
+      // drop the event on the floor
+      return;
+    }
+    if (isCapturing) {
+      capturedEvents.add(e);
+      return;
+    }
+    
     // phase out old events
     int newestReasonableEvent;
     for (newestReasonableEvent=0; newestReasonableEvent<recentEvents.size(); newestReasonableEvent++) {
@@ -37,15 +61,13 @@ public class ArduinoDispatcher {
     recentEvents.add(e);
 
     ArduinoSensor sensor = e.whichSensor;
-
-    if (e.touchDirection == TouchDirection.RELEASE) { 
-    	// ignore the release events, since they aren't relevant until we make combos happen
-      // TODO : Make combos happen!
-      recentEvents.remove(e);
-   	  return;
-    }
     
     setWhatISee();
+    
+    if(e.touchDirection == TouchDirection.RELEASE) {
+      //ignore these for right now...
+      return;
+    }
     
     for (ArduinoToDisplayBridge bridge : bridgeObjects) {
       if (bridge.contains(sensor)) {
@@ -55,7 +77,7 @@ public class ArduinoDispatcher {
   }
   
   void setWhatISee() {
-    whatISee.setText(recentEvents.toString());
+    whatISee.setText((recentEvents.toString()).substring(1, recentEvents.toString().length()-1));
   }
   
   void clearRecentEvents() {

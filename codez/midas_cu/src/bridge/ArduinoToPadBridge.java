@@ -3,13 +3,17 @@ package bridge;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
-import serialtalk.ArduinoObject;
+import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoPad;
 import serialtalk.ArduinoSensor;
+import serialtalk.ArduinoSetup;
+import serialtalk.TouchDirection;
 import capture.UIPad;
 import display.SensorButtonGroup;
 import display.SetUp;
@@ -18,7 +22,6 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   
   private static final ArduinoPad nullPad = new ArduinoPad(new ArduinoSensor[0][0]);
   
-  public ArduinoObject arduinoPiece = nullPad;
   public UIPad interactivePiece;
   
   public Integer sensitivity;
@@ -26,6 +29,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
     
   public ArduinoToPadBridge(int sensitivity) {
     this.sensitivity = sensitivity;
+    arduinoPiece = nullPad;
     interactivePiece = new UIPad(sensitivity);
     
     padSensitivity.addActionListener(new ActionListener() {
@@ -90,5 +94,53 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   
   public void execute(ArduinoSensor sensor) {
     interactivePiece.execute(((ArduinoPad)arduinoPiece).locationOnPad(sensor));
+  }
+  
+  public void setSequence(List<ArduinoEvent> events) {
+    // for a pad, we want to know all the bits.  we need to tell this to the ArduinoSetup, too
+    List<ArduinoSensor> sensorsInPad = new ArrayList<ArduinoSensor>();
+    for(ArduinoEvent e : events) {
+      if (e.touchDirection == TouchDirection.RELEASE || sensorsInPad.contains(e.whichSensor)) {
+        continue;
+      }
+      sensorsInPad.add(e.whichSensor);
+    }
+    int arrayDim = (int) Math.sqrt(sensorsInPad.size());
+    ArduinoSensor[][] sensors = new ArduinoSensor[arrayDim][arrayDim];
+    for(int i=0; i<arrayDim; i++) {
+      for (int j=0; j<arrayDim; j++) {
+        sensors[i][j] = sensorsInPad.get(i*arrayDim + j);
+      }
+    }
+    arduinoPiece = new ArduinoPad(sensors);
+    ArduinoSetup.addPad((ArduinoPad)arduinoPiece);
+  }
+
+  @Override
+  public void setArduinoSequence(List<ArduinoEvent> events) {
+    // for a pad, we want to take them in order l->r t->b
+    List<ArduinoSensor> sensors = new ArrayList<ArduinoSensor>();
+    for (ArduinoEvent e : events) {
+      if (!sensors.contains(e.whichSensor)) {
+        continue;
+      }
+      sensors.add(e.whichSensor);
+    }
+    
+    // now organize them
+    if (sensitivity.intValue() != sensors.size()) {
+      System.out.println("wrong number of sensors registered");
+      return;
+    }
+    int sideOfPad = (int) Math.floor(Math.sqrt(sensitivity));
+    ArduinoSensor[][] newPad = new ArduinoSensor[sideOfPad][sideOfPad];
+    
+    for(int i=0; i<sideOfPad; i++) {
+      for(int j=0; j<sideOfPad; j++) {
+        newPad[i][j] = sensors.get(i*sideOfPad + j);
+      }
+    }
+    arduinoPiece = new ArduinoPad(newPad);
+    ArduinoSetup.addPad((ArduinoPad)arduinoPiece);
   }
 }

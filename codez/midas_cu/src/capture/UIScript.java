@@ -27,6 +27,8 @@ public class UIScript {
     }
     if (ret.length() > 2) {
       ret = ret.substring(0, ret.length() - 2);
+    } else {
+      ret = "unrecorded";
     }
     return ret;
   }

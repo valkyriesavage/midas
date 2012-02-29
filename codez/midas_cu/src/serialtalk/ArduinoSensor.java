@@ -35,11 +35,11 @@ public class ArduinoSensor implements ArduinoObject {
   }
   
   public boolean equals(Object o) {
-    return (o instanceof ArduinoSensor) && (this.hashCode() == o.hashCode());
+    return o instanceof ArduinoSensor && this.location.equals(((ArduinoSensor)o).location);
   }
 
   public boolean contains(ArduinoSensor sensor) {
-    return sensor.equals(this);
+    return sensor.location.x == this.location.x && sensor.location.y == this.location.y;
   }
   
   public void register(Point newLocation) {
