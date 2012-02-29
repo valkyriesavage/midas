@@ -20,6 +20,6 @@ public class TypeAction extends RobotAction implements UIAction {
   }
   
   public String toString() {
-    return "" + KeyStroke.getKeyStroke(keyCode, 0).getKeyChar();
+    return KeyStroke.getKeyStroke(keyCode, 0).toString().substring("pressed ".length());
   }
 }

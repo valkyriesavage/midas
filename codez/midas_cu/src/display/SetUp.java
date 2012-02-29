@@ -66,6 +66,7 @@ public class SetUp extends JFrame implements ActionListener {
 	List<ArduinoToDisplayBridge> bridgeObjects;
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
+	JPanel propertiesPane = new JPanel();
 	
 	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator();
 	
@@ -91,6 +92,8 @@ public class SetUp extends JFrame implements ActionListener {
 	private void cleanInterface() {
 	  setUpTheGrid();
 	  add(buttonDisplayGrid, BorderLayout.WEST);
+	  
+	  
 	  
 	  setListsOfThingsHappening();
 	  add(listsOfThingsHappening, BorderLayout.EAST);

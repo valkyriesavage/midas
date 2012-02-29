@@ -16,3 +16,4 @@ codez/midas_cu/src/examples/*
 *.project*
 *.settings*
 testdata/*
+.~lock.*
