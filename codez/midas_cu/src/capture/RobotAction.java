@@ -1,12 +1,16 @@
 package capture;
 
 import java.awt.AWTException;
+import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.Toolkit;
 import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
 
 public abstract class RobotAction {
 
   static protected Robot robot;
+  protected BufferedImage screenshot;
   
   protected RobotAction() throws AWTException {
     if (robot == null) {
@@ -29,4 +33,7 @@ public abstract class RobotAction {
     return retButtons;
   }
 
+  protected void addScreenshot() {
+    screenshot = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+  }
 }

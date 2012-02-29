@@ -12,7 +12,6 @@ import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.ArduinoSlider;
-import serialtalk.TouchDirection;
 import capture.UISlider;
 import display.SensorButtonGroup;
 import display.SetUp;

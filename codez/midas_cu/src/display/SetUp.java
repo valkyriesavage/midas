@@ -14,6 +14,7 @@ package display;
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,15 +30,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
-import org.apache.batik.dom.svg.SVGDOMImplementation;
-import org.apache.batik.svggen.SVGGraphics2D;
-import org.apache.batik.swing.JSVGCanvas;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Element;
-import org.w3c.dom.svg.SVGDocument;
 
 import serialtalk.SerialCommunication;
 import bridge.ArduinoToButtonBridge;
@@ -49,8 +41,8 @@ import display.SensorShape.shapes;
 public class SetUp extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -7176602414855781819L;
 	
-	public static final int CANVAS_X = 150;
-	public static final int CANVAS_Y = 150;
+	public static final int CANVAS_X = 300;
+	public static final int CANVAS_Y = 400;
 	
 	public static final Integer[] SLIDER_SENSITIVITIES = {3,4,5,6,7,8};
 	public static final Integer[] PAD_SENSITIVITIES = {4,9,16,25,36};
@@ -59,21 +51,23 @@ public class SetUp extends JFrame implements ActionListener {
 	public static final String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
-  JSVGCanvas svgCanvas = new JSVGCanvas();
+  /*JSVGCanvas svgCanvas = new JSVGCanvas();
   SVGGraphics2D g;
-  SVGDocument doc;
+  SVGDocument doc;*/
 	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
+	CanvasPanel buttonCanvas = new CanvasPanel(displayedButtons);
 	List<ArduinoToDisplayBridge> bridgeObjects;
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
 	JPanel propertiesPane = new JPanel();
+	JPanel tempButtonDisplay = new JPanel();
 	
 	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator();
 	
 	SensorShape.shapes queuedShape;
 
 	public SetUp(boolean test) throws AWTException {
-		setSize(880, 600);
+		setSize(600, 600);
 		setTitle("Midas Cu");
 
 		serialCommunication = new SerialCommunication();
@@ -93,48 +87,30 @@ public class SetUp extends JFrame implements ActionListener {
 	  setUpTheGrid();
 	  add(buttonDisplayGrid, BorderLayout.WEST);
 	  
+	  prepPropertiesPane();
+	  add(propertiesPane, BorderLayout.EAST);
 	  
-	  
-	  setListsOfThingsHappening();
-	  add(listsOfThingsHappening, BorderLayout.EAST);
+	  /*setListsOfThingsHappening();
+	  add(listsOfThingsHappening, BorderLayout.EAST);*/
 	  
 	  add(serialCommunication.whatISee(), BorderLayout.SOUTH);
 	}
 	
 	private void setUpTheGrid() {
-	  setUpSVGCanvas();
+	  buttonDisplayGrid.setVisible(false);
 	  
-    buttonDisplayGrid.setPreferredSize(new Dimension(300,600));
+    buttonDisplayGrid.setSize(300,600);
     buttonDisplayGrid.setLayout(new BorderLayout());
-    buttonDisplayGrid.add(svgCanvas, BorderLayout.NORTH);
+    buttonDisplayGrid.add(buttonCanvas, BorderLayout.NORTH);
     
     setUpButtonCreator();
     buttonDisplayGrid.add(buttonCreatorPanel, BorderLayout.SOUTH);
+    buttonDisplayGrid.setVisible(true);
 	}
 	
-	private void setUpSVGCanvas() {
-	   svgCanvas.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
-	   svgCanvas.setSize(CANVAS_X,CANVAS_Y);
-	   DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
-     String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-     doc = (SVGDocument) impl.createDocument(svgNS, "svg", null);
-     g = new SVGGraphics2D(doc);
-     g.setSVGCanvasSize(new Dimension(300, 300));
-     svgCanvas.setSVGDocument(doc);
-	}
-	
-	public void paint() {
-	  for (SensorButtonGroup sbg : displayedButtons) {
-	    sbg.paint(g);
-	  }
+	public void paintComponent(Graphics2D g) {
+	  super.paint(g);
 	  pathwaysGenerator.paint(g);
-
-    Element root = doc.getDocumentElement();
-    g.getRoot(root);
-    
-    setListsOfThingsHappening();
-    
-    repaint();
 	}
 
 	private void setUpButtonCreator() {
@@ -172,7 +148,7 @@ public class SetUp extends JFrame implements ActionListener {
 	      displayedButtons.add(newButton);
 	      newBridge.setInterfacePiece(newButton);
 	      bridgeObjects.add(newBridge);
-	      paint();
+	      setSelectedBridge(newBridge);
 	    }
 	  });
 	  addStockButtonPanel.add(addStock);
@@ -224,91 +200,53 @@ public class SetUp extends JFrame implements ActionListener {
 	    displayedButtons.remove(deleteable);
 	  }
 	  generatePathways();
-	  paint();
 	}
 	
 	private void generatePathways() {
 	  pathwaysGenerator.generatePathways(displayedButtons);
 	}
 	
-	private void setListsOfThingsHappening() {
-    listsOfThingsHappening.setLayout(new GridLayout(0, 1));
-
-	  listsOfThingsHappening.setVisible(false);
-    listsOfThingsHappening.removeAll();
-    
-		JPanel buttonSection = new JPanel();
-		buttonSection.setLayout(new BorderLayout());
-		buttonSection.add(new JLabel("buttons"), BorderLayout.NORTH);
-		JPanel buttonMappings = new JPanel();
-		buttonMappings.setLayout(new GridLayout(0, 2));
-		for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
-		  if (genericBridge.interfacePiece.isSlider || genericBridge.interfacePiece.isPad) { continue; }
-		  ArduinoToButtonBridge bridge = (ArduinoToButtonBridge) genericBridge;
-      JTextField name = new JTextField(genericBridge.interfacePiece.name);
-      name.getDocument().addDocumentListener(new DocumentListener() {
-        public void changedUpdate(DocumentEvent e) {
-          // now we have to figure out how to set the name of this guy...
-        }
-        public void removeUpdate(DocumentEvent e) {}
-        public void insertUpdate(DocumentEvent e) {}});
-      buttonMappings.add(name);
-	    buttonMappings.add(bridge.setArduinoSequenceButton());
-	    buttonMappings.add(bridge.interactionButton());
-	    buttonMappings.add(bridge.goButton());
-		}
-		buttonSection.add(buttonMappings, BorderLayout.SOUTH);
-
-		JPanel sliderSection = new JPanel();
-		sliderSection.setLayout(new BorderLayout());
-		sliderSection.add(new JLabel("sliders"), BorderLayout.NORTH);
-    JPanel sliderMappings = new JPanel();
-    sliderMappings.setLayout(new GridLayout(0, 3));
-    for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
-      if (!(genericBridge.interfacePiece.isSlider)) { continue; }
-      ArduinoToSliderBridge bridge = (ArduinoToSliderBridge) genericBridge;
-      sliderMappings.add(new JTextField(bridge.interfacePiece.name));
-      sliderMappings.add(bridge.setArduinoSequenceButton());
-      sliderMappings.add(bridge.captureSliderButton());
-      sliderMappings.add(bridge.sliderSensitivityBox());
-      sliderMappings.add(bridge.showTestPositionsButton());
-    }
-    sliderSection.add(sliderMappings, BorderLayout.SOUTH);
-
-    JPanel padSection = new JPanel();
-    padSection.setLayout(new BorderLayout());
-    padSection.add(new JLabel("pads"), BorderLayout.NORTH);
-    JPanel padMappings = new JPanel();
-    padMappings.setLayout(new GridLayout(0, 3));
-    for (ArduinoToDisplayBridge genericBridge : bridgeObjects) {
-      if (!(genericBridge.interfacePiece.isPad)) { continue; }
-      ArduinoToPadBridge bridge = (ArduinoToPadBridge) genericBridge;
-      padMappings.add(new JTextField(bridge.interfacePiece.name));
-      padMappings.add(bridge.setArduinoSequenceButton());
-      padMappings.add(bridge.capturePadButton());
-      padMappings.add(bridge.padSensitivityBox());
-      padMappings.add(bridge.showTestPositionsButton());
-    }
-    padSection.add(padMappings, BorderLayout.SOUTH);    
-    
-    JPanel comboSection = new JPanel();
-    comboSection.setLayout(new BorderLayout());
-    comboSection.add(new JLabel("combos"), BorderLayout.NORTH);
-    JPanel comboMappings = new JPanel();
-    comboMappings.setLayout(new GridLayout(0, 4));
-    //FIXME : Add combo mappings!
-    comboMappings.add(new JButton("capture combo"));
-    comboMappings.add(new JButton("select action"));
-    comboSection.add(comboMappings, BorderLayout.SOUTH);
-    
-    listsOfThingsHappening.add(buttonSection);
-    listsOfThingsHappening.add(sliderSection);
-    listsOfThingsHappening.add(padSection);
-    listsOfThingsHappening.add(comboSection);
-
-    listsOfThingsHappening.setVisible(true);
+	private void setSelectedBridge(ArduinoToDisplayBridge bridge) {
+	  propertiesPane.setVisible(false);
+	  propertiesPane.removeAll();
+	  if (bridge.interfacePiece.isSlider) {
+	    ArduinoToSliderBridge sliderBridge = (ArduinoToSliderBridge) bridge;
+      propertiesPane.add(new JLabel("name"));
+	    propertiesPane.add(new JTextField(bridge.interfacePiece.name));
+	    propertiesPane.add(sliderBridge.captureSliderButton());
+	    propertiesPane.add(sliderBridge.showTestPositionsButton());
+      propertiesPane.add(new JLabel("sensitivity"));
+	    propertiesPane.add(sliderBridge.sliderSensitivityBox());
+	    propertiesPane.add(new JLabel("sensor registration"));
+      propertiesPane.add(sliderBridge.setArduinoSequenceButton());
+	  } else if (bridge.interfacePiece.isPad) {
+	    ArduinoToPadBridge padBridge = (ArduinoToPadBridge) bridge;
+      propertiesPane.add(new JLabel("name"));
+      propertiesPane.add(new JTextField(padBridge.interfacePiece.name));
+      propertiesPane.add(padBridge.capturePadButton());
+      propertiesPane.add(padBridge.showTestPositionsButton());
+      propertiesPane.add(new JLabel("sensitivity"));
+      propertiesPane.add(padBridge.padSensitivityBox());
+      propertiesPane.add(new JLabel("sensor registration"));
+      propertiesPane.add(padBridge.setArduinoSequenceButton());
+	  } else {
+	    ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
+      propertiesPane.add(new JLabel("name"));
+      propertiesPane.add(new JTextField(buttonBridge.interfacePiece.name));
+      propertiesPane.add(buttonBridge.interactionButton());
+      propertiesPane.add(buttonBridge.goButton());
+      propertiesPane.add(new JLabel("sensor registration"));
+      propertiesPane.add(buttonBridge.setArduinoSequenceButton());
+	  }
+	  propertiesPane.setVisible(true);
 	}
-
+	
+	private void prepPropertiesPane() {
+	  propertiesPane.setSize(300, 600);
+	  propertiesPane.setPreferredSize(new Dimension(300, 600));
+	  propertiesPane.setLayout(new GridLayout(0, 2));
+	}
+	
 	public static void main(String[] args) {
 		SetUp setup;
 		boolean test = true;
