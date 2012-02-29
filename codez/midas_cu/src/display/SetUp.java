@@ -13,6 +13,7 @@ package display;
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
@@ -20,6 +21,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,32 +166,32 @@ public class SetUp extends JFrame implements ActionListener {
 	  buttonCreatorPanel.add(addCustomButtonPanel);
 	  
 	  JPanel printingPanel = new JPanel();
-	  JButton printCopper = new JButton("print copper");
-	  printCopper.addActionListener(new ActionListener() {
+	  JButton printSensors = new JButton("print sensors");
+	  printSensors.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent event) {
 	      cleanUpDeletions();
         if(displayedButtons.size() > 0) {
-          //TODO
-          System.out.println("once this is hooked up for it, we will print copper shapes here!");
+          // code related to desktop taken from johnbokma.com
+          if( !Desktop.isDesktopSupported() ) {
+            System.err.println( "Can't get browser opener" );
+          }
+          Desktop desktop = Desktop.getDesktop();
+          if(!desktop.isSupported(Desktop.Action.BROWSE)) {
+            System.err.println( "Can't open browser" );
+          }
+          
+          try {
+            desktop.browse(generateInstructionsPage());
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+
         } else {
           JOptionPane.showMessageDialog(buttonDisplayGrid, "there are no shapes to print!");
         }
       }
 	  });
-	  JButton printVinyl = new JButton("print vinyl");
-	  printVinyl.addActionListener(new ActionListener() {
-	    public void actionPerformed(ActionEvent event) {
-	      cleanUpDeletions();
-	      if(displayedButtons.size() > 0) {
-	        //TODO
-	        System.out.println("once this is hooked up for it, we will print vinyl shapes here!");
-	      } else {
-	        JOptionPane.showMessageDialog(buttonDisplayGrid, "there are no shapes to print!");
-	      }
-	    }
-	  });
-	  printingPanel.add(printCopper);
-	  printingPanel.add(printVinyl);
+	  printingPanel.add(printSensors);
 	  buttonCreatorPanel.add(printingPanel);
 	}
 	
@@ -204,6 +210,21 @@ public class SetUp extends JFrame implements ActionListener {
 	
 	private void generatePathways() {
 	  pathwaysGenerator.generatePathways(displayedButtons);
+	}
+	
+	private URI generateInstructionsPage() {
+	  try {
+	    File temp = File.createTempFile("midas_cu", ".html");
+	    temp.deleteOnExit();
+
+	    BufferedWriter out = new BufferedWriter(new FileWriter(temp));
+	    out.write(InstructionsGenerator.instructions());
+	    out.close();
+
+	    return temp.toURI();
+	  } catch (IOException e) {
+	    return null;
+	  }
 	}
 	
 	private void setSelectedBridge(ArduinoToDisplayBridge bridge) {
