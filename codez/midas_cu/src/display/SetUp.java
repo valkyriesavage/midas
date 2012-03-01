@@ -116,6 +116,7 @@ public class SetUp extends JFrame implements ActionListener {
 	
 	public void paintComponent(Graphics2D g) {
 	  super.paint(g);
+	  buttonCanvas.paint(g);
 	  pathwaysGenerator.paint(g);
 	}
 
@@ -171,13 +172,13 @@ public class SetUp extends JFrame implements ActionListener {
 	    public void actionPerformed(ActionEvent event) {
 	      cleanUpDeletions();
         if(displayedButtons.size() > 0) {
-          // code related to desktop taken from johnbokma.com
-          if( !Desktop.isDesktopSupported() ) {
+          // code related to desktop inspired by johnbokma.com
+          if(!Desktop.isDesktopSupported()) {
             System.err.println( "Can't get browser opener" );
           }
           Desktop desktop = Desktop.getDesktop();
           if(!desktop.isSupported(Desktop.Action.BROWSE)) {
-            System.err.println( "Can't open browser" );
+            System.err.println("Can't open browser");
           }
           
           try {
@@ -187,7 +188,8 @@ public class SetUp extends JFrame implements ActionListener {
           }
 
         } else {
-          JOptionPane.showMessageDialog(buttonDisplayGrid, "there are no shapes to print!");
+          JOptionPane.showMessageDialog(null, "there are no buttons to print!",
+              "no buttons to print", JOptionPane.ERROR_MESSAGE);
         }
       }
 	  });

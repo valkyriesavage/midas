@@ -1,9 +1,15 @@
 package capture;
 
 import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
 import java.util.List;
+
+import javax.swing.ImageIcon;
 
 import org.jnativehook.GlobalScreen;
 
@@ -39,6 +45,17 @@ public class UIPad {
       return "" + topLeftOfPad.x + "," + topLeftOfPad.y + " -> " + bottomRightOfPad.x + "," + bottomRightOfPad.y;
     }
     return "mark pad";
+  }
+  
+  public ImageIcon icon() {
+    try {
+      BufferedImage image = new Robot().createScreenCapture(new Rectangle(topLeftOfPad, 
+                                                            new Dimension(bottomRightOfPad.x-topLeftOfPad.x, bottomRightOfPad.y-topLeftOfPad.y)));
+      return new ImageIcon(image);
+    } catch (AWTException e) {
+      e.printStackTrace();
+    }
+    return new ImageIcon();
   }
   
   public void record() {

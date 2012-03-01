@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
@@ -60,11 +61,14 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
     captureSlider.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         if (!interactivePiece.isRecording) {
+          JOptionPane.showMessageDialog(null, "click at the top and bottom or\nleft and right ends of the slider",
+              "slider capture instructions", JOptionPane.INFORMATION_MESSAGE);
           interactivePiece.record();
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setText(interactivePiece.toString());
+          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
+          ((JButton)event.getSource()).setText("");
         }
       }
     });

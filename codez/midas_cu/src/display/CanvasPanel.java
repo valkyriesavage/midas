@@ -22,6 +22,7 @@ public class CanvasPanel extends JComponent {
     super();
     displayedButtons = buttonsToDisplay;
     setSize(SetUp.CANVAS_X, SetUp.CANVAS_Y);
+    setVisible(true);
   }
   
   public void paintComponent(Graphics2D g) {

@@ -48,10 +48,10 @@ public abstract class ArduinoToDisplayBridge {
         if (!src.getText().equals("done")) {
           if(interfacePiece.isSlider) {
             JOptionPane.showMessageDialog(null, "slide your finger from top to bottom or left to right",
-                "slider capture instructions", JOptionPane.INFORMATION_MESSAGE);
+                "slider registration instructions", JOptionPane.INFORMATION_MESSAGE);
           } else if(interfacePiece.isPad) {
             JOptionPane.showMessageDialog(null, "slide your finger from left to right along each row,\nbeginning on the top row",
-                "slider capture instructions", JOptionPane.INFORMATION_MESSAGE);
+                "pad registration instructions", JOptionPane.INFORMATION_MESSAGE);
           }
           src.setText("done");
           dispatcher.beginCapturing();

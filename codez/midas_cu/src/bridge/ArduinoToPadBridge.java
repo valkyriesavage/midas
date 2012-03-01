@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoPad;
@@ -63,11 +64,14 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
     capturePad.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         if (!interactivePiece.isRecording) {
+          JOptionPane.showMessageDialog(null, "click in two opposite corners of the pad area you'd like to control",
+              "pad capture instructions", JOptionPane.INFORMATION_MESSAGE);
           interactivePiece.record();
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setText(interactivePiece.toString());
+          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
+          ((JButton)event.getSource()).setText("");
         }
       }
     });

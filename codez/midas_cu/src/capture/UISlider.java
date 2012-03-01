@@ -1,9 +1,15 @@
 package capture;
 
 import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
 import java.util.List;
+
+import javax.swing.ImageIcon;
 
 import org.jnativehook.GlobalScreen;
 
@@ -45,6 +51,17 @@ public class UISlider {
       return "" + lowEndOfSlider.x + "," + lowEndOfSlider.y + " -> " + highEndOfSlider.x + "," + highEndOfSlider.y;
     }
     return "mark slider";
+  }
+  
+  public ImageIcon icon() {
+    try {
+      BufferedImage image = new Robot().createScreenCapture(new Rectangle(new Point(highEndOfSlider.x-5, highEndOfSlider.y-5), 
+                                                            new Dimension(lowEndOfSlider.x+5, lowEndOfSlider.y+4)));
+      return new ImageIcon(image);
+    } catch (AWTException e) {
+      e.printStackTrace();
+    }
+    return new ImageIcon();
   }
   
   public void record() {
