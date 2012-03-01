@@ -2,6 +2,7 @@ package capture;
 
 import java.awt.AWTException;
 
+import javax.swing.ImageIcon;
 import javax.swing.KeyStroke;
 
 public class TypeAction extends RobotAction implements UIAction {
@@ -21,5 +22,9 @@ public class TypeAction extends RobotAction implements UIAction {
   
   public String toString() {
     return KeyStroke.getKeyStroke(keyCode, 0).toString().substring("pressed ".length());
+  }
+  
+  public ImageIcon icon() {
+    return new ImageIcon();
   }
 }

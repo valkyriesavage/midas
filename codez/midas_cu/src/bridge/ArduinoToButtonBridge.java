@@ -43,7 +43,8 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setText(interactivePiece.toString());
+          ((JButton)event.getSource()).setText("");
+          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
         }
       }
     });

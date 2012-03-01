@@ -67,8 +67,8 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
           ((JButton)event.getSource()).setText("");
+          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
         }
       }
     });
