@@ -3,6 +3,7 @@ package display;
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -12,7 +13,7 @@ import javax.swing.JPanel;
 
 public class SensorButtonGroup extends JPanel {
   private static final long serialVersionUID = -3154036436928212098L;
-  private ArduinoSensorButton triggerButton;
+  public ArduinoSensorButton triggerButton;
   private JButton rotateLeft = new JButton("<");
   private JButton rotateRight = new JButton(">");
   private JButton larger = new JButton("+");
@@ -99,5 +100,10 @@ public class SensorButtonGroup extends JPanel {
   
   public String toString() {
     return name;
+  }
+  
+  @Override
+  public boolean contains(Point p) {
+    return triggerButton.contains(p);
   }
 }

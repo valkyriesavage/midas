@@ -68,7 +68,7 @@ public class SetUp extends JFrame implements ActionListener {
 	JPanel propertiesPane = new JPanel();
 	JPanel tempButtonDisplay = new JPanel();
 	
-	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator();
+	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator(displayedButtons);
 	
 	SensorShape.shapes queuedShape;
 

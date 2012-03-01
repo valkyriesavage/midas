@@ -8,7 +8,7 @@ public class SVGPathwaysGenerator {
   
   private List<SensorConnector> sensorConnectors = new ArrayList<SensorConnector>();
 
-  public SVGPathwaysGenerator() {}
+  public SVGPathwaysGenerator(List<SensorButtonGroup> displayedButtons) {}
   
   public void paint(Graphics2D g) {
     for (SensorConnector connector : sensorConnectors) {
@@ -17,7 +17,13 @@ public class SVGPathwaysGenerator {
   }
   
   public void generatePathways(List<SensorButtonGroup> buttonsToConnect) {
-    //TODO
-    System.out.println("we would be generating pathways now.  :)");
+    List<ArduinoSensorButton> buttons = new ArrayList<ArduinoSensorButton>();
+    
+    for(SensorButtonGroup sbg : buttonsToConnect) {
+      ArduinoSensorButton button = sbg.triggerButton;
+      buttons.add(button);
+    }
+    
+    // here !!!
   }
 }

@@ -5,7 +5,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
@@ -15,8 +17,10 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-public class CanvasPanel extends JPanel {
+public class CanvasPanel extends JPanel implements MouseListener {
   private static final long serialVersionUID = 7046692110388368464L;
+  
+  public static final Color COPPER = new Color(184,115,51);
   
   List<SensorButtonGroup> displayedButtons;
 
@@ -26,6 +30,7 @@ public class CanvasPanel extends JPanel {
     setSize(SetUp.CANVAS_X, SetUp.CANVAS_Y);
     setPreferredSize(new Dimension(SetUp.CANVAS_X, SetUp.CANVAS_Y));
     setVisible(true);
+    this.addMouseListener(this);
   }
   
   @Override
@@ -53,4 +58,38 @@ public class CanvasPanel extends JPanel {
       sbg.paint(g2);
     }
   }
+  
+  SensorButtonGroup determineIntersection(Point pointClicked) {
+    for(SensorButtonGroup sbg : displayedButtons) {
+      if (sbg.contains(pointClicked)) {
+        return sbg;
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public void mouseClicked(MouseEvent arg0) {
+    // TODO Auto-generated method stub
+    
+  }
+  
+  @Override
+  public void mousePressed(MouseEvent arg0) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void mouseReleased(MouseEvent arg0) {
+    // TODO Auto-generated method stub
+    
+  }
+  
+  @Override
+  public void mouseEntered(MouseEvent arg0) { }
+
+  @Override
+  public void mouseExited(MouseEvent arg0) { }
+
 }

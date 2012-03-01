@@ -4,17 +4,13 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
 
 import javax.swing.JButton;
 
-import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
-import serialtalk.TouchDirection;
 import sl.shapes.StarPolygon;
 
 public class ArduinoSensorButton extends JButton {
@@ -28,34 +24,7 @@ public class ArduinoSensorButton extends JButton {
   
   public ArduinoSensorButton(SensorShape.shapes shape) {
     this.shape = shape;
-    addMouseListener(new MouseListener() {
-      public void mousePressed(MouseEvent event) {
-        ArduinoEvent triggered = new ArduinoEvent(((ArduinoSensorButton)event.getComponent()).sensor,
-                                                  TouchDirection.RELEASE);
-        SetUp.serialCommunication.handleCompleteEvent(triggered);
-        activate();
-      }
 
-      public void mouseReleased(MouseEvent event) {
-        ArduinoEvent triggered = new ArduinoEvent(((ArduinoSensorButton)event.getComponent()).sensor,
-                                                  TouchDirection.TOUCH);
-        SetUp.serialCommunication.handleCompleteEvent(triggered);
-        deactivate();
-      }
-      
-      public void mouseClicked(MouseEvent event) {
-        mousePressed(event);
-        mouseReleased(event);
-      }
-
-      public void mouseEntered(MouseEvent event) {
-        //TODO:  consider whether hover here should be doing something nice like highlighting the appropriate interaction line on the right
-      }
-      public void mouseExited(MouseEvent event) {
-        deactivate();
-      }
-
-    });
     Random random = new Random();
     upperLeft = new Point(random.nextInt(SetUp.CANVAS_X), random.nextInt(SetUp.CANVAS_Y));
     size = random.nextInt(10) * 10;
@@ -101,7 +70,7 @@ public class ArduinoSensorButton extends JButton {
   
   public void paint(Graphics2D g) {
     Shape drawShape = getShape();
-    g.setPaint(Color.gray);
+    g.setColor(CanvasPanel.COPPER);
     g.fill(drawShape);
   }
   
@@ -139,5 +108,14 @@ public class ArduinoSensorButton extends JButton {
   private Shape pad() {
     //TODO
     return square();
+  }
+  
+  @Override
+  public boolean contains(Point p) {
+    return getShape().contains(p);
+  }
+  
+  public void moveTo(Point upperLeft) {
+    this.upperLeft = upperLeft;
   }
 }
