@@ -106,4 +106,12 @@ public class SensorButtonGroup extends JPanel {
   public boolean contains(Point p) {
     return triggerButton.contains(p);
   }
+  
+  public boolean contains(ArduinoSensorButton button) {
+    return triggerButton == button;
+  }
+  
+  public void moveTo(Point p) {
+    triggerButton.moveTo(p);
+  }
 }

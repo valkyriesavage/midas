@@ -16,6 +16,7 @@ import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.TouchDirection;
 import capture.UIPad;
+import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
 import display.SetUp;
 
@@ -98,6 +99,13 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   
   public void execute(ArduinoSensor sensor) {
     interactivePiece.execute(((ArduinoPad)arduinoPiece).locationOnPad(sensor));
+  }
+  
+  public void execute(ArduinoSensorButton button) {
+    if(this.contains(button)) {
+      // TODO !!
+      // I think we need to split up sensorbuttons into multiple sensors so that this is a bit easier...      
+    }
   }
   
   public void setSequence(List<ArduinoEvent> events) {

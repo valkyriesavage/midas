@@ -14,6 +14,7 @@ import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.ArduinoSlider;
 import capture.UISlider;
+import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
 import display.SetUp;
 
@@ -93,6 +94,13 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   
   public void execute(ArduinoSensor sensor) {
     interactivePiece.execute(((ArduinoSlider)arduinoPiece).whichInSlider(sensor));
+  }
+  
+  public void execute(ArduinoSensorButton button) {
+    if(this.contains(button)) {
+      // TODO !!
+      // I think we need to split up sensorbuttons into multiple sensors so that this is a bit easier...      
+    }
   }
 
   @Override

@@ -10,11 +10,14 @@ import java.util.Random;
 
 import javax.swing.JButton;
 
+import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoSensor;
 import sl.shapes.StarPolygon;
 
 public class ArduinoSensorButton extends JButton {
   private static final long serialVersionUID = -5603499266721585353L;
+  private static ArduinoDispatcher dispatcher;
+  
   public ArduinoSensor sensor;
   SensorShape.shapes shape = null;
   boolean locationChecked = false;
@@ -22,11 +25,17 @@ public class ArduinoSensorButton extends JButton {
   private Point upperLeft;
   private int size;
   
+  private Color relevantColor = CanvasPanel.COPPER;
+  
+  public static void setDispatcher(ArduinoDispatcher newDispatcher) {
+    dispatcher = newDispatcher;
+  }
+  
   public ArduinoSensorButton(SensorShape.shapes shape) {
     this.shape = shape;
 
     Random random = new Random();
-    upperLeft = new Point(random.nextInt(SetUp.CANVAS_X), random.nextInt(SetUp.CANVAS_Y));
+    upperLeft = new Point(random.nextInt(SetUp.CANVAS_X - 50), random.nextInt(SetUp.CANVAS_Y - 50));
     size = random.nextInt(10) * 10;
   }
   
@@ -54,11 +63,14 @@ public class ArduinoSensorButton extends JButton {
     upperLeft.x -= 2;
     upperLeft.y -= 2;
   }
+  
   public void activate() {
-    setBackground(Color.orange);
+    relevantColor = Color.PINK;
+    dispatcher.handleFakeEvent(this);
   }
+
   public void deactivate() {
-    setBackground(null);
+    relevantColor = CanvasPanel.COPPER;
   }
   
   public void changeShape(SensorShape.shapes newShape) {
@@ -70,7 +82,7 @@ public class ArduinoSensorButton extends JButton {
   
   public void paint(Graphics2D g) {
     Shape drawShape = getShape();
-    g.setColor(CanvasPanel.COPPER);
+    g.setColor(relevantColor);
     g.fill(drawShape);
   }
   
@@ -96,20 +108,19 @@ public class ArduinoSensorButton extends JButton {
   }
   
   private Shape star() {
-    //I have no freaking clue why I have to put int int there.
-    return new StarPolygon(upperLeft.x, upperLeft.y, size, (int)((int)size*.6), 5);
+    return new StarPolygon(upperLeft.x, upperLeft.y, size, (int)(size*.6), 5);
   }
   
   private Shape slider() {
     //TODO
     return square();
   }
-  
+
   private Shape pad() {
     //TODO
     return square();
   }
-  
+
   @Override
   public boolean contains(Point p) {
     return getShape().contains(p);

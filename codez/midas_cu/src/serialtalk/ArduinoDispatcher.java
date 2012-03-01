@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.JTextField;
 
 import bridge.ArduinoToDisplayBridge;
+import display.ArduinoSensorButton;
 
 
 public class ArduinoDispatcher {
@@ -37,8 +38,16 @@ public class ArduinoDispatcher {
     isCapturing = false;
     return capturedEvents;
   }
+  
+  public void handleFakeEvent(ArduinoSensorButton button) {
+    for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+      if (bridge.contains(button)) {
+        bridge.execute(button);
+      }
+    }
+  }
 
-  void handleEvent(ArduinoEvent e) {
+  public void handleEvent(ArduinoEvent e) {
     if (isPaused) {
       // drop the event on the floor
       return;

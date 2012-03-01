@@ -8,6 +8,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
@@ -17,12 +18,14 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-public class CanvasPanel extends JPanel implements MouseListener {
+public class CanvasPanel extends JPanel implements MouseListener, MouseMotionListener {
   private static final long serialVersionUID = 7046692110388368464L;
   
   public static final Color COPPER = new Color(184,115,51);
   
   List<SensorButtonGroup> displayedButtons;
+  
+  private SensorButtonGroup draggingGroup;
 
   public CanvasPanel(List<SensorButtonGroup> buttonsToDisplay) {
     super();
@@ -69,27 +72,42 @@ public class CanvasPanel extends JPanel implements MouseListener {
   }
 
   @Override
-  public void mouseClicked(MouseEvent arg0) {
-    // TODO Auto-generated method stub
-    
+  public void mouseClicked(MouseEvent event) {
+    SensorButtonGroup intersectedGroup;
+    if ((intersectedGroup = determineIntersection(event.getPoint())) != null) {
+      // if the mouse clicks, we probably want to trigger the event
+      intersectedGroup.triggerButton.activate();
+    }
   }
   
   @Override
-  public void mousePressed(MouseEvent arg0) {
-    // TODO Auto-generated method stub
-    
+  public void mousePressed(MouseEvent event) {
+    SensorButtonGroup intersectedGroup;
+    if ((intersectedGroup = determineIntersection(event.getPoint())) != null) {
+      draggingGroup = intersectedGroup;
+    }
   }
 
   @Override
-  public void mouseReleased(MouseEvent arg0) {
-    // TODO Auto-generated method stub
-    
+  public void mouseReleased(MouseEvent event) {
+    //draggingGroup.setNotDragging();
+    draggingGroup = null;
   }
   
   @Override
-  public void mouseEntered(MouseEvent arg0) { }
+  public void mouseEntered(MouseEvent event) { }
 
   @Override
-  public void mouseExited(MouseEvent arg0) { }
+  public void mouseExited(MouseEvent event) { }
+
+  @Override
+  public void mouseDragged(MouseEvent event) {
+    if(draggingGroup != null) {
+      draggingGroup.moveTo(event.getPoint());
+    }
+  }
+
+  @Override
+  public void mouseMoved(MouseEvent event) { }
 
 }

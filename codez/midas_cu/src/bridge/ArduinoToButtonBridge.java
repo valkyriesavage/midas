@@ -5,10 +5,12 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import capture.UIScript;
+import display.ArduinoSensorButton;
 
 public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   private static final ArduinoSensor nullSensor = new ArduinoSensor(-1,-1);
@@ -28,6 +30,12 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
     interactivePiece.execute();
   }
   
+  public void execute(ArduinoSensorButton button) {
+    if (this.contains(button)) {
+      executeScript();
+    }
+  }
+  
   public JButton interactionButton() {
     JButton change;
     if (interactivePiece.actions.size() > 0) {
@@ -39,6 +47,8 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
     change.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         if (!interactivePiece.isRecording) {
+          JOptionPane.showMessageDialog(null, "click and type as you like,\nyour actions will be recorded and saved",
+              "capture instructions", JOptionPane.INFORMATION_MESSAGE);
           interactivePiece.record();
           ((JButton)event.getSource()).setText("stop recording");
         } else {
