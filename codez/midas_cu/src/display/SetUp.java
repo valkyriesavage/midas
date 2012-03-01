@@ -47,8 +47,8 @@ import display.SensorShape.shapes;
 public class SetUp extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -7176602414855781819L;
 	
-	public static final int CANVAS_X = 300;
-	public static final int CANVAS_Y = 400;
+	public static final int CANVAS_X = 280;
+	public static final int CANVAS_Y = 520;
 	
 	public static final Integer[] SLIDER_SENSITIVITIES = {3,4,5,6,7,8};
 	public static final Integer[] PAD_SENSITIVITIES = {4,9,16,25,36};
@@ -73,7 +73,7 @@ public class SetUp extends JFrame implements ActionListener {
 	SensorShape.shapes queuedShape;
 
 	public SetUp(boolean test) throws AWTException {
-		setSize(600, 600);
+		setSize(CANVAS_X + 350, CANVAS_Y + 180);
 		setTitle("Midas Cu");
 
 		serialCommunication = new SerialCommunication();

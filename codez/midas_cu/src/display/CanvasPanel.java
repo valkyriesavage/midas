@@ -1,6 +1,8 @@
 package display;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -11,9 +13,9 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.swing.JComponent;
+import javax.swing.JPanel;
 
-public class CanvasPanel extends JComponent {
+public class CanvasPanel extends JPanel {
   private static final long serialVersionUID = 7046692110388368464L;
   
   List<SensorButtonGroup> displayedButtons;
@@ -22,20 +24,20 @@ public class CanvasPanel extends JComponent {
     super();
     displayedButtons = buttonsToDisplay;
     setSize(SetUp.CANVAS_X, SetUp.CANVAS_Y);
+    setPreferredSize(new Dimension(SetUp.CANVAS_X, SetUp.CANVAS_Y));
     setVisible(true);
   }
   
-  public void paintComponent(Graphics2D g) {
-    super.paintComponent(g);
-    g.setColor(Color.white);
-    g.fillRect(0, 0, getWidth(), getHeight());
-    g.setColor(Color.yellow);
-    g.fillRect(10,10,10,10);
+  @Override
+  public void paintComponent(Graphics g) {
+    Graphics2D g2 = (Graphics2D) g;
     
+    super.paintComponent(g2);
+
     BufferedImage templateImage;
     try {
       templateImage = ImageIO.read(new File(SetUp.PROJ_HOME + "display/images/iPhone_template.png"));
-      g.drawImage(templateImage, 0, 0, Color.BLACK, new ImageObserver() {
+      g2.drawImage(templateImage, 0, 0, Color.BLACK, new ImageObserver() {
         public boolean imageUpdate(Image img, int infoflags, int x, int y,
             int width, int height) {
           System.out.println("we have some info?");
@@ -47,10 +49,8 @@ public class CanvasPanel extends JComponent {
       e.printStackTrace();
     }
     
-    g.draw(new Rectangle(0,10,15,15));
-    
     for (SensorButtonGroup sbg : displayedButtons) {
-      sbg.paint(g);
+      sbg.paint(g2);
     }
   }
 }
