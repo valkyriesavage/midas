@@ -65,6 +65,8 @@ public class SetUp extends JFrame {
 	JPanel propertiesPane = new JPanel();
 	JPanel tempButtonDisplay = new JPanel();
 	
+	private ArduinoToDisplayBridge selectedBridge;
+	
 	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator(displayedButtons);
 	
 	SensorShape.shapes queuedShape;
@@ -226,57 +228,106 @@ public class SetUp extends JFrame {
 	  }
 	}
 	
+	private ActionListener repainter() {
+	  return new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        repaint();
+      }
+    };
+	}
+	
+	private ActionListener repainterDeleter() {
+	  return new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        bridgeObjects.remove(selectedBridge);
+        if (bridgeObjects.size() >= 1) {
+          setSelectedBridge(bridgeObjects.get(0));
+        } else {
+          prepPropertiesPane();
+        }
+        repaint();
+      }
+    };
+	}
+	
 	public void setSelectedBridge(ArduinoToDisplayBridge bridge) {
+	  selectedBridge = bridge;
 	  propertiesPane.setVisible(false);
 	  propertiesPane.removeAll();
 	  if (bridge.interfacePiece.isSlider) {
 	    ArduinoToSliderBridge sliderBridge = (ArduinoToSliderBridge) bridge;
       propertiesPane.add(new JLabel("name"));
-	    propertiesPane.add(new JTextField(bridge.interfacePiece.name));
+	    propertiesPane.add(bridge.interfacePiece.nameField);
 	    propertiesPane.add(sliderBridge.captureSliderButton());
 	    propertiesPane.add(sliderBridge.showTestPositionsButton());
       propertiesPane.add(new JLabel("sensitivity"));
       JComboBox sensitivityBox = sliderBridge.sliderSensitivityBox();
-      sensitivityBox.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent event) {
-          repaint();
-        }
-      });
+      sensitivityBox.addActionListener(repainter());
       propertiesPane.add(sensitivityBox);
+      JButton larger = sliderBridge.interfacePiece.larger;
+      larger.addActionListener(repainter());
+      propertiesPane.add(larger);
+      JButton smaller = sliderBridge.interfacePiece.smaller;
+      smaller.addActionListener(repainter());
+      propertiesPane.add(smaller);
+      JButton orientationFlip = sliderBridge.interfacePiece.orientationFlip;
+      orientationFlip.addActionListener(repainter());
+      propertiesPane.add(orientationFlip);
+      propertiesPane.add(new JLabel(""));  // placeholder
 	    propertiesPane.add(new JLabel("sensor registration"));
       propertiesPane.add(sliderBridge.setArduinoSequenceButton());
+      JButton delete = sliderBridge.interfacePiece.delete;
+      delete.addActionListener(repainterDeleter());
+      propertiesPane.add(delete);
 	  } else if (bridge.interfacePiece.isPad) {
 	    ArduinoToPadBridge padBridge = (ArduinoToPadBridge) bridge;
       propertiesPane.add(new JLabel("name"));
-      propertiesPane.add(new JTextField(padBridge.interfacePiece.name));
+      propertiesPane.add(bridge.interfacePiece.nameField);
       propertiesPane.add(padBridge.capturePadButton());
       propertiesPane.add(padBridge.showTestPositionsButton());
       propertiesPane.add(new JLabel("sensitivity"));
       JComboBox sensitivityBox = padBridge.padSensitivityBox();
-      sensitivityBox.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent event) {
-          repaint();
-        }
-      });
+      sensitivityBox.addActionListener(repainter());
       propertiesPane.add(sensitivityBox);
+      JButton larger = padBridge.interfacePiece.larger;
+      larger.addActionListener(repainter());
+      propertiesPane.add(larger);
+      JButton smaller = padBridge.interfacePiece.smaller;
+      smaller.addActionListener(repainter());
+      propertiesPane.add(smaller);   
       propertiesPane.add(new JLabel("sensor registration"));
       propertiesPane.add(padBridge.setArduinoSequenceButton());
-	  } else {
+      JButton delete = padBridge.interfacePiece.delete;
+      delete.addActionListener(repainterDeleter());
+      propertiesPane.add(delete);	  
+    } else {
 	    ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
       propertiesPane.add(new JLabel("name"));
-      propertiesPane.add(new JTextField(buttonBridge.interfacePiece.name));
+      propertiesPane.add(bridge.interfacePiece.nameField);
       propertiesPane.add(buttonBridge.interactionButton());
       propertiesPane.add(buttonBridge.goButton());
+      JButton larger = buttonBridge.interfacePiece.larger;
+      larger.addActionListener(repainter());
+      propertiesPane.add(larger);
+      JButton smaller = buttonBridge.interfacePiece.smaller;
+      smaller.addActionListener(repainter());
+      propertiesPane.add(smaller);
       propertiesPane.add(new JLabel("sensor registration"));
       propertiesPane.add(buttonBridge.setArduinoSequenceButton());
+      JButton delete = buttonBridge.interfacePiece.delete;
+      delete.addActionListener(repainterDeleter());
+      propertiesPane.add(delete);
 	  }
 	  propertiesPane.setVisible(true);
 	}
 	
 	private void prepPropertiesPane() {
+	  propertiesPane.setVisible(false);
+	  propertiesPane.removeAll();
 	  propertiesPane.setSize(300, 600);
 	  propertiesPane.setPreferredSize(new Dimension(300, 600));
 	  propertiesPane.setLayout(new GridLayout(0, 2));
+	  propertiesPane.setVisible(true);
 	}
 	
 	public static void main(String[] args) {

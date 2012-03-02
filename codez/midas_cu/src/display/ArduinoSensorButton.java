@@ -114,7 +114,7 @@ public class ArduinoSensorButton extends JButton {
   }
   
   private Shape star() {
-    return new StarPolygon(upperLeft.x, upperLeft.y, size, (int)(size*.6), 5);
+    return new StarPolygon(upperLeft.x + size, upperLeft.y + size, size, (int)(size*.5), 5);
   }
   
   private Shape slider() {

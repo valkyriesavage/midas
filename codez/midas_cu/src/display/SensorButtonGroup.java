@@ -10,6 +10,9 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import util.Direction;
 
@@ -21,12 +24,11 @@ public class SensorButtonGroup extends JPanel {
   public List<ArduinoSensorButton> triggerButtons = new ArrayList<ArduinoSensorButton>();
   private Point base = new Point(BASE, BASE);
 
-  // TODO these buttons will be used in the properties interface at right
-  private JButton horizontal = new JButton("horizontal");
-  private JButton vertical = new JButton("vertical");
-  private JButton larger = new JButton("larger");
-  private JButton smaller = new JButton("smaller");
-  private JButton delete = new JButton("delete");
+  public JButton orientationFlip = new JButton("make horizontal");
+  public JButton larger = new JButton("larger");
+  public JButton smaller = new JButton("smaller");
+  public JButton delete = new JButton("delete");
+  public JTextField nameField;
 
   private SensorShape.shapes shape;
   private int spacing = 5;
@@ -50,13 +52,25 @@ public class SensorButtonGroup extends JPanel {
 
     name = shape.name().toLowerCase();
     this.shape = shape;
+    nameField = new JTextField(name);
+    nameField.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void changedUpdate(DocumentEvent event) {
+        JTextField target = (JTextField)event.getDocument();
+        name = target.getText();
+      }
+
+      @Override
+      public void insertUpdate(DocumentEvent event) {}
+      @Override
+      public void removeUpdate(DocumentEvent event) {}
+      
+    });
   }
 
   public void setSensitivity(Integer sensitivity) {
     this.sensitivity = sensitivity;
     triggerButtons = new ArrayList<ArduinoSensorButton>();
-    // the way we have this right now, we can case on sensitivity < 9 vs >= 9
-    // for pad vs slider!
     if (!isPad()) { // we have a slider or a single button
       if (orientation == Direction.VERTICAL) {
         for (int i = 0; i < sensitivity.intValue(); i++) {
@@ -80,16 +94,16 @@ public class SensorButtonGroup extends JPanel {
   }
 
   private void initializeButtons() {
-    horizontal.addActionListener(new ActionListener() {
+    orientationFlip.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        orientation = Direction.HORIZONTAL;
-        setSensitivity(sensitivity);
-        repaint();
-      }
-    });
-    vertical.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) {
-        orientation = Direction.VERTICAL;
+        if (orientation == Direction.VERTICAL) {
+          orientation = Direction.HORIZONTAL;
+          orientationFlip.setText("make vertical");
+        }
+        else {
+          orientation = Direction.VERTICAL;
+          orientationFlip.setText("make horizontal");
+        }
         setSensitivity(sensitivity);
         repaint();
       }
@@ -173,5 +187,9 @@ public class SensorButtonGroup extends JPanel {
   
   private boolean isPad() {
     return sensitivity >= 9;
+  }
+  
+  public JTextField nameField() {
+    return nameField;
   }
 }

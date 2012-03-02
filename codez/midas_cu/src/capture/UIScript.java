@@ -52,6 +52,7 @@ public class UIScript {
   }
   
   public ImageIcon icon() {
-    return actions.get(0).icon();
+    if(actions.size() >= 1) { return actions.get(0).icon(); }
+    return null;
   }
 }

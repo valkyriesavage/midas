@@ -97,6 +97,11 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     if ((intersectedGroup = determineIntersection(event.getPoint())) != null) {
       draggingGroup = intersectedGroup;
     }
+    for(ArduinoToDisplayBridge bridge : setUp.bridgeObjects) {
+      if (bridge.interfacePiece == draggingGroup) {
+        setUp.setSelectedBridge(bridge);
+      }
+    }
   }
 
   @Override
@@ -115,6 +120,11 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     if(draggingGroup != null) {
       draggingGroup.moveTo(event.getPoint());
       repaint();
+    }
+    for(ArduinoToDisplayBridge bridge : setUp.bridgeObjects) {
+      if (bridge.interfacePiece == draggingGroup) {
+        setUp.setSelectedBridge(bridge);
+      }
     }
   }
 
