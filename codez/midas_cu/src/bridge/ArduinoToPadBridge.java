@@ -61,7 +61,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   }
   
   public JButton capturePadButton() {
-    JButton capturePad = new JButton(interactivePiece.toString());
+    JButton capturePad = new JButton(interactivePiece.icon());
     capturePad.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         if (!interactivePiece.isRecording) {

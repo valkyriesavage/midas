@@ -58,7 +58,7 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   }
   
   public JButton captureSliderButton() {
-    JButton captureSlider = new JButton(interactivePiece.toString());
+    JButton captureSlider = new JButton(interactivePiece.icon());
     captureSlider.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         if (!interactivePiece.isRecording) {

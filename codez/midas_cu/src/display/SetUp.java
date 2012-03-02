@@ -44,7 +44,7 @@ import bridge.ArduinoToPadBridge;
 import bridge.ArduinoToSliderBridge;
 import display.SensorShape.shapes;
 
-public class SetUp extends JFrame implements ActionListener {
+public class SetUp extends JFrame {
 	private static final long serialVersionUID = -7176602414855781819L;
 	
 	public static final int CANVAS_X = 280;
@@ -57,11 +57,8 @@ public class SetUp extends JFrame implements ActionListener {
 	public static final String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
-  /*JSVGCanvas svgCanvas = new JSVGCanvas();
-  SVGGraphics2D g;
-  SVGDocument doc;*/
 	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
-	CanvasPanel buttonCanvas = new CanvasPanel(displayedButtons);
+	CanvasPanel buttonCanvas = new CanvasPanel(this, displayedButtons);
 	List<ArduinoToDisplayBridge> bridgeObjects;
 	JPanel buttonCreatorPanel = new JPanel();
 	JPanel listsOfThingsHappening = new JPanel();
@@ -86,8 +83,6 @@ public class SetUp extends JFrame implements ActionListener {
 		
 		getContentPane().setVisible(true);
 	}
-
-	public void actionPerformed(ActionEvent evt) {}
 	
 	private void cleanInterface() {
 	  setUpTheGrid();
@@ -96,16 +91,13 @@ public class SetUp extends JFrame implements ActionListener {
 	  prepPropertiesPane();
 	  add(propertiesPane, BorderLayout.EAST);
 	  
-	  /*setListsOfThingsHappening();
-	  add(listsOfThingsHappening, BorderLayout.EAST);*/
-	  
 	  add(serialCommunication.whatISee(), BorderLayout.SOUTH);
 	}
 	
 	private void setUpTheGrid() {
 	  buttonDisplayGrid.setVisible(false);
 	  
-    buttonDisplayGrid.setSize(300,600);
+    buttonDisplayGrid.setSize(CANVAS_X,600);
     buttonDisplayGrid.setLayout(new BorderLayout());
     buttonDisplayGrid.add(buttonCanvas, BorderLayout.NORTH);
     
@@ -156,6 +148,7 @@ public class SetUp extends JFrame implements ActionListener {
 	      newBridge.setInterfacePiece(newButton);
 	      bridgeObjects.add(newBridge);
 	      setSelectedBridge(newBridge);
+	      repaint();
 	    }
 	  });
 	  addStockButtonPanel.add(addStock);
@@ -229,7 +222,7 @@ public class SetUp extends JFrame implements ActionListener {
 	  }
 	}
 	
-	private void setSelectedBridge(ArduinoToDisplayBridge bridge) {
+	public void setSelectedBridge(ArduinoToDisplayBridge bridge) {
 	  propertiesPane.setVisible(false);
 	  propertiesPane.removeAll();
 	  if (bridge.interfacePiece.isSlider) {

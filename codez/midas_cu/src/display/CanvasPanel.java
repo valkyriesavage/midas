@@ -18,17 +18,21 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
+import bridge.ArduinoToDisplayBridge;
+
 public class CanvasPanel extends JPanel implements MouseListener, MouseMotionListener {
   private static final long serialVersionUID = 7046692110388368464L;
   
   public static final Color COPPER = new Color(184,115,51);
   
   List<SensorButtonGroup> displayedButtons;
+  SetUp setUp;
   
   private SensorButtonGroup draggingGroup;
 
-  public CanvasPanel(List<SensorButtonGroup> buttonsToDisplay) {
+  public CanvasPanel(SetUp setUp, List<SensorButtonGroup> buttonsToDisplay) {
     super();
+    this.setUp = setUp;
     displayedButtons = buttonsToDisplay;
     setSize(SetUp.CANVAS_X, SetUp.CANVAS_Y);
     setPreferredSize(new Dimension(SetUp.CANVAS_X, SetUp.CANVAS_Y));
@@ -71,12 +75,23 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     return null;
   }
 
+  /**
+   * For more on how to do this click and drag and repaint nonsense, see http://www.leepoint.net/notes-java/examples/mouse/paintdemo.html
+   * he seems to think that we need a separate BufferedImage to keep the "saved" information apart from the "current" (i.e. drag) information
+   */
+  
   @Override
   public void mouseClicked(MouseEvent event) {
     SensorButtonGroup intersectedGroup;
     if ((intersectedGroup = determineIntersection(event.getPoint())) != null) {
-      // if the mouse clicks, we probably want to trigger the event
-      intersectedGroup.triggerButton.activate();
+      // if the mouse clicks, we probably don't want to trigger the event, that would be annoying
+      //intersectedGroup.triggerButton.activate();
+      // we want to select that one
+      for(ArduinoToDisplayBridge bridge : setUp.bridgeObjects) {
+        if (bridge.interfacePiece == intersectedGroup) {
+          setUp.setSelectedBridge(bridge);
+        }
+      }
     }
   }
   
@@ -104,6 +119,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
   public void mouseDragged(MouseEvent event) {
     if(draggingGroup != null) {
       draggingGroup.moveTo(event.getPoint());
+      repaint();
     }
   }
 
