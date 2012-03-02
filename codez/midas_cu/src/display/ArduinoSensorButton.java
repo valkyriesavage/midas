@@ -39,6 +39,12 @@ public class ArduinoSensorButton extends JButton {
     size = (random.nextInt(10)+4) * 8;
   }
   
+  public ArduinoSensorButton(SensorShape.shapes shape, Point upperLeft, int size) {
+    this.shape = shape;
+    this.upperLeft = upperLeft;
+    this.size = size;
+  }
+  
   public void setSensor(ArduinoSensor sensor) {
     this.sensor = sensor;
   }
@@ -54,14 +60,14 @@ public class ArduinoSensorButton extends JButton {
     
   }
   public void smaller() {
-    size -= 4;
-    upperLeft.x += 2;
-    upperLeft.y += 2;
+    size -= SensorButtonGroup.SIZE_CHANGE;
+    upperLeft.x += SensorButtonGroup.SIZE_CHANGE/2;
+    upperLeft.y += SensorButtonGroup.SIZE_CHANGE/2;
   }
   public void larger() {
-    size += 4;
-    upperLeft.x -= 2;
-    upperLeft.y -= 2;
+    size += SensorButtonGroup.SIZE_CHANGE;
+    upperLeft.x -= SensorButtonGroup.SIZE_CHANGE/2;
+    upperLeft.y -= SensorButtonGroup.SIZE_CHANGE/2;
   }
   
   public void activate() {
@@ -112,12 +118,10 @@ public class ArduinoSensorButton extends JButton {
   }
   
   private Shape slider() {
-    //TODO
     return square();
   }
 
   private Shape pad() {
-    //TODO
     return square();
   }
 

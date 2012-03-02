@@ -60,7 +60,7 @@ public class UISlider {
       return new ImageIcon(image);
     } catch (AWTException e) {
       e.printStackTrace();
-    }
+    } catch (NullPointerException npe) {}
     return new ImageIcon();
   }
   

@@ -20,8 +20,9 @@ public class SVGPathwaysGenerator {
     List<ArduinoSensorButton> buttons = new ArrayList<ArduinoSensorButton>();
     
     for(SensorButtonGroup sbg : buttonsToConnect) {
-      ArduinoSensorButton button = sbg.triggerButton;
-      buttons.add(button);
+      for(ArduinoSensorButton button : sbg.triggerButtons) {
+        buttons.add(button);
+      }
     }
     
     // here !!!

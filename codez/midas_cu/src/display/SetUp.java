@@ -51,7 +51,7 @@ public class SetUp extends JFrame {
 	public static final int CANVAS_Y = 520;
 	
 	public static final Integer[] SLIDER_SENSITIVITIES = {3,4,5,6,7,8};
-	public static final Integer[] PAD_SENSITIVITIES = {4,9,16,25,36};
+	public static final Integer[] PAD_SENSITIVITIES = {9,16,25,36};
 
 	static SerialCommunication serialCommunication;
 	public static final String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
@@ -139,13 +139,17 @@ public class SetUp extends JFrame {
 	      }
 	      else if (queuedShape == shapes.PAD) {
 	        newButton.isPad = true;
-	        newBridge = new ArduinoToPadBridge(SLIDER_SENSITIVITIES[0]);
+	        newBridge = new ArduinoToPadBridge(PAD_SENSITIVITIES[0]);
 	      }
 	      else { // it is a button
 	        newBridge = new ArduinoToButtonBridge();
 	      }
 	      displayedButtons.add(newButton);
 	      newBridge.setInterfacePiece(newButton);
+	      if (queuedShape != shapes.PAD && queuedShape != shapes.SLIDER) {
+	        // this is definitely bad coding practice, but we have to get the single buttons drawing still
+	        newBridge.interfacePiece.setSensitivity(1);
+	      }
 	      bridgeObjects.add(newBridge);
 	      setSelectedBridge(newBridge);
 	      repaint();
@@ -232,7 +236,13 @@ public class SetUp extends JFrame {
 	    propertiesPane.add(sliderBridge.captureSliderButton());
 	    propertiesPane.add(sliderBridge.showTestPositionsButton());
       propertiesPane.add(new JLabel("sensitivity"));
-	    propertiesPane.add(sliderBridge.sliderSensitivityBox());
+      JComboBox sensitivityBox = sliderBridge.sliderSensitivityBox();
+      sensitivityBox.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          repaint();
+        }
+      });
+      propertiesPane.add(sensitivityBox);
 	    propertiesPane.add(new JLabel("sensor registration"));
       propertiesPane.add(sliderBridge.setArduinoSequenceButton());
 	  } else if (bridge.interfacePiece.isPad) {
@@ -242,7 +252,13 @@ public class SetUp extends JFrame {
       propertiesPane.add(padBridge.capturePadButton());
       propertiesPane.add(padBridge.showTestPositionsButton());
       propertiesPane.add(new JLabel("sensitivity"));
-      propertiesPane.add(padBridge.padSensitivityBox());
+      JComboBox sensitivityBox = padBridge.padSensitivityBox();
+      sensitivityBox.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          repaint();
+        }
+      });
+      propertiesPane.add(sensitivityBox);
       propertiesPane.add(new JLabel("sensor registration"));
       propertiesPane.add(padBridge.setArduinoSequenceButton());
 	  } else {
