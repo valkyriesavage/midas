@@ -36,7 +36,7 @@ public class ArduinoSensorButton extends JButton {
 
     Random random = new Random();
     upperLeft = new Point(random.nextInt(SetUp.CANVAS_X - 50), random.nextInt(SetUp.CANVAS_Y - 50));
-    size = random.nextInt(10) * 10;
+    size = (random.nextInt(10)+4) * 8;
   }
   
   public void setSensor(ArduinoSensor sensor) {
@@ -100,11 +100,11 @@ public class ArduinoSensorButton extends JButton {
   }
   
   private Shape circle() {
-    return new Ellipse2D.Double(upperLeft.x, upperLeft.y,size,size);
+    return new Ellipse2D.Double(upperLeft.x, upperLeft.y, size, size);
   }
   
   private Shape square() {
-    return new Rectangle2D.Double(upperLeft.x, upperLeft.y,size,size);
+    return new Rectangle2D.Double(upperLeft.x, upperLeft.y, size, size);
   }
   
   private Shape star() {

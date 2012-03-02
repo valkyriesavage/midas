@@ -38,6 +38,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     setPreferredSize(new Dimension(SetUp.CANVAS_X, SetUp.CANVAS_Y));
     setVisible(true);
     this.addMouseListener(this);
+    this.addMouseMotionListener(this);
   }
   
   @Override
@@ -74,12 +75,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     }
     return null;
   }
-
-  /**
-   * For more on how to do this click and drag and repaint nonsense, see http://www.leepoint.net/notes-java/examples/mouse/paintdemo.html
-   * he seems to think that we need a separate BufferedImage to keep the "saved" information apart from the "current" (i.e. drag) information
-   */
-  
+ 
   @Override
   public void mouseClicked(MouseEvent event) {
     SensorButtonGroup intersectedGroup;
@@ -105,7 +101,6 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 
   @Override
   public void mouseReleased(MouseEvent event) {
-    //draggingGroup.setNotDragging();
     draggingGroup = null;
   }
   

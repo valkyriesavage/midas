@@ -39,7 +39,7 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   public JButton interactionButton() {
     JButton change;
     if (interactivePiece.actions.size() > 0) {
-      change = new JButton(interactivePiece.toString());
+      change = new JButton(interactivePiece.icon());
     }
     else {
       change = new JButton("record interaction");
