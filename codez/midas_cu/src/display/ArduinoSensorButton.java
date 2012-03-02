@@ -106,15 +106,15 @@ public class ArduinoSensorButton extends JButton {
   }
   
   private Shape circle() {
-    return new Ellipse2D.Double(upperLeft.x, upperLeft.y, size, size);
+    return new Ellipse2D.Double(upperLeft.x - size/2, upperLeft.y - size/2, size, size);
   }
   
   private Shape square() {
-    return new Rectangle2D.Double(upperLeft.x, upperLeft.y, size, size);
+    return new Rectangle2D.Double(upperLeft.x - size/2, upperLeft.y - size/2, size, size);
   }
   
   private Shape star() {
-    return new StarPolygon(upperLeft.x + size, upperLeft.y + size, size, (int)(size*.5), 5);
+    return new StarPolygon(upperLeft.x, upperLeft.y, size, (int)(size*.5), 5);
   }
   
   private Shape slider() {

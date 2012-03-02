@@ -18,7 +18,8 @@ import util.Direction;
 
 public class SensorButtonGroup extends JPanel {
   private static final long serialVersionUID = -3154036436928212098L;
-  private static final int BASE = 10;
+  private static final int BASE = 20;
+  private static final int MIN_SIZE = 30;
   public static final int SIZE_CHANGE = 4;
 
   public List<ArduinoSensorButton> triggerButtons = new ArrayList<ArduinoSensorButton>();
@@ -63,8 +64,7 @@ public class SensorButtonGroup extends JPanel {
       @Override
       public void insertUpdate(DocumentEvent event) {}
       @Override
-      public void removeUpdate(DocumentEvent event) {}
-      
+      public void removeUpdate(DocumentEvent event) {} 
     });
   }
 
@@ -111,6 +111,7 @@ public class SensorButtonGroup extends JPanel {
     smaller.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         size -= SIZE_CHANGE;
+        if (size < MIN_SIZE) { size = MIN_SIZE; }
         for (ArduinoSensorButton button : triggerButtons) {
           button.smaller();
         }
