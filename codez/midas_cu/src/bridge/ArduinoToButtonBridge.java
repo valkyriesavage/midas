@@ -62,7 +62,7 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   }
   
   public JButton goButton() {
-    JButton change = new JButton("replay");
+    JButton change = new JButton("replay interaction");
     change.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         interactivePiece.execute();

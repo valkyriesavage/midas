@@ -35,7 +35,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import serialtalk.SerialCommunication;
 import bridge.ArduinoToButtonBridge;
@@ -64,9 +63,7 @@ public class SetUp extends JFrame {
 	JPanel listsOfThingsHappening = new JPanel();
 	JPanel propertiesPane = new JPanel();
 	JPanel tempButtonDisplay = new JPanel();
-	
-	private ArduinoToDisplayBridge selectedBridge;
-	
+
 	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator(displayedButtons);
 	
 	SensorShape.shapes queuedShape;
@@ -198,13 +195,22 @@ public class SetUp extends JFrame {
 	
 	private void cleanUpDeletions() {
 	  List<SensorButtonGroup> toDelete = new ArrayList<SensorButtonGroup>();
+	  List<ArduinoToDisplayBridge> bridgesToDelete = new ArrayList<ArduinoToDisplayBridge>();
 	  for (SensorButtonGroup sbg : displayedButtons) {
 	    if (sbg.deleteMe) {
 	      toDelete.add(sbg);
+	      for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+	        if (bridge.interfacePiece == sbg) {
+	           bridgesToDelete.add(bridge);
+	        }
+	      }
 	    }
 	  }
 	  for (SensorButtonGroup deleteable : toDelete) {
 	    displayedButtons.remove(deleteable);
+	  }
+	  for (ArduinoToDisplayBridge deleteable : bridgesToDelete) {
+	    bridgeObjects.remove(deleteable);
 	  }
 	  generatePathways();
 	}
@@ -236,22 +242,13 @@ public class SetUp extends JFrame {
     };
 	}
 	
-	private ActionListener repainterDeleter() {
-	  return new ActionListener() {
-      public void actionPerformed(ActionEvent event) {
-        bridgeObjects.remove(selectedBridge);
-        if (bridgeObjects.size() >= 1) {
-          setSelectedBridge(bridgeObjects.get(0));
-        } else {
-          prepPropertiesPane();
-        }
-        repaint();
-      }
-    };
-	}
-	
 	public void setSelectedBridge(ArduinoToDisplayBridge bridge) {
-	  selectedBridge = bridge;
+	  for (ArduinoToDisplayBridge notSelected : bridgeObjects) {
+	    notSelected.interfacePiece.setSelected(false);
+	  }
+	  bridge.interfacePiece.setSelected(true);
+	  repaint();
+
 	  propertiesPane.setVisible(false);
 	  propertiesPane.removeAll();
 	  if (bridge.interfacePiece.isSlider) {
@@ -274,10 +271,9 @@ public class SetUp extends JFrame {
       orientationFlip.addActionListener(repainter());
       propertiesPane.add(orientationFlip);
       propertiesPane.add(new JLabel(""));  // placeholder
-	    propertiesPane.add(new JLabel("sensor registration"));
       propertiesPane.add(sliderBridge.setArduinoSequenceButton());
       JButton delete = sliderBridge.interfacePiece.delete;
-      delete.addActionListener(repainterDeleter());
+      delete.addActionListener(repainter());
       propertiesPane.add(delete);
 	  } else if (bridge.interfacePiece.isPad) {
 	    ArduinoToPadBridge padBridge = (ArduinoToPadBridge) bridge;
@@ -295,10 +291,9 @@ public class SetUp extends JFrame {
       JButton smaller = padBridge.interfacePiece.smaller;
       smaller.addActionListener(repainter());
       propertiesPane.add(smaller);   
-      propertiesPane.add(new JLabel("sensor registration"));
       propertiesPane.add(padBridge.setArduinoSequenceButton());
       JButton delete = padBridge.interfacePiece.delete;
-      delete.addActionListener(repainterDeleter());
+      delete.addActionListener(repainter());
       propertiesPane.add(delete);	  
     } else {
 	    ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
@@ -312,10 +307,9 @@ public class SetUp extends JFrame {
       JButton smaller = buttonBridge.interfacePiece.smaller;
       smaller.addActionListener(repainter());
       propertiesPane.add(smaller);
-      propertiesPane.add(new JLabel("sensor registration"));
       propertiesPane.add(buttonBridge.setArduinoSequenceButton());
       JButton delete = buttonBridge.interfacePiece.delete;
-      delete.addActionListener(repainterDeleter());
+      delete.addActionListener(repainter());
       propertiesPane.add(delete);
 	  }
 	  propertiesPane.setVisible(true);

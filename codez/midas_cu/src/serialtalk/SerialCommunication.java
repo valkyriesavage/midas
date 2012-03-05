@@ -15,9 +15,8 @@ import java.util.regex.Pattern;
 
 import javax.swing.JTextField;
 
-import display.ArduinoSensorButton;
-
 import bridge.ArduinoToDisplayBridge;
+import display.ArduinoSensorButton;
 
 
 /**

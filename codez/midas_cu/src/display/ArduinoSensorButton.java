@@ -133,4 +133,13 @@ public class ArduinoSensorButton extends JButton {
   public void moveTo(Point upperLeft) {
     this.upperLeft = upperLeft;
   }
+  
+  @Override
+  public void setSelected(boolean selected) {
+    if(!selected) {
+      relevantColor = CanvasPanel.COPPER;
+    } else {
+      relevantColor = Color.GREEN;
+    }
+  }
 }

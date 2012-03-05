@@ -105,8 +105,8 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   
   public void execute(ArduinoSensorButton button) {
     if(this.contains(button)) {
-      // TODO !!
-      // I think we need to split up sensorbuttons into multiple sensors so that this is a bit easier...      
+      // we might not need to do this at the moment... we aren't triggering on click
+      //this.interactivePiece.execute(whichPad)
     }
   }
   

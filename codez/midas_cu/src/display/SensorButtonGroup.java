@@ -18,9 +18,9 @@ import util.Direction;
 
 public class SensorButtonGroup extends JPanel {
   private static final long serialVersionUID = -3154036436928212098L;
-  private static final int BASE = 20;
+  private static final int BASE = 30;
   private static final int MIN_SIZE = 30;
-  public static final int SIZE_CHANGE = 4;
+  public static final int SIZE_CHANGE = 5;
 
   public List<ArduinoSensorButton> triggerButtons = new ArrayList<ArduinoSensorButton>();
   private Point base = new Point(BASE, BASE);
@@ -33,7 +33,7 @@ public class SensorButtonGroup extends JPanel {
 
   private SensorShape.shapes shape;
   private int spacing = 5;
-  private int size = 45;
+  private int size = MIN_SIZE + 4*SIZE_CHANGE;
   private Direction orientation = Direction.VERTICAL;
 
   public String name;
@@ -112,9 +112,12 @@ public class SensorButtonGroup extends JPanel {
       public void actionPerformed(ActionEvent event) {
         size -= SIZE_CHANGE;
         if (size < MIN_SIZE) { size = MIN_SIZE; }
-        for (ArduinoSensorButton button : triggerButtons) {
-          button.smaller();
+        else {
+          for (ArduinoSensorButton button : triggerButtons) {
+            button.smaller();
+          }
         }
+        moveTo(base);
         repaint();
       }
     });
@@ -124,6 +127,7 @@ public class SensorButtonGroup extends JPanel {
         for (ArduinoSensorButton button : triggerButtons) {
           button.larger();
         }
+        moveTo(base);
         repaint();
       }
     });
@@ -149,8 +153,8 @@ public class SensorButtonGroup extends JPanel {
   @Override
   public boolean contains(Point p) {
     boolean contains = false;
-    for (ArduinoSensorButton butt : triggerButtons) {
-      contains |= butt.contains(p);
+    for (ArduinoSensorButton button : triggerButtons) {
+      contains |= button.contains(p);
     }
     return contains;
   }
@@ -192,5 +196,11 @@ public class SensorButtonGroup extends JPanel {
   
   public JTextField nameField() {
     return nameField;
+  }
+  
+  public void setSelected(boolean selected) {
+    for (ArduinoSensorButton button : triggerButtons) {
+      button.setSelected(selected);
+    }
   }
 }
