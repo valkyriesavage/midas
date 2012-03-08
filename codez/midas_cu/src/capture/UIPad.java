@@ -54,8 +54,8 @@ public class UIPad {
       return new ImageIcon(image);
     } catch (AWTException e) {
       e.printStackTrace();
-    }
-    return new ImageIcon();
+    } catch (NullPointerException npe) {}
+    return null;
   }
   
   public void record() {

@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import javax.swing.JTextField;
 
 import bridge.ArduinoToDisplayBridge;
+import display.ArduinoSensorButton;
 
 
 /**
@@ -63,6 +64,7 @@ public class SerialCommunication implements SerialPortEventListener {
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     dispatcher = new ArduinoDispatcher();
     ArduinoToDisplayBridge.setDispatcher(dispatcher);
+    ArduinoSensorButton.setDispatcher(dispatcher);
     bridgeObjects = dispatcher.bridgeObjects;
 
     // iterate through, looking for the port

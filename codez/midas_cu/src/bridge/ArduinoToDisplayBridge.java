@@ -12,6 +12,7 @@ import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
+import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
 
 public abstract class ArduinoToDisplayBridge {
@@ -32,10 +33,16 @@ public abstract class ArduinoToDisplayBridge {
     interfacePiece.paint(g);
   }
   
-  public void execute(ArduinoSensor sensor) {};
+  public abstract void execute(ArduinoSensor sensor);
+  
+  public abstract void execute(ArduinoSensorButton button);
   
   public boolean contains(ArduinoSensor sensor) {
     return arduinoPiece != null && arduinoPiece.contains(sensor);
+  }
+  
+  public boolean contains(ArduinoSensorButton button) {
+    return interfacePiece.contains(button);
   }
   
   public abstract void setArduinoSequence(List<ArduinoEvent> events);

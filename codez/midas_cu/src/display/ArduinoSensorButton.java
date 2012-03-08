@@ -4,21 +4,20 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
 
 import javax.swing.JButton;
 
-import serialtalk.ArduinoEvent;
+import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoSensor;
-import serialtalk.TouchDirection;
 import sl.shapes.StarPolygon;
 
 public class ArduinoSensorButton extends JButton {
   private static final long serialVersionUID = -5603499266721585353L;
+  private static ArduinoDispatcher dispatcher;
+  
   public ArduinoSensor sensor;
   SensorShape.shapes shape = null;
   boolean locationChecked = false;
@@ -26,39 +25,24 @@ public class ArduinoSensorButton extends JButton {
   private Point upperLeft;
   private int size;
   
+  private Color relevantColor = CanvasPanel.COPPER;
+  
+  public static void setDispatcher(ArduinoDispatcher newDispatcher) {
+    dispatcher = newDispatcher;
+  }
+  
   public ArduinoSensorButton(SensorShape.shapes shape) {
     this.shape = shape;
-    addMouseListener(new MouseListener() {
-      public void mousePressed(MouseEvent event) {
-        ArduinoEvent triggered = new ArduinoEvent(((ArduinoSensorButton)event.getComponent()).sensor,
-                                                  TouchDirection.RELEASE);
-        SetUp.serialCommunication.handleCompleteEvent(triggered);
-        activate();
-      }
 
-      public void mouseReleased(MouseEvent event) {
-        ArduinoEvent triggered = new ArduinoEvent(((ArduinoSensorButton)event.getComponent()).sensor,
-                                                  TouchDirection.TOUCH);
-        SetUp.serialCommunication.handleCompleteEvent(triggered);
-        deactivate();
-      }
-      
-      public void mouseClicked(MouseEvent event) {
-        mousePressed(event);
-        mouseReleased(event);
-      }
-
-      public void mouseEntered(MouseEvent event) {
-        //TODO:  consider whether hover here should be doing something nice like highlighting the appropriate interaction line on the right
-      }
-      public void mouseExited(MouseEvent event) {
-        deactivate();
-      }
-
-    });
     Random random = new Random();
-    upperLeft = new Point(random.nextInt(SetUp.CANVAS_X), random.nextInt(SetUp.CANVAS_Y));
-    size = random.nextInt(10) * 10;
+    upperLeft = new Point(random.nextInt(SetUp.CANVAS_X - 50), random.nextInt(SetUp.CANVAS_Y - 50));
+    size = (random.nextInt(10)+4) * 8;
+  }
+  
+  public ArduinoSensorButton(SensorShape.shapes shape, Point upperLeft, int size) {
+    this.shape = shape;
+    this.upperLeft = upperLeft;
+    this.size = size;
   }
   
   public void setSensor(ArduinoSensor sensor) {
@@ -76,20 +60,23 @@ public class ArduinoSensorButton extends JButton {
     
   }
   public void smaller() {
-    size -= 4;
-    upperLeft.x += 2;
-    upperLeft.y += 2;
+    size -= SensorButtonGroup.SIZE_CHANGE;
+    upperLeft.x += SensorButtonGroup.SIZE_CHANGE/2;
+    upperLeft.y += SensorButtonGroup.SIZE_CHANGE/2;
   }
   public void larger() {
-    size += 4;
-    upperLeft.x -= 2;
-    upperLeft.y -= 2;
+    size += SensorButtonGroup.SIZE_CHANGE;
+    upperLeft.x -= SensorButtonGroup.SIZE_CHANGE/2;
+    upperLeft.y -= SensorButtonGroup.SIZE_CHANGE/2;
   }
+  
   public void activate() {
-    setBackground(Color.orange);
+    relevantColor = Color.PINK;
+    dispatcher.handleFakeEvent(this);
   }
+
   public void deactivate() {
-    setBackground(null);
+    relevantColor = CanvasPanel.COPPER;
   }
   
   public void changeShape(SensorShape.shapes newShape) {
@@ -101,7 +88,7 @@ public class ArduinoSensorButton extends JButton {
   
   public void paint(Graphics2D g) {
     Shape drawShape = getShape();
-    g.setPaint(Color.gray);
+    g.setColor(relevantColor);
     g.fill(drawShape);
   }
   
@@ -119,25 +106,40 @@ public class ArduinoSensorButton extends JButton {
   }
   
   private Shape circle() {
-    return new Ellipse2D.Double(upperLeft.x, upperLeft.y,size,size);
+    return new Ellipse2D.Double(upperLeft.x - size/2, upperLeft.y - size/2, size, size);
   }
   
   private Shape square() {
-    return new Rectangle2D.Double(upperLeft.x, upperLeft.y,size,size);
+    return new Rectangle2D.Double(upperLeft.x - size/2, upperLeft.y - size/2, size, size);
   }
   
   private Shape star() {
-    //I have no freaking clue why I have to put int int there.
-    return new StarPolygon(upperLeft.x, upperLeft.y, size, (int)((int)size*.6), 5);
+    return new StarPolygon(upperLeft.x, upperLeft.y, size, (int)(size*.5), 5);
   }
   
   private Shape slider() {
-    //TODO
     return square();
   }
-  
+
   private Shape pad() {
-    //TODO
     return square();
+  }
+
+  @Override
+  public boolean contains(Point p) {
+    return getShape().contains(p);
+  }
+  
+  public void moveTo(Point upperLeft) {
+    this.upperLeft = upperLeft;
+  }
+  
+  @Override
+  public void setSelected(boolean selected) {
+    if(!selected) {
+      relevantColor = CanvasPanel.COPPER;
+    } else {
+      relevantColor = Color.GREEN;
+    }
   }
 }

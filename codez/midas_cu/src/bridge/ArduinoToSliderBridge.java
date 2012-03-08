@@ -14,6 +14,7 @@ import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.ArduinoSlider;
 import capture.UISlider;
+import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
 import display.SetUp;
 
@@ -57,7 +58,9 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   }
   
   public JButton captureSliderButton() {
-    JButton captureSlider = new JButton(interactivePiece.toString());
+    JButton captureSlider;
+    if (interactivePiece.icon() != null) { captureSlider = new JButton(interactivePiece.icon()); }
+    else { captureSlider = new JButton("capture slider"); }
     captureSlider.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         if (!interactivePiece.isRecording) {
@@ -67,8 +70,8 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
           ((JButton)event.getSource()).setText("");
+          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
         }
       }
     });
@@ -93,6 +96,13 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   
   public void execute(ArduinoSensor sensor) {
     interactivePiece.execute(((ArduinoSlider)arduinoPiece).whichInSlider(sensor));
+  }
+  
+  public void execute(ArduinoSensorButton button) {
+    if(this.contains(button)) {
+      //we might not need this at the moment, we aren't executing on click
+      //this.interactivePiece.execute(whichPad)
+    }
   }
 
   @Override

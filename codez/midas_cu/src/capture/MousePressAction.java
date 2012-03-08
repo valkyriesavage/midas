@@ -1,8 +1,14 @@
 package capture;
 
 import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
+
+import javax.swing.ImageIcon;
 
 public class MousePressAction extends RobotAction implements UIAction {
   
@@ -24,5 +30,16 @@ public class MousePressAction extends RobotAction implements UIAction {
   
   public String toString() {
     return "click @ " + p.x + "," + p.y;
+  }
+  
+  public ImageIcon icon() {
+    try {
+      BufferedImage image = new Robot().createScreenCapture(new Rectangle(new Point(p.x - 20, p.y - 20), 
+                                                            new Dimension(40, 40)));
+      return new ImageIcon(image);
+    } catch (AWTException e) {
+      e.printStackTrace();
+    }
+    return new ImageIcon();
   }
 }

@@ -13,7 +13,7 @@ public class SVGPathwaysGenerator {
   private List<SensorConnector> sensorConnectors = new ArrayList<SensorConnector>();
   public int lineWidth = 3;
 
-  public SVGPathwaysGenerator() {}
+  public SVGPathwaysGenerator(List<SensorButtonGroup> displayedButtons) {}
   
   public void paint(Graphics2D g) {
     for (SensorConnector connector : sensorConnectors) {

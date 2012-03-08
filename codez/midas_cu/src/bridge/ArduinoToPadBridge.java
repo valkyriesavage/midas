@@ -16,6 +16,7 @@ import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.TouchDirection;
 import capture.UIPad;
+import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
 import display.SetUp;
 
@@ -60,7 +61,9 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   }
   
   public JButton capturePadButton() {
-    JButton capturePad = new JButton(interactivePiece.toString());
+    JButton capturePad;
+    if (interactivePiece.icon() != null) { capturePad = new JButton(interactivePiece.icon()); }
+    else { capturePad = new JButton("capture pad"); }
     capturePad.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         if (!interactivePiece.isRecording) {
@@ -70,8 +73,8 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
           ((JButton)event.getSource()).setText("stop recording");
         } else {
           interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
           ((JButton)event.getSource()).setText("");
+          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
         }
       }
     });
@@ -98,6 +101,13 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   
   public void execute(ArduinoSensor sensor) {
     interactivePiece.execute(((ArduinoPad)arduinoPiece).locationOnPad(sensor));
+  }
+  
+  public void execute(ArduinoSensorButton button) {
+    if(this.contains(button)) {
+      // we might not need to do this at the moment... we aren't triggering on click
+      //this.interactivePiece.execute(whichPad)
+    }
   }
   
   public void setSequence(List<ArduinoEvent> events) {

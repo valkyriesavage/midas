@@ -3,6 +3,8 @@ package capture;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
+
 import org.jnativehook.GlobalScreen;
 
 public class UIScript {
@@ -47,5 +49,10 @@ public class UIScript {
     GlobalScreen.getInstance().removeNativeMouseListener(capturer);
     capturer = null;
     isRecording = false;
+  }
+  
+  public ImageIcon icon() {
+    if(actions.size() >= 1) { return actions.get(0).icon(); }
+    return null;
   }
 }
