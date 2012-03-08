@@ -1,16 +1,5 @@
 package display;
 
-/**
- * 
- * TODO:
- *  hella updated interface
- *    add functionality for updating button names/actions
- *    AUTOSAVE
- * 	  grid thing for layout of sensors
- *      get comfortable with batik
- *    
- */
-
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Desktop;

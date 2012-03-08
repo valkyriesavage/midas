@@ -3,6 +3,7 @@ package display;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
@@ -141,5 +142,20 @@ public class ArduinoSensorButton extends JButton {
     } else {
       relevantColor = Color.GREEN;
     }
+  }
+  
+  public void setIntersecting(boolean intersecting) {
+    if(intersecting) {
+      relevantColor = Color.RED;
+    }
+  }
+  
+  public boolean intersects(Rectangle rectangle) {
+    return getShape().intersects(rectangle);
+  }
+  
+  @Override
+  public Rectangle getBounds() {
+    return getShape().getBounds();
   }
 }

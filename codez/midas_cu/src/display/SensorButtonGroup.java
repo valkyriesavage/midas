@@ -3,6 +3,7 @@ package display;
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -202,5 +203,29 @@ public class SensorButtonGroup extends JPanel {
     for (ArduinoSensorButton button : triggerButtons) {
       button.setSelected(selected);
     }
+  }
+  
+  public void setIntersecting(boolean intersecting) {
+    for (ArduinoSensorButton button : triggerButtons) {
+      button.setIntersecting(intersecting);
+    }
+  }
+  
+  public boolean intersects(Rectangle rectangle) {
+    for(ArduinoSensorButton button : triggerButtons) {
+      if (button.intersects(rectangle)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  @Override
+  public Rectangle getBounds() {
+    // we want the upper corner of the first one and the lower corner of the last one
+    Rectangle first = triggerButtons.get(0).getBounds();
+    Rectangle last = triggerButtons.get(triggerButtons.size() -1).getBounds();
+    
+    return new Rectangle(first.x, first.y, last.x + last.width, last.y + last.width);
   }
 }
