@@ -1,5 +1,9 @@
 package display;
 
+/**
+ * FIX THE DAMN RECTANGLES
+ */
+
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Desktop;

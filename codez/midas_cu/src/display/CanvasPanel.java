@@ -64,7 +64,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     for (SensorButtonGroup sbg : displayedButtons) {
       sbg.setIntersecting(false);
       for (SensorButtonGroup intersecting : displayedButtons) {
-        if (sbg == intersecting) {
+        if (sbg == intersecting || (sbg.isIntersecting() && intersecting.isIntersecting())) {
           continue;
         }
         if (sbg.intersects(intersecting.getBounds())) {

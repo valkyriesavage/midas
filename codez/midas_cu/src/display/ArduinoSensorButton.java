@@ -151,11 +151,13 @@ public class ArduinoSensorButton extends JButton {
   }
   
   public boolean intersects(Rectangle rectangle) {
-    return getShape().intersects(rectangle);
+    return getShape().getBounds().intersects(rectangle);
   }
   
   @Override
   public Rectangle getBounds() {
-    return getShape().getBounds();
+    Rectangle bounds = getShape().getBounds();
+    bounds.grow(SensorButtonGroup.BUFFER, SensorButtonGroup.BUFFER);
+    return bounds;
   }
 }

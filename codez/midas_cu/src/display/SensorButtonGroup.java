@@ -22,6 +22,8 @@ public class SensorButtonGroup extends JPanel {
   private static final int BASE = 30;
   private static final int MIN_SIZE = 30;
   public static final int SIZE_CHANGE = 5;
+  public static final int BUFFER = 2;
+
 
   public List<ArduinoSensorButton> triggerButtons = new ArrayList<ArduinoSensorButton>();
   private Point base = new Point(BASE, BASE);
@@ -43,6 +45,8 @@ public class SensorButtonGroup extends JPanel {
   public boolean isSlider;
   public boolean isPad;
   public Integer sensitivity;
+  
+  private boolean isIntersecting = false;
 
   public SensorButtonGroup(SensorShape.shapes shape) {
     isSlider = (shape == SensorShape.shapes.SLIDER);
@@ -209,6 +213,11 @@ public class SensorButtonGroup extends JPanel {
     for (ArduinoSensorButton button : triggerButtons) {
       button.setIntersecting(intersecting);
     }
+    isIntersecting = intersecting;
+  }
+  
+  public boolean isIntersecting() {
+    return isIntersecting;
   }
   
   public boolean intersects(Rectangle rectangle) {
@@ -222,10 +231,13 @@ public class SensorButtonGroup extends JPanel {
   
   @Override
   public Rectangle getBounds() {
+    
     // we want the upper corner of the first one and the lower corner of the last one
     Rectangle first = triggerButtons.get(0).getBounds();
     Rectangle last = triggerButtons.get(triggerButtons.size() -1).getBounds();
     
-    return new Rectangle(first.x, first.y, last.x + last.width, last.y + last.width);
+    Rectangle bounds = new Rectangle(first.x, first.y, (last.x-first.x) + last.width, (last.y-first.y) + last.width);
+    bounds.grow(BUFFER, BUFFER);
+    return bounds;
   }
 }
