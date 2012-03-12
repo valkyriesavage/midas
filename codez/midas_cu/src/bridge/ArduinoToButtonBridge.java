@@ -7,9 +7,10 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
+import actions.UIScript;
+
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
-import capture.UIScript;
 import display.ArduinoSensorButton;
 
 public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {

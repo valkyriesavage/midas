@@ -1,7 +1,9 @@
 package display;
 
 /**
- * FIX THE DAMN RECTANGLES
+ * TODO
+ *  allow import of png
+ *  allow websending of shite (involves adding UI elements and not much else, i think...)
  */
 
 import java.awt.AWTException;
@@ -24,6 +26,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -151,7 +154,16 @@ public class SetUp extends JFrame {
 	  buttonCreatorPanel.add(addStockButtonPanel);
 	  
 	  JPanel addCustomButtonPanel = new JPanel();
-	  JButton addCustom = new JButton("draw custom button");
+	  JButton addCustom = new JButton("add custom button");
+	  addCustom.addActionListener(new ActionListener() {
+	    public void actionPerformed(ActionEvent e) {
+	      JFileChooser fc = new JFileChooser();
+	      int returnVal = fc.showOpenDialog(SetUp.this);
+	      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	        File customImage = fc.getSelectedFile();
+	      }
+	     }
+	  });
 	  addCustomButtonPanel.add(addCustom);
 	  buttonCreatorPanel.add(addCustomButtonPanel);
 	  

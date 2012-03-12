@@ -3,8 +3,9 @@ package bridge;
 import java.util.ArrayList;
 import java.util.List;
 
+import actions.UIScript;
+
 import serialtalk.ArduinoEvent;
-import capture.UIScript;
 
 public class ArduinoToComboBridge {
   private static final List<ArduinoEvent> nullEventList = new ArrayList<ArduinoEvent>();

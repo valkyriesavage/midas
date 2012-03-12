@@ -21,6 +21,8 @@ public abstract class ArduinoToDisplayBridge {
   
   private static ArduinoDispatcher dispatcher;
   
+  public static final String[] possibleInteractions = {"screen script", "web script"};
+  
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
   }

@@ -1,4 +1,4 @@
-package capture;
+package actions;
 
 import javax.swing.ImageIcon;
 

@@ -1,4 +1,4 @@
-package capture;
+package actions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,9 @@ import java.util.List;
 import javax.swing.ImageIcon;
 
 import org.jnativehook.GlobalScreen;
+
+import capture.InputCapturer;
+
 
 public class UIScript {
   public List<UIAction> actions = new ArrayList<UIAction>();

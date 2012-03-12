@@ -26,6 +26,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
   public static final Color COPPER = new Color(184,115,51);
   
   List<SensorButtonGroup> displayedButtons;
+  List<File> displayedCustomButtons;
   SetUp setUp;
   
   private SensorButtonGroup draggingGroup;

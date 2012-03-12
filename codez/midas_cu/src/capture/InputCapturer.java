@@ -10,6 +10,11 @@ import org.jnativehook.keyboard.NativeKeyListener;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
 
+import actions.MousePressAction;
+import actions.MouseReleaseAction;
+import actions.TypeAction;
+import actions.UIAction;
+
 public class InputCapturer implements NativeKeyListener, NativeMouseInputListener {
 
   private List<UIAction> actions = new ArrayList<UIAction>();
