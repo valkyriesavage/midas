@@ -2,8 +2,8 @@ package display;
 
 /**
  * TODO
- *  test transparency with png
  *  allow websending of shite (involves adding UI elements and not much else, i think...)
+ *  generate crazy sliders
  */
 
 import java.awt.AWTException;
@@ -46,7 +46,8 @@ public class SetUp extends JFrame {
 	public static final int CANVAS_X = 280;
 	public static final int CANVAS_Y = 520;
 	
-	public static final Integer[] SLIDER_SENSITIVITIES = {3,4,5,6,7,8,256};
+	public static final Integer HELLA_SLIDER = 256;
+	public static final Integer[] SLIDER_SENSITIVITIES = {3,4,5,6,7,8, HELLA_SLIDER};
 	public static final Integer[] PAD_SENSITIVITIES = {4,9,16,25,36};
 
 	static SerialCommunication serialCommunication;

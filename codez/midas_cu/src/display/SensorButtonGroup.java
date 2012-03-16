@@ -100,7 +100,8 @@ public class SensorButtonGroup extends JPanel {
       triggerButtons.add(new ArduinoSensorButton(customImage, new Point(base.x,
           (size + spacing) + base.y), size));
     } else {
-      if (!isPad) { // we have a slider or a single button
+      if (!isPad && sensitivity != SetUp.HELLA_SLIDER) { // we have a slider or
+                                                         // a single button
         if (orientation == Direction.VERTICAL) {
           for (int i = 0; i < sensitivity.intValue(); i++) {
             triggerButtons.add(new ArduinoSensorButton(shape, new Point(base.x,
@@ -112,12 +113,24 @@ public class SensorButtonGroup extends JPanel {
                 * (size + spacing) + base.x, base.y), size));
           }
         }
-      } else { // we have a pad!
+      } else if (isPad) { // we have a pad!
         for (int i = 0; i < Math.floor(Math.sqrt(sensitivity)); i++) {
           for (int j = 0; j < Math.floor(Math.sqrt(sensitivity)); j++) {
             triggerButtons.add(new ArduinoSensorButton(shape, new Point(i
                 * (size + spacing) + base.x, j * (size + spacing) + base.y),
                 size));
+          }
+        }
+      } else { // we have a hella slider
+        if (orientation == Direction.VERTICAL) {
+          for (int i = 0; i < SetUp.SLIDER_SENSITIVITIES[0]; i++) {
+            triggerButtons.add(new ArduinoSensorButton(shape, new Point(base.x,
+                i * (size) + base.y), size));
+          }
+        } else {
+          for (int i = 0; i < SetUp.SLIDER_SENSITIVITIES[0]; i++) {
+            triggerButtons.add(new ArduinoSensorButton(shape, new Point(i
+                * (size) + base.x, base.y), size));
           }
         }
       }
@@ -204,6 +217,19 @@ public class SensorButtonGroup extends JPanel {
               .get((int) (i * Math.floor(Math.sqrt(sensitivity)) + j)).moveTo(
                   new Point(i * (size + spacing) + base.x, j * (size + spacing)
                       + base.y));
+        }
+      }
+    } else if (sensitivity == SetUp.HELLA_SLIDER) { // we have a hella slider
+      // note that for hella sliders we render a full bar with no spaces in it.
+      if (orientation == Direction.HORIZONTAL) {
+        for (int i = 0; i < SetUp.SLIDER_SENSITIVITIES[0]; i++) {
+          triggerButtons.get(i).moveTo(
+              new Point(i * (size) + base.x, base.y));
+        }
+      } else {
+        for (int i = 0; i < SetUp.SLIDER_SENSITIVITIES[0]; i++) {
+          triggerButtons.get(i).moveTo(
+              new Point(base.x, i * (size) + base.y));
         }
       }
     } else { // we have a slider or single button

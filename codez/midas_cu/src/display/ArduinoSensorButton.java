@@ -69,11 +69,13 @@ public class ArduinoSensorButton extends JButton {
   public void rotateRight() {
     
   }
+  
   public void smaller() {
     size -= SensorButtonGroup.SIZE_CHANGE;
     upperLeft.x += SensorButtonGroup.SIZE_CHANGE/2;
     upperLeft.y += SensorButtonGroup.SIZE_CHANGE/2;
   }
+  
   public void larger() {
     size += SensorButtonGroup.SIZE_CHANGE;
     upperLeft.x -= SensorButtonGroup.SIZE_CHANGE/2;
