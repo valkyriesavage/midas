@@ -43,7 +43,11 @@ public class SocketTalkAction extends WebSocketClient implements UIAction {
 	
 	public void doAction() {
 	  try {
-      send(dispatcher.lastEvent.toString());
+	    if(dispatcher.lastEvent != null) {
+	      send(dispatcher.lastEvent.toString());
+	    } else {
+	      send("hurdy durdy");
+	    }
     } catch (NotYetConnectedException e) {
       e.printStackTrace();
       System.out.println("we aren't connected!");

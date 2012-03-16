@@ -59,8 +59,10 @@ public class InputCapturer implements NativeKeyListener, NativeMouseInputListene
 
   public List<UIAction> reportBack() {
     // before returning, pop off the last two events; it's the click and release where they hit "stop recording"
-    actions.remove(actions.size() - 1);
-    actions.remove(actions.size() - 1);
+    if (actions.size() >= 2) {
+      actions.remove(actions.size() - 1);
+      actions.remove(actions.size() - 1);
+    }
     
     return actions;
   }

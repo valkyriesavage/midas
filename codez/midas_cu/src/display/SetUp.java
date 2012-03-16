@@ -2,8 +2,9 @@ package display;
 
 /**
  * TODO
- *  allow websending of shite (involves adding UI elements and not much else, i think...)
- *  generate crazy sliders
+ *  tie crazy sliders to the known pins on the QT1106
+ *  make sure gridded registration works
+ *  make the actionlisteners behave :(
  */
 
 import java.awt.AWTException;
@@ -27,6 +28,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -39,6 +41,7 @@ import bridge.ArduinoToDisplayBridge;
 import bridge.ArduinoToPadBridge;
 import bridge.ArduinoToSliderBridge;
 import display.SensorShape.shapes;
+import util.ExtensionFileFilter;
 
 public class SetUp extends JFrame {
 	private static final long serialVersionUID = -7176602414855781819L;
@@ -65,6 +68,8 @@ public class SetUp extends JFrame {
 	SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator(displayedButtons);
 	
 	SensorShape.shapes queuedShape;
+	
+	private ArduinoToDisplayBridge currentBridge;
 
 	public SetUp(boolean test) throws AWTException {
 		setSize(CANVAS_X + 350, CANVAS_Y + 180);
@@ -160,6 +165,7 @@ public class SetUp extends JFrame {
 	  addCustom.addActionListener(new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
 	      JFileChooser fc = new JFileChooser();
+	      fc.setFileFilter(new ExtensionFileFilter("PNG images", new String[] { "PNG", "png" }));
 	      int returnVal = fc.showOpenDialog(SetUp.this);
 	      if (returnVal == JFileChooser.APPROVE_OPTION) {
 	        File customImage = fc.getSelectedFile();
@@ -265,7 +271,21 @@ public class SetUp extends JFrame {
     };
 	}
 	
-	public void setSelectedBridge(ArduinoToDisplayBridge bridge) {
+	private ActionListener refreshSelected() {
+	  return new ActionListener() {
+	    public void actionPerformed(ActionEvent event) {
+        setSelectedBridge(currentBridge);
+	    }
+	  };
+	}
+	
+	private JComponent placeholder() {
+	  return new JLabel("");
+	}
+	
+	public void setSelectedBridge(ArduinoToDisplayBridge bridge) {	 
+	  currentBridge = bridge;
+	  
 	  for (ArduinoToDisplayBridge notSelected : bridgeObjects) {
 	    notSelected.interfacePiece.setSelected(false);
 	  }
@@ -274,12 +294,20 @@ public class SetUp extends JFrame {
 
 	  propertiesPane.setVisible(false);
 	  propertiesPane.removeAll();
+	  JComboBox interactionType = bridge.chooseInteractionType();
+	  interactionType.addActionListener(refreshSelected());
+	  
 	  if (bridge.isCustom) {
 	    ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
 	    propertiesPane.add(new JLabel("name"));
-      propertiesPane.add(bridge.interfacePiece.nameField);
-      propertiesPane.add(buttonBridge.interactionButton());
+      propertiesPane.add(buttonBridge.interfacePiece.nameField);
+      
+      propertiesPane.add(interactionType);
+      propertiesPane.add(placeholder());
+      
+      propertiesPane.add(buttonBridge.interactionSetter());
       propertiesPane.add(buttonBridge.goButton());
+      
       propertiesPane.add(buttonBridge.setArduinoSequenceButton());
       JButton delete = buttonBridge.interfacePiece.delete;
       delete.addActionListener(repainter());
@@ -288,24 +316,33 @@ public class SetUp extends JFrame {
 	  else if (bridge.interfacePiece.isSlider) {
 	    ArduinoToSliderBridge sliderBridge = (ArduinoToSliderBridge) bridge;
       propertiesPane.add(new JLabel("name"));
-	    propertiesPane.add(bridge.interfacePiece.nameField);
-	    propertiesPane.add(sliderBridge.captureSliderButton());
-	    propertiesPane.add(sliderBridge.showTestPositionsButton());
-      propertiesPane.add(new JLabel("sensitivity"));
+	    propertiesPane.add(sliderBridge.interfacePiece.nameField);
+	    
+      propertiesPane.add(interactionType);
+      propertiesPane.add(placeholder());
+	    
+      propertiesPane.add(sliderBridge.interactionSetter());
+	    propertiesPane.add(sliderBridge.goButton());
+      
+	    propertiesPane.add(new JLabel("sensitivity"));
       JComboBox sensitivityBox = sliderBridge.sliderSensitivityBox();
       sensitivityBox.addActionListener(repainter());
       propertiesPane.add(sensitivityBox);
+      
       JButton larger = sliderBridge.interfacePiece.larger;
       larger.addActionListener(repainter());
       propertiesPane.add(larger);
       JButton smaller = sliderBridge.interfacePiece.smaller;
       smaller.addActionListener(repainter());
       propertiesPane.add(smaller);
+      
       JButton orientationFlip = sliderBridge.interfacePiece.orientationFlip;
       orientationFlip.addActionListener(repainter());
       propertiesPane.add(orientationFlip);
-      propertiesPane.add(new JLabel(""));  // placeholder
+      propertiesPane.add(placeholder());
+      
       propertiesPane.add(sliderBridge.setArduinoSequenceButton());
+      
       JButton delete = sliderBridge.interfacePiece.delete;
       delete.addActionListener(repainter());
       propertiesPane.add(delete);
@@ -313,18 +350,25 @@ public class SetUp extends JFrame {
 	    ArduinoToPadBridge padBridge = (ArduinoToPadBridge) bridge;
       propertiesPane.add(new JLabel("name"));
       propertiesPane.add(bridge.interfacePiece.nameField);
-      propertiesPane.add(padBridge.capturePadButton());
-      propertiesPane.add(padBridge.showTestPositionsButton());
+      
+      propertiesPane.add(interactionType);
+      propertiesPane.add(placeholder());
+
+      propertiesPane.add(padBridge.interactionSetter());
+      propertiesPane.add(padBridge.goButton());
+
       propertiesPane.add(new JLabel("sensitivity"));
       JComboBox sensitivityBox = padBridge.padSensitivityBox();
       sensitivityBox.addActionListener(repainter());
       propertiesPane.add(sensitivityBox);
+      
       JButton larger = padBridge.interfacePiece.larger;
       larger.addActionListener(repainter());
       propertiesPane.add(larger);
       JButton smaller = padBridge.interfacePiece.smaller;
       smaller.addActionListener(repainter());
       propertiesPane.add(smaller);   
+      
       propertiesPane.add(padBridge.setArduinoSequenceButton());
       JButton delete = padBridge.interfacePiece.delete;
       delete.addActionListener(repainter());
@@ -333,7 +377,11 @@ public class SetUp extends JFrame {
 	    ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
       propertiesPane.add(new JLabel("name"));
       propertiesPane.add(bridge.interfacePiece.nameField);
-      propertiesPane.add(buttonBridge.interactionButton());
+      
+      propertiesPane.add(interactionType);
+      propertiesPane.add(placeholder());
+      
+      propertiesPane.add(buttonBridge.interactionSetter());
       propertiesPane.add(buttonBridge.goButton());
       JButton larger = buttonBridge.interfacePiece.larger;
       larger.addActionListener(repainter());
@@ -341,6 +389,7 @@ public class SetUp extends JFrame {
       JButton smaller = buttonBridge.interfacePiece.smaller;
       smaller.addActionListener(repainter());
       propertiesPane.add(smaller);
+      
       propertiesPane.add(buttonBridge.setArduinoSequenceButton());
       JButton delete = buttonBridge.interfacePiece.delete;
       delete.addActionListener(repainter());

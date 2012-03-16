@@ -6,12 +6,15 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
+import actions.UIAction;
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
 
@@ -23,7 +26,9 @@ public abstract class ArduinoToDisplayBridge {
   
   private static ArduinoDispatcher dispatcher;
   
-  public static final String[] possibleInteractions = {"screen script", "web script"};
+  protected String interactionType = UIAction.POSSIBLE_INTERACTIONS[0];
+  protected JTextField websocketField = new JTextField();
+  protected String websocket = "";
   
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
@@ -73,5 +78,29 @@ public abstract class ArduinoToDisplayBridge {
       }
     });
     return sequenceButton;
+  }
+  
+  public JComboBox chooseInteractionType() {
+    JComboBox choose = new JComboBox(UIAction.POSSIBLE_INTERACTIONS);
+    choose.setSelectedItem(interactionType);
+    choose.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        String selected = (String) ((JComboBox)event.getSource()).getSelectedItem();
+        interactionType = selected;
+      }
+    });
+    return choose;
+  }
+  
+  public JTextField websocketField() {
+    return websocketField;
+  }
+  
+  protected boolean websocketing() {
+    return interactionType.equals(UIAction.POSSIBLE_INTERACTIONS[1]);
+  }
+  
+  protected boolean screenScripting() {
+    return interactionType.equals(UIAction.POSSIBLE_INTERACTIONS[0]);
   }
 }

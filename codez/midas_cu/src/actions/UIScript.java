@@ -10,7 +10,7 @@ import org.jnativehook.GlobalScreen;
 import capture.InputCapturer;
 
 
-public class UIScript {
+public class UIScript implements UIAction {
   public List<UIAction> actions = new ArrayList<UIAction>();
   private InputCapturer capturer;
   
@@ -57,5 +57,10 @@ public class UIScript {
   public ImageIcon icon() {
     if(actions.size() >= 1) { return actions.get(0).icon(); }
     return null;
+  }
+
+  @Override
+  public void doAction() {
+    execute();
   }
 }

@@ -29,6 +29,9 @@ public class ArduinoSensorButton extends JButton {
   private Point upperLeft;
   private int size;
   
+  private int width;
+  private int height;
+  
   private Color relevantColor = CanvasPanel.COPPER;
   
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
@@ -111,9 +114,11 @@ public class ArduinoSensorButton extends JButton {
       g.setColor(relevantColor);
       g.fill(drawShape);
     } else if (customImage != null) {
-      g.drawImage(customImage, upperLeft.x, upperLeft.y, null, new ImageObserver() {
+      g.drawImage(customImage, upperLeft.x - size/2, upperLeft.y - size/2, null, new ImageObserver() {
         public boolean imageUpdate(Image img, int infoflags, int x, int y,
-            int width, int height) {
+            int imgWidth, int imgHeight) {
+          width = imgWidth;
+          height = imgHeight;
           return false;
         }
       });
@@ -121,6 +126,9 @@ public class ArduinoSensorButton extends JButton {
   }
   
   private Shape getShape() {
+    if (shape == null) {
+      return new Rectangle2D.Double(upperLeft.x - width / 2, upperLeft.y - width/2, width, height);
+    }
     if (shape.equals(SensorShape.shapes.CIRCLE)) {
       return circle();
     } if (shape.equals(SensorShape.shapes.STAR)) {
