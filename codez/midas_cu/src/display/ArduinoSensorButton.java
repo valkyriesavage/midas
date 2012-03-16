@@ -109,7 +109,7 @@ public class ArduinoSensorButton extends JButton {
       g.setColor(relevantColor);
       g.fill(drawShape);
     } else if (customImage != null) {
-      g.drawImage(customImage, upperLeft.x, upperLeft.y, Color.BLACK, new ImageObserver() {
+      g.drawImage(customImage, upperLeft.x, upperLeft.y, null, new ImageObserver() {
         public boolean imageUpdate(Image img, int infoflags, int x, int y,
             int width, int height) {
           return false;

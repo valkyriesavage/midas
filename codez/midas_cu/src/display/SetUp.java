@@ -2,7 +2,7 @@ package display;
 
 /**
  * TODO
- *  allow import of png
+ *  test transparency with png
  *  allow websending of shite (involves adding UI elements and not much else, i think...)
  */
 
@@ -46,8 +46,8 @@ public class SetUp extends JFrame {
 	public static final int CANVAS_X = 280;
 	public static final int CANVAS_Y = 520;
 	
-	public static final Integer[] SLIDER_SENSITIVITIES = {3,4,5,6,7,8};
-	public static final Integer[] PAD_SENSITIVITIES = {9,16,25,36};
+	public static final Integer[] SLIDER_SENSITIVITIES = {3,4,5,6,7,8,256};
+	public static final Integer[] PAD_SENSITIVITIES = {4,9,16,25,36};
 
 	static SerialCommunication serialCommunication;
 	public static final String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";

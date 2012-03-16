@@ -100,7 +100,7 @@ public class SensorButtonGroup extends JPanel {
       triggerButtons.add(new ArduinoSensorButton(customImage, new Point(base.x,
           (size + spacing) + base.y), size));
     } else {
-      if (!isPad()) { // we have a slider or a single button
+      if (!isPad) { // we have a slider or a single button
         if (orientation == Direction.VERTICAL) {
           for (int i = 0; i < sensitivity.intValue(); i++) {
             triggerButtons.add(new ArduinoSensorButton(shape, new Point(base.x,
@@ -197,7 +197,7 @@ public class SensorButtonGroup extends JPanel {
 
   public void moveTo(Point p) {
     base = p;
-    if (isPad()) { // we have a pad
+    if (isPad) { // we have a pad
       for (int i = 0; i < Math.floor(Math.sqrt(sensitivity)); i++) {
         for (int j = 0; j < Math.floor(Math.sqrt(sensitivity)); j++) {
           triggerButtons
@@ -220,10 +220,6 @@ public class SensorButtonGroup extends JPanel {
       }
     }
     repaint();
-  }
-
-  private boolean isPad() {
-    return sensitivity >= 9;
   }
 
   public JTextField nameField() {
