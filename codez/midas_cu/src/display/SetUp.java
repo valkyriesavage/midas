@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -161,6 +162,22 @@ public class SetUp extends JFrame {
 	      int returnVal = fc.showOpenDialog(SetUp.this);
 	      if (returnVal == JFileChooser.APPROVE_OPTION) {
 	        File customImage = fc.getSelectedFile();
+	        cleanUpDeletions();
+	        SensorButtonGroup newButton;
+          try {
+            newButton = new SensorButtonGroup(ImageIO.read(customImage), customImage.getName());
+          } catch (IOException ioe) {
+            newButton = new SensorButtonGroup(shapes.SQUARE);
+            ioe.printStackTrace();
+          }
+	        ArduinoToDisplayBridge newBridge = new ArduinoToButtonBridge();
+	        newBridge.isCustom = true;
+	        displayedButtons.add(newButton);
+	        newBridge.setInterfacePiece(newButton);
+	        newBridge.interfacePiece.setSensitivity(1);
+	        bridgeObjects.add(newBridge);
+	        setSelectedBridge(newBridge);
+	        repaint();
 	      }
 	     }
 	  });
@@ -256,7 +273,18 @@ public class SetUp extends JFrame {
 
 	  propertiesPane.setVisible(false);
 	  propertiesPane.removeAll();
-	  if (bridge.interfacePiece.isSlider) {
+	  if (bridge.isCustom) {
+	    ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
+	    propertiesPane.add(new JLabel("name"));
+      propertiesPane.add(bridge.interfacePiece.nameField);
+      propertiesPane.add(buttonBridge.interactionButton());
+      propertiesPane.add(buttonBridge.goButton());
+      propertiesPane.add(buttonBridge.setArduinoSequenceButton());
+      JButton delete = buttonBridge.interfacePiece.delete;
+      delete.addActionListener(repainter());
+      propertiesPane.add(delete);
+	  }
+	  else if (bridge.interfacePiece.isSlider) {
 	    ArduinoToSliderBridge sliderBridge = (ArduinoToSliderBridge) bridge;
       propertiesPane.add(new JLabel("name"));
 	    propertiesPane.add(bridge.interfacePiece.nameField);

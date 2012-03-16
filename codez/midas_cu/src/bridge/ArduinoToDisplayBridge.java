@@ -19,6 +19,8 @@ public abstract class ArduinoToDisplayBridge {
   public ArduinoObject arduinoPiece;
   public SensorButtonGroup interfacePiece;
   
+  public boolean isCustom = false;
+  
   private static ArduinoDispatcher dispatcher;
   
   public static final String[] possibleInteractions = {"screen script", "web script"};
