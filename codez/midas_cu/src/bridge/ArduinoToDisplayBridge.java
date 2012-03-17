@@ -17,6 +17,7 @@ import serialtalk.ArduinoSensor;
 import actions.UIAction;
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
+import display.SetUp;
 
 public abstract class ArduinoToDisplayBridge {
   public ArduinoObject arduinoPiece;
@@ -27,11 +28,17 @@ public abstract class ArduinoToDisplayBridge {
   private static ArduinoDispatcher dispatcher;
   
   protected String interactionType = UIAction.POSSIBLE_INTERACTIONS[0];
-  protected JTextField websocketField = new JTextField();
+  protected JTextField websocketField = new JTextField("socket address");
   protected String websocket = "";
+  
+  protected static SetUp repainter;
   
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
+  }
+  
+  public static void setRepainter(SetUp newRepainter) {
+    repainter = newRepainter;
   }
   
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
@@ -87,6 +94,8 @@ public abstract class ArduinoToDisplayBridge {
       public void actionPerformed(ActionEvent event) {
         String selected = (String) ((JComboBox)event.getSource()).getSelectedItem();
         interactionType = selected;
+        repainter.setSelectedBridge(repainter.currentBridge);
+        repainter.repaint();
       }
     });
     return choose;

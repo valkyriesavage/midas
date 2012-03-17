@@ -69,7 +69,7 @@ public class SetUp extends JFrame {
 	
 	SensorShape.shapes queuedShape;
 	
-	private ArduinoToDisplayBridge currentBridge;
+	public ArduinoToDisplayBridge currentBridge;
 
 	public SetUp(boolean test) throws AWTException {
 		setSize(CANVAS_X + 350, CANVAS_Y + 180);
@@ -78,6 +78,7 @@ public class SetUp extends JFrame {
 		serialCommunication = new SerialCommunication();
 		serialCommunication.initialize(test);
 		bridgeObjects = serialCommunication.bridgeObjects;
+		ArduinoToDisplayBridge.setRepainter(this);
 		
 		setLayout(new BorderLayout());
 
@@ -283,7 +284,7 @@ public class SetUp extends JFrame {
 	  return new JLabel("");
 	}
 	
-	public void setSelectedBridge(ArduinoToDisplayBridge bridge) {	 
+	public void setSelectedBridge(ArduinoToDisplayBridge bridge) {
 	  currentBridge = bridge;
 	  
 	  for (ArduinoToDisplayBridge notSelected : bridgeObjects) {

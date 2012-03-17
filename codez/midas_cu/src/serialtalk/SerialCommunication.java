@@ -49,8 +49,9 @@ public class SerialCommunication implements SerialPortEventListener {
   boolean paused = false;
   private String currentSerialInfo = new String();
 
-  private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
-  private Pattern matchOneArduino2DMessage = Pattern.compile("((\\d{2})(U|D)){2}");
+  private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)\n");
+  private Pattern matchOneArduino2DMessage = Pattern.compile("((\\d{2})(U|D)){2}\n");
+  private Pattern matchOneArduinoSliderMessage = Pattern.compile("(\\d{3})\n");
   
   public boolean isGridded = false;
   
