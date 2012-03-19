@@ -10,37 +10,49 @@ import java.util.Map;
 
 public class SVGPathwaysGenerator {
   
-  private List<SensorConnector> sensorConnectors = new ArrayList<SensorConnector>();
-  public int lineWidth = 3;
+  private List<List<Point>> paths = new ArrayList();
 
+  //todo: create a path class that's more efficient than storing ALL of the points
+  
   public SVGPathwaysGenerator(List<SensorButtonGroup> displayedButtons) {}
   
   public void paint(Graphics2D g) {
-    for (SensorConnector connector : sensorConnectors) {
-      connector.paint(g);
+    for (List<Point> path : paths) {
+    	for(Point p : path) {
+    		g.drawRect(p.x, p.y, 1, 1); //todo: optimize
+    	}
+//      connector.paint(g);
     }
   }
   
   public void generatePathways(List<SensorButtonGroup> buttonsToConnect) {
+	  System.out.println("Pathways generating: "+buttonsToConnect);
 	  /* 
 	   * Recreate the connectors each time -
-	   * 	Get all of the groups' button's positions: 
+	   * 	Get all of the groups' button's positions, and delegate to appropriate method
 	   */
-	  sensorConnectors.clear();
+	  paths.clear();
+	  
+	  
 	  List<ArduinoSensorButton> btns = new ArrayList();
 	  for(SensorButtonGroup s : buttonsToConnect)
-		  btns.add(s.triggerButton);
-	  if(btns.size() <= 12)
-		  sensorConnectors.addAll(generateIndividual(btns));
-	  else 
-		  sensorConnectors.addAll(generateGrid(btns));
-  }
-  
-  private List<SensorConnector> generateGrid(List<ArduinoSensorButton> buttons) {
+		  btns.addAll(s.triggerButtons);
 	  
+	  if(btns.size() <= 12)
+		  paths.addAll(generateIndividual(btns));
+	  else 
+		  paths.addAll(generateGrid(btns));
+	  
+	  System.out.println("Paths is now "+paths);
   }
   
-  private List<SensorConnector> generateIndividual(List<ArduinoSensorButton> buttons) {
+  private List<List<Point>> generateGrid(List<ArduinoSensorButton> buttons) {
+	  throw new UnsupportedOperationException("Not implemented yet!");
+  }
+  
+  private List<List<Point>> generateIndividual(List<ArduinoSensorButton> buttons) {
+	  List<List<Point>> paths = new ArrayList();
+	  
 	  Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 	  int idx = 0;
 	  for(ArduinoSensorButton b : buttons) {
@@ -49,11 +61,14 @@ public class SVGPathwaysGenerator {
 		  List<Point> path = g.findPath(nearButton, new Point(5, idx*5));
 		  
 		  if(path != null) { //yay we found one
-			  
+			  paths.add(path);
+			  g.falsifyPath(path);
 		  }
 		  
 		  idx++;
 	  }
+	  
+	  return paths;
   }
   
   private class Grid {
