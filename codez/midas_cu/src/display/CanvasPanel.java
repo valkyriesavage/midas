@@ -26,6 +26,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
   public static final Color COPPER = new Color(184,115,51);
   
   List<SensorButtonGroup> displayedButtons;
+  List<File> displayedCustomButtons;
   SetUp setUp;
   
   private SensorButtonGroup draggingGroup;
@@ -53,7 +54,6 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
       g2.drawImage(templateImage, 0, 0, Color.BLACK, new ImageObserver() {
         public boolean imageUpdate(Image img, int infoflags, int x, int y,
             int width, int height) {
-          System.out.println("we have some info?");
           return false;
         }
       });
@@ -63,6 +63,16 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     }
     
     for (SensorButtonGroup sbg : displayedButtons) {
+      sbg.setIntersecting(false);
+      for (SensorButtonGroup intersecting : displayedButtons) {
+        if (sbg == intersecting || (sbg.isIntersecting() && intersecting.isIntersecting())) {
+          continue;
+        }
+        if (sbg.intersects(intersecting.getBounds())) {
+          sbg.setIntersecting(true);
+          intersecting.setIntersecting(true);
+        }
+      }
       sbg.paint(g2);
     }
   }

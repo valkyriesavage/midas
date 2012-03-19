@@ -7,7 +7,11 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
@@ -19,106 +23,139 @@ import display.SensorButtonGroup;
 import display.SetUp;
 
 public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
-  
-  private static final ArduinoSlider nullSlider = new ArduinoSlider(new ArduinoSensor[0]);
-  
+
+  private static final ArduinoSlider nullSlider = new ArduinoSlider(
+      new ArduinoSensor[0]);
+
   public UISlider interactivePiece;
-  
+
   public Integer sensitivity;
-  private JComboBox sliderSensitivity = new JComboBox(SetUp.SLIDER_SENSITIVITIES);
-    
+  private JComboBox sliderSensitivity = new JComboBox(
+      SetUp.SLIDER_SENSITIVITIES);
+
   public ArduinoToSliderBridge(int sensitivity) {
+    initWebsocketField();
     this.sensitivity = sensitivity;
     arduinoPiece = nullSlider;
     interactivePiece = new UISlider(sensitivity);
-    
+
     sliderSensitivity.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        JComboBox sensitivityBox = (JComboBox)event.getSource();
+        JComboBox sensitivityBox = (JComboBox) event.getSource();
         Integer newSensitivity = (Integer) sensitivityBox.getSelectedItem();
         setSensitivity(newSensitivity);
       }
     });
   }
-    
+
   public String toString() {
     return interfacePiece.name;
   }
-  
+
   public void setSensitivity(Integer sensitivity) {
     this.sensitivity = sensitivity;
     this.interactivePiece.sensitivity = sensitivity;
     this.interfacePiece.setSensitivity(sensitivity);
   }
-  
+
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
     this.interfacePiece = interfacePiece;
     interfacePiece.isSlider = true;
     this.interfacePiece.setSensitivity(this.sensitivity);
   }
-  
-  public JButton captureSliderButton() {
-    JButton captureSlider;
-    if (interactivePiece.icon() != null) { captureSlider = new JButton(interactivePiece.icon()); }
-    else { captureSlider = new JButton("capture slider"); }
-    captureSlider.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) {
-        if (!interactivePiece.isRecording) {
-          JOptionPane.showMessageDialog(null, "click at the top and bottom or\nleft and right ends of the slider",
-              "slider capture instructions", JOptionPane.INFORMATION_MESSAGE);
-          interactivePiece.record();
-          ((JButton)event.getSource()).setText("stop recording");
-        } else {
-          interactivePiece.stopRecording();
-          ((JButton)event.getSource()).setText("");
-          ((JButton)event.getSource()).setIcon(interactivePiece.icon());
-        }
+
+  public JComponent interactionSetter() {
+    if (websocketing()) {
+      return websocketField;
+    } else {
+      JButton captureSlider;
+      if (interactivePiece.icon() != null) {
+        captureSlider = new JButton(interactivePiece.icon());
+      } else {
+        captureSlider = new JButton("capture slider");
       }
-    });
-    return captureSlider;
+      captureSlider.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          if (!interactivePiece.isRecording) {
+            JOptionPane
+                .showMessageDialog(
+                    null,
+                    "click at the top and bottom or\nleft and right ends of the slider",
+                    "slider capture instructions",
+                    JOptionPane.INFORMATION_MESSAGE);
+            interactivePiece.record();
+            ((JButton) event.getSource()).setText("stop recording");
+          } else {
+            interactivePiece.stopRecording();
+            ((JButton) event.getSource()).setText("");
+            ((JButton) event.getSource()).setIcon(interactivePiece.icon());
+          }
+        }
+      });
+      return captureSlider;
+    }
   }
-  
+
   public JComboBox sliderSensitivityBox() {
     return sliderSensitivity;
   }
-  
-  public JButton showTestPositionsButton() {
+
+  public JButton goButton() {
     JButton show = new JButton("test positions");
     show.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        for(int i=0; i<sensitivity; i++) {
+        for (int i = 0; i < sensitivity; i++) {
           interactivePiece.execute(i);
         }
       }
     });
     return show;
   }
-  
+
   public void execute(ArduinoSensor sensor) {
-    interactivePiece.execute(((ArduinoSlider)arduinoPiece).whichInSlider(sensor));
+    interactivePiece.execute(((ArduinoSlider) arduinoPiece)
+        .whichInSlider(sensor));
+  }
+
+  public void execute(ArduinoSensorButton button) {
+    if (this.contains(button)) {
+      // we might not need this at the moment, we aren't executing on click
+      // this.interactivePiece.execute(whichPad)
+    }
   }
   
-  public void execute(ArduinoSensorButton button) {
-    if(this.contains(button)) {
-      //we might not need this at the moment, we aren't executing on click
-      //this.interactivePiece.execute(whichPad)
-    }
+  private void initWebsocketField() {
+    websocketField.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void changedUpdate(DocumentEvent event) {
+        JTextField target = (JTextField) event.getDocument();
+        websocket = target.getText();
+      }
+
+      @Override
+      public void insertUpdate(DocumentEvent event) {
+      }
+
+      @Override
+      public void removeUpdate(DocumentEvent event) {
+      }
+    });
   }
 
   @Override
   public void setArduinoSequence(List<ArduinoEvent> events) {
-    //for a slider, we want t->b
+    // for a slider, we want t->b
     List<ArduinoSensor> sensors = new ArrayList<ArduinoSensor>();
     for (ArduinoEvent e : events) {
-      if(!sensors.contains(e.whichSensor)) {
+      if (!sensors.contains(e.whichSensor)) {
         sensors.add(e.whichSensor);
       }
     }
-    if(sensors.size() != sensitivity.intValue()) {
+    if (sensors.size() != sensitivity.intValue()) {
       System.out.println("wrong number of sensors registered");
       return;
-    }    
+    }
     arduinoPiece = new ArduinoSlider(sensors);
-    ArduinoSetup.addSlider((ArduinoSlider)arduinoPiece);
+    ArduinoSetup.addSlider((ArduinoSlider) arduinoPiece);
   }
 }

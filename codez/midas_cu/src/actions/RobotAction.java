@@ -1,4 +1,4 @@
-package capture;
+package actions;
 
 import java.awt.AWTException;
 import java.awt.Rectangle;

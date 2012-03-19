@@ -6,23 +6,39 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
+import actions.UIAction;
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
+import display.SetUp;
 
 public abstract class ArduinoToDisplayBridge {
   public ArduinoObject arduinoPiece;
   public SensorButtonGroup interfacePiece;
   
+  public boolean isCustom = false;
+  
   private static ArduinoDispatcher dispatcher;
+  
+  protected String interactionType = UIAction.POSSIBLE_INTERACTIONS[0];
+  protected JTextField websocketField = new JTextField("socket address");
+  protected String websocket = "";
+  
+  protected static SetUp repainter;
   
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
+  }
+  
+  public static void setRepainter(SetUp newRepainter) {
+    repainter = newRepainter;
   }
   
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
@@ -69,5 +85,31 @@ public abstract class ArduinoToDisplayBridge {
       }
     });
     return sequenceButton;
+  }
+  
+  public JComboBox chooseInteractionType() {
+    JComboBox choose = new JComboBox(UIAction.POSSIBLE_INTERACTIONS);
+    choose.setSelectedItem(interactionType);
+    choose.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        String selected = (String) ((JComboBox)event.getSource()).getSelectedItem();
+        interactionType = selected;
+        repainter.setSelectedBridge(repainter.currentBridge);
+        repainter.repaint();
+      }
+    });
+    return choose;
+  }
+  
+  public JTextField websocketField() {
+    return websocketField;
+  }
+  
+  protected boolean websocketing() {
+    return interactionType.equals(UIAction.POSSIBLE_INTERACTIONS[1]);
+  }
+  
+  protected boolean screenScripting() {
+    return interactionType.equals(UIAction.POSSIBLE_INTERACTIONS[0]);
   }
 }

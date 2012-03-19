@@ -13,6 +13,10 @@ import javax.swing.ImageIcon;
 
 import org.jnativehook.GlobalScreen;
 
+import actions.MousePressAction;
+import actions.MouseReleaseAction;
+import actions.UIAction;
+
 public class UISlider {
   public Point lowEndOfSlider;
   public Point highEndOfSlider;

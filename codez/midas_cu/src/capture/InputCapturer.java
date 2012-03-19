@@ -10,6 +10,11 @@ import org.jnativehook.keyboard.NativeKeyListener;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
 
+import actions.MousePressAction;
+import actions.MouseReleaseAction;
+import actions.TypeAction;
+import actions.UIAction;
+
 public class InputCapturer implements NativeKeyListener, NativeMouseInputListener {
 
   private List<UIAction> actions = new ArrayList<UIAction>();
@@ -54,8 +59,10 @@ public class InputCapturer implements NativeKeyListener, NativeMouseInputListene
 
   public List<UIAction> reportBack() {
     // before returning, pop off the last two events; it's the click and release where they hit "stop recording"
-    actions.remove(actions.size() - 1);
-    actions.remove(actions.size() - 1);
+    if (actions.size() >= 2) {
+      actions.remove(actions.size() - 1);
+      actions.remove(actions.size() - 1);
+    }
     
     return actions;
   }

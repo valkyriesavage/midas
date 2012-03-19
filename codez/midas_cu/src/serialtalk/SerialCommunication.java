@@ -6,6 +6,7 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 import java.awt.AWTException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.JTextField;
 
+import actions.SocketTalkAction;
 import bridge.ArduinoToDisplayBridge;
 import display.ArduinoSensorButton;
 
@@ -29,13 +31,12 @@ public class SerialCommunication implements SerialPortEventListener {
   private static final String PORT_NAMES[] = {
     "/dev/tty.usbmodemfa131", // Mac, Arduino Uno, works for Ragnarok
     "/dev/tty.usbmodemfa121", // Mac, Arduino Uno, works for Ragnarok
-    "/dev/ttyACM0", // Linux, specifically for Arduino Uno
+    "/dev/ttyACM0", // Linux, Arduino Uno
     "COM3", // Windows
   };
   /** Buffered input stream from the port */
   private InputStream input;
   /** The output stream to the port */
-  @SuppressWarnings("unused")
   private OutputStream output;
   /** Milliseconds to block while waiting for port open */
   private static final int TIME_OUT = 2000;
@@ -48,8 +49,9 @@ public class SerialCommunication implements SerialPortEventListener {
   boolean paused = false;
   private String currentSerialInfo = new String();
 
-  private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)");
-  private Pattern matchOneArduino2DMessage = Pattern.compile("((\\d{2})(U|D)){2}");
+  private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)\n");
+  private Pattern matchOneArduino2DMessage = Pattern.compile("((\\d{2})(U|D)){2}\n");
+  private Pattern matchOneArduinoSliderMessage = Pattern.compile("(\\d{3})\n");
   
   public boolean isGridded = false;
   
@@ -65,6 +67,7 @@ public class SerialCommunication implements SerialPortEventListener {
     dispatcher = new ArduinoDispatcher();
     ArduinoToDisplayBridge.setDispatcher(dispatcher);
     ArduinoSensorButton.setDispatcher(dispatcher);
+    SocketTalkAction.setDispatcher(dispatcher);
     bridgeObjects = dispatcher.bridgeObjects;
 
     // iterate through, looking for the port
@@ -120,12 +123,20 @@ public class SerialCommunication implements SerialPortEventListener {
       serialPort.close();
     }
   }
+  
+  public synchronized void sendMessage(String message) {
+    try {
+      output.write(message.getBytes());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   public synchronized boolean isPaused() {
 	  return paused;
   }
   
-  public void togglePaused() {
+  public synchronized void togglePaused() {
 	  paused = !paused;
   }
 

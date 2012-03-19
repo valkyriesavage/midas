@@ -13,6 +13,7 @@ public class SensorShape {
     STAR,
     SLIDER,
     PAD,
+    HELLA_SLIDER,
   }
   public shapes shape = null;
 
