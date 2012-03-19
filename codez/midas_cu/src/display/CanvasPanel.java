@@ -50,7 +50,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 
     BufferedImage templateImage;
     try {
-      templateImage = ImageIO.read(new File(SetUp.PROJ_HOME + "display/images/iPhone_template.png"));
+      templateImage = ImageIO.read(new File("src/display/images/iPhone_template.png"));
       g2.drawImage(templateImage, 0, 0, Color.BLACK, new ImageObserver() {
         public boolean imageUpdate(Image img, int infoflags, int x, int y,
             int width, int height) {

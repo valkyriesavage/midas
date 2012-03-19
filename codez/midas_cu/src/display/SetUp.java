@@ -54,7 +54,7 @@ public class SetUp extends JFrame {
 	public static final Integer[] PAD_SENSITIVITIES = {4,9,16,25,36};
 
 	static SerialCommunication serialCommunication;
-	public static final String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
+//	public static final String PROJ_HOME = "/Users/valkyrie/projects/midas_cu/codez/midas_cu/src/";
 	
 	JPanel buttonDisplayGrid = new JPanel();
 	List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();

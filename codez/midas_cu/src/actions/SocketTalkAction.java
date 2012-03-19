@@ -15,7 +15,7 @@ import display.SetUp;
 public class SocketTalkAction extends WebSocketClient implements UIAction {
   
   private static ArduinoDispatcher dispatcher;
-  private static final ImageIcon ICON = new ImageIcon(SetUp.PROJ_HOME + "actions/images/websocket.png");
+  private static final ImageIcon ICON = new ImageIcon("src/actions/images/websocket.png");
   
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
