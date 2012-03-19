@@ -4,6 +4,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.FlatteningPathIterator;
+import java.awt.geom.Line2D;
+import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -21,7 +25,7 @@ public class SVGPathwaysGenerator {
   
   public void paint(Graphics2D g) {
 	  g.setColor(Color.red);
-	  System.out.println("Painting "+paths.size()+" paths!");
+//	  System.out.println("Painting "+paths.size()+" paths!");
     for (List<Point> path : paths) {
     	for(Point p : path) {
     		g.drawRect(p.x, p.y, 1, 1); //todo: optimize
@@ -32,7 +36,7 @@ public class SVGPathwaysGenerator {
   }
   
   public void generatePathways(List<SensorButtonGroup> buttonsToConnect) {
-	  System.out.println("Pathways generating: "+buttonsToConnect);
+//	  System.out.println("Pathways generating: "+buttonsToConnect);
 	  /* 
 	   * Recreate the connectors each time -
 	   * 	Get all of the groups' button's positions, and delegate to appropriate method
@@ -49,30 +53,130 @@ public class SVGPathwaysGenerator {
 	  else 
 		  paths.addAll(generateGrid(btns));
 	  
-	  System.out.println("Paths is now "+paths);
+//	  System.out.println("Paths is now "+paths);
+  }
+  
+  //taken from http://stackoverflow.com/questions/8144156/using-pathiterator-to-return-all-line-segments-that-constrain-an-area
+  private List<Line2D.Double> toSegments(FlatteningPathIterator pi) {    
+	  ArrayList<double[]> areaPoints = new ArrayList<double[]>();
+	  ArrayList<Line2D.Double> areaSegments = new ArrayList<Line2D.Double>();
+	  double[] coords = new double[6];
+
+	  for ( ; !pi.isDone(); pi.next()) {
+	      // The type will be SEG_LINETO, SEG_MOVETO, or SEG_CLOSE
+	      // Because the Area is composed of straight lines
+	      int type = pi.currentSegment(coords);
+	      // We record a double array of {segment type, x coord, y coord}
+	      double[] pathIteratorCoords = {type, coords[0], coords[1]};
+	      areaPoints.add(pathIteratorCoords);
+	  }
+
+	  double[] start = new double[3]; // To record where each polygon starts
+
+	  for (int i = 0; i < areaPoints.size(); i++) {
+	      // If we're not on the last point, return a line from this point to the next
+	      double[] currentElement = areaPoints.get(i);
+
+	      // We need a default value in case we've reached the end of the ArrayList
+	      double[] nextElement = {-1, -1, -1};
+	      if (i < areaPoints.size() - 1) {
+	          nextElement = areaPoints.get(i + 1);
+	      }
+
+	      // Make the lines
+	      if (currentElement[0] == PathIterator.SEG_MOVETO) {
+	          start = currentElement; // Record where the polygon started to close it later
+	      } 
+
+	      if (nextElement[0] == PathIterator.SEG_LINETO) {
+	          areaSegments.add(
+	                  new Line2D.Double(
+	                      currentElement[1], currentElement[2],
+	                      nextElement[1], nextElement[2]
+	                  )
+	              );
+	      } else if (nextElement[0] == PathIterator.SEG_CLOSE) {
+	          areaSegments.add(
+	                  new Line2D.Double(
+	                      currentElement[1], currentElement[2],
+	                      start[1], start[2]
+	                  )
+	              );
+	      }
+	  }
+
+	  // areaSegments now contains all the line segments
+	  return areaSegments;
   }
   
   private List<Point> outlineFor(ArduinoSensorButton b) {
-	  Rectangle r = b.getShape().getBounds();
+//	  Rectangle r = b.getShape().getBounds();
 	  List<Point> outline = new LinkedList<Point>();
 	  
-	  int x = r.x;
-	  int y = r.y;
+//	  int x = r.x;
+//	  int y = r.y;
+//	  
+//	  for( ; x < r.x + r.width; x++) { //from top-left corner to top-right
+//		  outline.add(new Point(x, y));
+//	  }
+//	  
+//	  for( ; y < r.y + r.height; y++) { //from top-right corner to bottom-right
+//		  outline.add(new Point(x, y));
+//	  }
+//
+//	  for(; x > r.x ; x--) { //from top-left corner to top-right
+//		  outline.add(new Point(x, y));
+//	  }
+//
+//	  for(; y > r.y ; y--) { //from top-left corner to top-right
+//		  outline.add(new Point(x, y));
+//	  }
 	  
-	  for( ; x < r.x + r.width; x++) { //from top-left corner to top-right
-		  outline.add(new Point(x, y));
-	  }
-	  
-	  for( ; y < r.y + r.height; y++) { //from top-right corner to bottom-right
-		  outline.add(new Point(x, y));
-	  }
-
-	  for(; x > r.x ; x--) { //from top-left corner to top-right
-		  outline.add(new Point(x, y));
-	  }
-
-	  for(; y > r.y ; y--) { //from top-left corner to top-right
-		  outline.add(new Point(x, y));
+	  FlatteningPathIterator p = new FlatteningPathIterator(b.getShape().getPathIterator(null), 1);
+	  List<Line2D.Double> segments = toSegments(p);
+	  for(Line2D.Double seg : segments) {
+		  int x0 = (int)seg.x1, //possibly do rounding later
+		      x1 = (int)seg.x2,
+		      y0 = (int)seg.y1,
+		      y1 = (int)seg.y2;
+		  //Rasterization from http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+		  boolean steep = Math.abs(y1 - y0) > Math.abs(x1 - x0);
+		  
+		  if(steep) {
+			  int temp = y0; //swap x0, y0
+			  y0 = x0; x0 = temp;
+			  
+			  temp = y1;  //swap x1, y1
+			  y1 = x1; x1 = temp;
+		  }
+		  if(x0 > x1) {
+			  //swap x0, x1
+			  int temp = x1;
+			  x1 = x0; x0 = temp;
+			  
+			  //swap y0, y1
+			  temp = y1;
+			  y1 = y0; y0 = temp;
+		  }
+		  
+		  int dx = x1 - x0;
+		  int dy = Math.abs(y1 - y0);
+		  float err = 0;
+		  float dErr = (float)dy/dx;
+		  
+		  int yStep;
+		  int y = y0;
+		  if(y0 < y1) yStep = 1; else yStep = -1;
+		  for(int x = x0; x <= x1; x++) {
+			  if(steep) outline.add(new Point(y, x));
+			  else		outline.add(new Point(x, y));
+			  
+			  err += dErr;
+			  if(err > .5f) {
+				  y += yStep;
+				  err -= 1;
+			  }
+		  }
 	  }
 	  
 	  return outline;
@@ -90,7 +194,7 @@ public class SVGPathwaysGenerator {
 //		  for(Point p : outlineFor(b)) {
 //			  g.falsify(g.adjDiags(p));
 //		  }
-		  g.falsify(outlineFor(b));
+		  g.falsify(g.removeOutOfBounds(outlineFor(b)));
 	  }
 	  
 	  int idx = 0;
@@ -242,7 +346,7 @@ public class SVGPathwaysGenerator {
 		  return list;
 	  }
 	  
-	  private void removeOutOfBounds(List<Point> list) {
+	  private List<Point> removeOutOfBounds(List<Point> list) {
 		  //remove out of bounds points
 		  List<Point> toRemove = new LinkedList();
 		  for(Point temp : list) {
@@ -250,6 +354,7 @@ public class SVGPathwaysGenerator {
 				  toRemove.add(temp);
 		  }
 		  list.removeAll(toRemove);
+		  return list;
 	  }
   }
 }

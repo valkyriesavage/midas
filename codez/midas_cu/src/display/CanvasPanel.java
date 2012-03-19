@@ -132,6 +132,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     if(draggingGroup != null) {
       draggingGroup.moveTo(event.getPoint());
       repaint();
+      setUp.generatePathways(); //regenerate because something just moved
     }
     for(ArduinoToDisplayBridge bridge : setUp.bridgeObjects) {
       if (bridge.interfacePiece == draggingGroup) {
