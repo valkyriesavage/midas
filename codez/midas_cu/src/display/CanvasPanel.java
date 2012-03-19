@@ -75,6 +75,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
       }
       sbg.paint(g2);
     }
+    
+    setUp.pathwaysGenerator.paint(g2);
   }
   
   SensorButtonGroup determineIntersection(Point pointClicked) {

@@ -125,7 +125,7 @@ public class ArduinoSensorButton extends JButton {
     }
   }
   
-  private Shape getShape() {
+  public Shape getShape() {
     if (shape == null) {
       return new Rectangle2D.Double(upperLeft.x - width / 2, upperLeft.y - width/2, width, height);
     }
