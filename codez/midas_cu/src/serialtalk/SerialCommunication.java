@@ -20,7 +20,6 @@ import actions.SocketTalkAction;
 import bridge.ArduinoToDisplayBridge;
 import display.ArduinoSensorButton;
 
-
 /**
  * This code was inspired by the Internet.
  */
@@ -28,11 +27,15 @@ import display.ArduinoSensorButton;
 public class SerialCommunication implements SerialPortEventListener {
   SerialPort serialPort;
 
-  private static final String PORT_NAMES[] = {
-    "/dev/tty.usbmodemfa131", // Mac, Arduino Uno, works for Ragnarok
-    "/dev/tty.usbmodemfa121", // Mac, Arduino Uno, works for Ragnarok
-    "/dev/ttyACM0", // Linux, Arduino Uno
-    "COM3", // Windows
+  private static final String PORT_NAMES[] = { "/dev/tty.usbmodemfa131", // Mac,
+                                                                         // Arduino
+                                                                         // Uno,
+                                                                         // works
+                                                                         // for
+                                                                         // Ragnarok
+      "/dev/tty.usbmodemfa121", // Mac, Arduino Uno, works for Ragnarok
+      "/dev/ttyACM0", // Linux, Arduino Uno
+      "COM3", // Windows
   };
   /** Buffered input stream from the port */
   private InputStream input;
@@ -49,19 +52,22 @@ public class SerialCommunication implements SerialPortEventListener {
   boolean paused = false;
   private String currentSerialInfo = new String();
 
-  private Pattern matchOneArduinoMessage = Pattern.compile("(\\d{2})(U|D)\n");
-  private Pattern matchOneArduino2DMessage = Pattern.compile("((\\d{2})(U|D)){2}\n");
-  private Pattern matchOneArduinoSliderMessage = Pattern.compile("(\\d{3})\n");
-  
+  private Pattern matchOneLine = Pattern.compile(".*\n");
+  private Pattern matchOneArduinoMessage = Pattern.compile("K:(\\d{2})(U|D)\n");
+  private Pattern matchOneArduino2DMessage = Pattern
+      .compile("(K:(\\d{2})(U|D)){2}\n");
+  private Pattern matchOneArduinoSliderMessage = Pattern.compile("S:(\\d{1,3})(U|D)\n");
+
   public boolean isGridded = false;
-  
+
   public void initialize(boolean test) throws AWTException {
     ArduinoSetup.initialize(test);
-    
+
     CommPortIdentifier portId = null;
-    // the following line is useful for computers with AMD processors.  it's stupid.
-    //System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
-    
+    // the following line is useful for computers with AMD processors. it's
+    // stupid.
+    // System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
+
     @SuppressWarnings("rawtypes")
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     dispatcher = new ArduinoDispatcher();
@@ -72,7 +78,8 @@ public class SerialCommunication implements SerialPortEventListener {
 
     // iterate through, looking for the port
     while (portEnum.hasMoreElements()) {
-      CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
+      CommPortIdentifier currPortId = (CommPortIdentifier) portEnum
+          .nextElement();
       for (String portName : PORT_NAMES) {
         if (currPortId.getName().equals(portName)) {
           portId = currPortId;
@@ -107,7 +114,7 @@ public class SerialCommunication implements SerialPortEventListener {
       // add event listeners
       serialPort.addEventListener(this);
       serialPort.notifyOnDataAvailable(true);
-      
+
     } catch (Exception e) {
       System.err.println(e.toString());
     }
@@ -123,7 +130,7 @@ public class SerialCommunication implements SerialPortEventListener {
       serialPort.close();
     }
   }
-  
+
   public synchronized void sendMessage(String message) {
     try {
       output.write(message.getBytes());
@@ -133,11 +140,11 @@ public class SerialCommunication implements SerialPortEventListener {
   }
 
   public synchronized boolean isPaused() {
-	  return paused;
+    return paused;
   }
-  
+
   public synchronized void togglePaused() {
-	  paused = !paused;
+    paused = !paused;
   }
 
   /**
@@ -153,30 +160,43 @@ public class SerialCommunication implements SerialPortEventListener {
         System.err.println(e.toString());
         return;
       }
-      
+
       currentSerialInfo = currentSerialInfo + new String(touched).trim();
 
       Matcher oneMessage;
 
-      if (isGridded) {
-        while ((oneMessage = matchOneArduino2DMessage.matcher(currentSerialInfo))
-            .lookingAt()) {
-          currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
+      while (((oneMessage = matchOneLine.matcher(currentSerialInfo))
+          .lookingAt())) {
+        String singleMessage = currentSerialInfo.substring(0,
+            oneMessage.start() - 1);
+        currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
+
+        if ((oneMessage = matchOneArduinoSliderMessage.matcher(singleMessage))
+            .lookingAt()) { // we have a slider thing to look at
           TouchDirection direction;
-          if (oneMessage.group(2).equals("U") && oneMessage.group(2).equals(oneMessage.group(4))) {
+          if (oneMessage.group(2).equals("U")) {
+            direction = TouchDirection.TOUCH;
+          } else {
+            direction = TouchDirection.RELEASE;
+          }
+          ArduinoEvent currentEvent = new ArduinoEvent(Integer.parseInt(oneMessage.group(1)), direction);
+          handleCompleteEvent(currentEvent);
+        } else if (isGridded
+            && (oneMessage = matchOneArduino2DMessage.matcher(singleMessage))
+                .lookingAt()) { // we need to look at two touch informationz
+          TouchDirection direction;
+          if (oneMessage.group(2).equals("U")
+              && oneMessage.group(2).equals(oneMessage.group(4))) {
             direction = TouchDirection.TOUCH;
           } else {
             direction = TouchDirection.RELEASE;
           }
           ArduinoEvent currentEvent = new ArduinoEvent(
-              ArduinoSetup.gridSensors[Integer.parseInt(oneMessage.group(1))][Integer.parseInt(oneMessage.group(3))],
-              direction);
+              ArduinoSetup.gridSensors[Integer.parseInt(oneMessage.group(1))][Integer
+                  .parseInt(oneMessage.group(3))], direction);
           handleCompleteEvent(currentEvent);
-        }
-      } else { //is not gridded
-        while ((oneMessage = matchOneArduinoMessage.matcher(currentSerialInfo))
-            .lookingAt()) {
-          currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
+        } else if ((oneMessage = matchOneArduinoMessage.matcher(singleMessage))
+            .lookingAt()) { // we are looking at one touch information at a time
           TouchDirection direction;
           if (oneMessage.group(2).equals("U")) {
             direction = TouchDirection.TOUCH;
@@ -199,7 +219,7 @@ public class SerialCommunication implements SerialPortEventListener {
     }
     dispatcher.handleEvent(e);
   }
-  
+
   public JTextField whatISee() {
     return dispatcher.whatISee;
   }

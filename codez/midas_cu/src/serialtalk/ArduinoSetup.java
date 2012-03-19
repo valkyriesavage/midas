@@ -5,22 +5,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ArduinoSetup {
-  public static ArduinoSensor[][] gridSensors = new ArduinoSensor[12][12];
-  public static ArduinoSensor[] sensors = new ArduinoSensor[12];
+  public static final int NUM_TERMINALS = 7;
+  
+  public static ArduinoSensor[][] gridSensors = new ArduinoSensor[NUM_TERMINALS][NUM_TERMINALS];
+  public static ArduinoSensor[] sensors = new ArduinoSensor[NUM_TERMINALS];
   
   public static List<ArduinoSlider> sliders = new ArrayList<ArduinoSlider>();
   public static List<ArduinoPad> pads = new ArrayList<ArduinoPad>();
   
   public static void initialize(boolean test) {
     if (gridSensors[0][0] == null) {
-      for(int i=0; i<12; i++) {
-        for(int j=0; j<12; j++) {
+      for(int i=0; i<NUM_TERMINALS; i++) {
+        for(int j=0; j<NUM_TERMINALS; j++) {
           gridSensors[i][j] = new ArduinoSensor(i, j);
         }
       }
     }
     if (sensors[0] == null) {
-      for(int i=0; i<12; i++) {
+      for(int i=0; i<NUM_TERMINALS; i++) {
         sensors[i] = new ArduinoSensor(i, -1);
       }
     }
@@ -61,7 +63,7 @@ public class ArduinoSetup {
   }
   
   public int whichSensor(ArduinoSensor sensor) {
-    for (int i=0; i<12; i++) {
+    for (int i=0; i<NUM_TERMINALS; i++) {
       if (sensors[i] == sensor) {
         return i;
       }
@@ -70,8 +72,8 @@ public class ArduinoSetup {
   }
   
   public Point whichGridSensor(ArduinoSensor sensor) {
-    for (int i=0; i<12; i++) {
-      for (int j=0; j<12; j++) {
+    for (int i=0; i<NUM_TERMINALS; i++) {
+      for (int j=0; j<NUM_TERMINALS; j++) {
         if (gridSensors[i][j] == sensor) {
           return new Point(i, j);
         }

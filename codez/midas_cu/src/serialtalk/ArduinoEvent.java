@@ -6,9 +6,18 @@ public class ArduinoEvent implements ArduinoObject {
   public ArduinoSensor whichSensor;
   long timestamp = System.currentTimeMillis();
   
+  public boolean isHellaSlider = false;
+  public int hellaSliderLocation = -1;
+  
   public ArduinoEvent(ArduinoSensor whichSensor, TouchDirection touchDirection) {
 	    this.whichSensor = whichSensor;
 	    this.touchDirection = touchDirection;
+  }
+  
+  public ArduinoEvent(int location, TouchDirection touchDirection) {
+    isHellaSlider = true;
+    hellaSliderLocation = location;
+    this.touchDirection = touchDirection;
   }
   
   public ArduinoEvent(ArduinoSensor whichSensor) {
@@ -20,11 +29,11 @@ public class ArduinoEvent implements ArduinoObject {
   }
   
   public boolean isComplete() {
-	  return (this.touchDirection != null);
+	  return (touchDirection != null && (whichSensor != null || isHellaSlider));
   }
   
   public int hashCode() {
-    return this.whichSensor.location.x + 100*this.whichSensor.location.y + 1000*this.touchDirection.ordinal();
+    return whichSensor.location.x + 100*whichSensor.location.y + 1000*touchDirection.ordinal() + 10000*hellaSliderLocation;
   }
   
   @Override
@@ -40,6 +49,8 @@ public class ArduinoEvent implements ArduinoObject {
       if (whichSensor.location.y >= 0) {
         retVal += ", " + whichSensor.location.y;
       }
+    } else if (hellaSliderLocation >= 0) {
+      retVal += " slider " + hellaSliderLocation;
     }
 
     return retVal;
@@ -54,6 +65,6 @@ public class ArduinoEvent implements ArduinoObject {
   }
 
   public boolean contains(ArduinoSensor sensor) {
-    return sensor.equals(whichSensor);
+    return !isHellaSlider && sensor.equals(whichSensor);
   }
 }
