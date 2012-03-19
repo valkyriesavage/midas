@@ -26,7 +26,7 @@ public class ArduinoSensorButton extends JButton {
   Image customImage = null;
   boolean locationChecked = false;
   
-  private Point upperLeft;
+  public Point upperLeft;
   private int size;
   
   private int width;
