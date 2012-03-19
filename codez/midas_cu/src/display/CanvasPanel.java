@@ -18,6 +18,8 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
+import serialtalk.ArduinoSetup;
+
 import bridge.ArduinoToDisplayBridge;
 
 public class CanvasPanel extends JPanel implements MouseListener, MouseMotionListener {
@@ -61,9 +63,18 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
       // well, poop
       e.printStackTrace();
     }
-    
+
+    // this is a dumb place to have to do this counting nonsense, but we'll do it anyway!
+    int totalButtons = 0;
     for (SensorButtonGroup sbg : displayedButtons) {
       sbg.setIntersecting(false);
+      
+      // count the total number of buttons to see if we need grid sensing
+      if (!sbg.deleteMe && !(sbg.sensitivity == SetUp.HELLA_SLIDER)) {
+        totalButtons += sbg.sensitivity;
+      }
+      
+      // test for intersections to see if we need to color differently
       for (SensorButtonGroup intersecting : displayedButtons) {
         if (sbg == intersecting || (sbg.isIntersecting() && intersecting.isIntersecting())) {
           continue;
@@ -77,6 +88,9 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     }
     
     setUp.pathwaysGenerator.paint(g2);
+
+    // do we need grid sensing?
+    setUp.serialCommunication.isGridded = (totalButtons > ArduinoSetup.NUM_TERMINALS);
   }
   
   SensorButtonGroup determineIntersection(Point pointClicked) {

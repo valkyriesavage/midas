@@ -27,7 +27,7 @@ public class ArduinoTestWindow extends JFrame {
   
   public void setUpButtonsPerInput() {
     setLayout(new GridLayout(0,2));
-    for (int i=0; i < 12; i++) {
+    for (int i=0; i < ArduinoSetup.NUM_TERMINALS; i++) {
       StorageJButton pinTouch = new StorageJButton("touch "+i);
       pinTouch.sensorData = ArduinoSetup.sensors[i];
       pinTouch.addActionListener(new ActionListener() {
