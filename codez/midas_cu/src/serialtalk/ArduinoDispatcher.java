@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.JTextField;
 
 import bridge.ArduinoToDisplayBridge;
+import bridge.ArduinoToSliderBridge;
 import display.ArduinoSensorButton;
 
 
@@ -46,6 +47,14 @@ public class ArduinoDispatcher {
       }
     }
   }
+  
+  public void handleFakeEvent(int hellaSliderValue) {
+    for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+      if (bridge.isHellaSlider) {
+        ((ArduinoToSliderBridge)bridge).execute(hellaSliderValue);
+      }
+    }
+  }
 
   public void handleEvent(ArduinoEvent e) {
     if (isPaused) {
@@ -66,27 +75,32 @@ public class ArduinoDispatcher {
     }
     recentEvents = recentEvents.subList(newestReasonableEvent, recentEvents.size());
     lastEvent = e;
-    
-    recentEvents.add(e);
-
-    ArduinoSensor sensor = e.whichSensor;
-    
-    setWhatISee();
-    
+       
     if(e.touchDirection == TouchDirection.RELEASE) {
       //ignore these for right now...
       return;
     }
+
+    recentEvents.add(e);
+    setWhatISee();
     
-    for (ArduinoToDisplayBridge bridge : bridgeObjects) {
-      if (bridge.contains(sensor)) {
-        bridge.execute(sensor);
+    if (e.isHellaSlider) {
+      for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+        if (bridge.isHellaSlider) {
+          ((ArduinoToSliderBridge)bridge).execute(e.hellaSliderLocation);
+        }
+      }
+    } else {
+      for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+        if (bridge.contains(e.whichSensor)) {
+          bridge.execute(e.whichSensor);
+        }
       }
     }
   }
   
   void setWhatISee() {
-    whatISee.setText((recentEvents.toString()).substring(1, recentEvents.toString().length()-1));
+    whatISee.setText((recentEvents.toString()).substring("[".length(), recentEvents.toString().length()-"]".length()));
   }
   
   void clearRecentEvents() {

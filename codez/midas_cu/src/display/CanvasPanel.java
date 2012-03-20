@@ -66,6 +66,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 
     // this is a dumb place to have to do this counting nonsense, but we'll do it anyway!
     int totalButtons = 0;
+        
     for (SensorButtonGroup sbg : displayedButtons) {
       sbg.setIntersecting(false);
       
@@ -84,6 +85,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
           intersecting.setIntersecting(true);
         }
       }
+      
       sbg.paint(g2);
     }
 

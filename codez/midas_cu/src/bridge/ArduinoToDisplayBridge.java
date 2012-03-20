@@ -24,6 +24,7 @@ public abstract class ArduinoToDisplayBridge {
   public SensorButtonGroup interfacePiece;
   
   public boolean isCustom = false;
+  public boolean isHellaSlider = false;
   
   private static ArduinoDispatcher dispatcher;
   
@@ -43,6 +44,7 @@ public abstract class ArduinoToDisplayBridge {
   
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
     this.interfacePiece = interfacePiece;
+    isHellaSlider = (interfacePiece.sensitivity == SetUp.HELLA_SLIDER);
   }
   
   public void paint(Graphics2D g) {
