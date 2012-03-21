@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +38,11 @@ public class SVGPathwaysGenerator {
   }
   private void drawPath(List<Point> path, Graphics2D g) {
   	for(Point p : path) {
-  		g.fillRect(p.x, p.y, 1, 1); //todo: optimize
+  		g.fillRect(p.x, p.y, 1, 1);
   	}
   }
   
   public void generatePathways(List<SensorButtonGroup> buttonsToConnect) {
-//	  System.out.println("Pathways generating: "+buttonsToConnect);
 	  /* 
 	   * Recreate the connectors each time -
 	   * 	Get all of the groups' button's positions, and delegate to appropriate method
@@ -54,21 +54,24 @@ public class SVGPathwaysGenerator {
 	  for(SensorButtonGroup s : buttonsToConnect)
 		  btns.addAll(s.triggerButtons);
 	  
-	  btns = (new GreedyMinSorter()).sort(btns);
+	  List<Point> ports = new ArrayList(btns.size()); for(int x = 0; x < btns.size(); x++) ports.add(new Point(1, 5*x));
+
+//	  (new GreedyMinSorter()).sort(buttons, ports);
+	  (new YSorter()).sort(btns, ports);
 	  
 	  if(btns.size() <= 12)
-		  paths.addAll(generateIndividual(btns));
+		  paths.addAll(generateIndividual(btns, ports));
 	  else 
-		  paths.addAll(generateGrid(btns));
-	  
-//	  System.out.println("Paths is now "+paths);
+		  paths.addAll(generateGrid(btns, ports));
   }
   
-  private List<List<Point>> generateGrid(List<ArduinoSensorButton> buttons) {
+  private List<List<Point>> generateGrid(List<ArduinoSensorButton> buttons, List<Point> ports) {
 	  throw new UnsupportedOperationException("Not implemented yet!");
   }
   
-  private List<List<Point>> generateIndividual(List<ArduinoSensorButton> buttons) {
+  private List<List<Point>> generateIndividual(List<ArduinoSensorButton> buttons, List<Point> ports) {
+	  
+	  
 	  List<List<Point>> paths = new ArrayList();
 	  
 	  Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
@@ -78,30 +81,30 @@ public class SVGPathwaysGenerator {
 		  }
 //		  g.falsify(g.removeOutOfBounds(outlineFor(b)));
 	  }
-	  
-	  int idx = 0;
+
+	  Iterator<Point> portIterator = ports.iterator();
 	  for(ArduinoSensorButton b : buttons) { //generate pathways for each button
+		  Point port = portIterator.next();
 		  List<Point> nearButton = new LinkedList();
 		  for(Point p : outlineFor(b)) {
 			  nearButton.addAll(g.removeOutOfBounds(adj(p)));
 		  }
 		  
 //		  List<Point> nearButton = outlineFor(b);
-		  List<Point> path = g.findPath(nearButton, new Point(5, idx*5));
+		  List<Point> path = g.findPath(nearButton, port);
 		  
 		  if(path != null) { //yay we found one
 			  paths.add(path);
 			  g.falsifyPath(path);
 		  }
-		  
-		  idx++;
 	  }
+	  assert(!portIterator.hasNext());
 	  
 	  return paths;
   }
   
   //taken from http://stackoverflow.com/questions/8144156/using-pathiterator-to-return-all-line-segments-that-constrain-an-area
-  public static List<Line2D.Double> toSegments(FlatteningPathIterator pi) {    
+  private static List<Line2D.Double> toSegments(FlatteningPathIterator pi) {    
 	  ArrayList<double[]> areaPoints = new ArrayList<double[]>();
 	  ArrayList<Line2D.Double> areaSegments = new ArrayList<Line2D.Double>();
 	  double[] coords = new double[6];
@@ -343,98 +346,124 @@ public class SVGPathwaysGenerator {
 
 
 interface Sorter {
-	List<ArduinoSensorButton> sort(List<ArduinoSensorButton> in);
+	void sort(List<ArduinoSensorButton> in, List<Point> ports);
 }
 
 class NoSorter implements Sorter {
 	@Override
-	public List<ArduinoSensorButton> sort(List<ArduinoSensorButton> in) {
-		// TODO Auto-generated method stub
-		return in;
+	public void sort(List<ArduinoSensorButton> in, List<Point> ports) {
+		//do nothing
+	}
+}
+
+
+class YSorter implements Sorter {
+	@Override
+	public void sort(List<ArduinoSensorButton> in, List<Point> ports) {
+		Collections.sort(in, new Comparator<ArduinoSensorButton>() {
+
+			@Override
+			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
+				return (new Integer(o1.upperLeft.y)).compareTo(new Integer(o2.upperLeft.y));
+			}
+			
+		});
 	}
 }
 
 class GreedyMinSorter implements Sorter {
 
-	  protected int portDist(ArduinoSensorButton b, Point p1) {
-		  Point bp = b.upperLeft;
-		  return Math.abs(p1.x - bp.x) + Math.abs(p1.y - bp.y);
-	  }
-	  protected Point closestPort(final ArduinoSensorButton b, Set<Point> P) {
-		  Point min = Collections.min(P, new Comparator<Point>() {
-			  public int compare(Point p1, Point p2) {
-				  return (new Integer(portDist(b, p1))).compareTo(
-						  new Integer(portDist(b, p2)));
-			  }
-		  });
-		  
-		  return min;
-	  }
-	  
-	  /**
-	   * Sort the input buttons.
-	   * @param in
-	   * @return
-	   */
-	  public List<ArduinoSensorButton> sort(List<ArduinoSensorButton> in) {
+	protected int dist(Point p1, Point bp) {
+		return Math.abs(p1.x - bp.x) + Math.abs(p1.y - bp.y);
+	}
 
-//		  Collections.sort(in, new Comparator<ArduinoSensorButton>() {
-	//
-//			@Override
-//			public int compare(ArduinoSensorButton arg0, ArduinoSensorButton arg1) {
-//				return (new Integer(arg0.upperLeft.x + arg0.upperLeft.y)).compareTo(new Integer(arg1.upperLeft.x + arg1.upperLeft.y));
-//			}
-	//
-//		  });
-//		  return in;
+	protected int portDist(ArduinoSensorButton b, Point p1) {
+		return dist(p1, b.upperLeft);
+	}
 
-		  
-		  //--new method--
-		  //For a given set of buttons S and a set of ports P, find the one button B that has a minimum distance to a port T.
-		  //Give that button its choice, and recursively ask.
-		  ArduinoSensorButton[] sorted = new ArduinoSensorButton[in.size()];
-		  
-		  
-		  final Set<ArduinoSensorButton> S = new HashSet(); S.addAll(in);
-		  final Set<Point> P = new HashSet(); for(int x = 0; x < in.size(); x++) { P.add(new Point(5, x*5)); }
-		  
-		  while(!S.isEmpty()) {
-			  //Find button B that minimizes distance to any port
-			  ArduinoSensorButton closest = Collections.min(S, new Comparator<ArduinoSensorButton>() {
+	protected Point closestPort(final ArduinoSensorButton b, Set<Point> P) {
+		Point min = Collections.min(P, new Comparator<Point>() {
+			public int compare(Point p1, Point p2) {
+				return (new Integer(portDist(b, p1))).compareTo(new Integer(
+						portDist(b, p2)));
+			}
+		});
+
+		return min;
+	}
+
+	/**
+	 * Sort the input buttons.
+	 * 
+	 * @param in
+	 * @return
+	 */
+	public void sort(List<ArduinoSensorButton> in, List<Point> ports) {
+		// For a given set of buttons S and a set of ports P, find the one
+		// button B that has a minimum distance to a port T.
+		// Give that button its choice, and recursively ask.
+		List<ArduinoSensorButton> sortedButtons = new ArrayList();
+		List<Point> sortedPorts = new ArrayList();
+
+		//S is the set of buttons
+		final Set<ArduinoSensorButton> S = new HashSet(); S.addAll(in);
 		
-				@Override
-				public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
-					// TODO Auto-generated method stub
-					int dist1 = portDist(o1, closestPort(o1, P));
-					int dist2 = portDist(o2, closestPort(o2, P));
-					return (new Integer(dist1)).compareTo(dist2);
-				}
-				  
-			  });
-			  //find the port it's closest to
-			  Point closestPort = closestPort(closest, P);
-			  int index = closestPort.y / 5;
-			  sorted[index] = closest;
-			  
-			  S.remove(closest);
-			  P.remove(closestPort);
-		  }
-		  
-		  return Arrays.asList(sorted);
-		  
-		  //Create all permutations of the input
-		  //	for each permutation, calculate the sum of (manhattan distances from each button to its corresponding port)
-		  //	find the permutation that minimizes that sum
-		  //	choose that
-		  
-	  }
+		//P is the set of ports
+		final Set<Point> P = new HashSet(); P.addAll(ports);
+
+		while (!S.isEmpty()) {
+			// Find the button that minimizes distance to any port
+			ArduinoSensorButton closest = Collections.min(S,
+					new Comparator<ArduinoSensorButton>() {
+
+						@Override
+						public int compare(ArduinoSensorButton o1,
+								ArduinoSensorButton o2) {
+							// TODO Auto-generated method stub
+							int dist1 = portDist(o1, closestPort(o1, P));
+							int dist2 = portDist(o2, closestPort(o2, P));
+							return (new Integer(dist1)).compareTo(dist2);
+						}
+
+					});
+			// find the port it's closest to
+			Point closestPort = closestPort(closest, P);
+			
+			
+//			int index = closestPort.y / 5;
+//			sortedButtons[index] = closest;
+//			sortedPorts[index] = closestPort;
+			
+			sortedButtons.add(closest);
+			sortedPorts.add(closestPort);
+
+			S.remove(closest);
+			P.remove(closestPort);
+		}
+		
+		in.clear(); ports.clear();
+		in.addAll(sortedButtons);
+		ports.addAll(sortedPorts);
+//		in.addAll(Arrays.asList(sortedButtons));
+//		ports.addAll(Arrays.asList(sortedPorts));
+	}
 }
 
-class ThickGreedyMinSorter extends GreedyMinSorter {
+class OutlinedGreedyMinSorter extends GreedyMinSorter {
 
 	@Override
-	protected int portDist(ArduinoSensorButton b, Point p1) {
-		return 0; //todo: finish
+	protected int portDist(ArduinoSensorButton b, final Point p1) {
+		//outline the button, find the closest distance from anywhere on the outline to the given point
+		List<Point> outline = SVGPathwaysGenerator.outlineFor(b);
+		Point min = Collections.min(outline, new Comparator<Point>() {
+
+			@Override
+			public int compare(Point arg0, Point arg1) {
+				return (new Integer(dist(arg0, p1))).compareTo(dist(arg1, p1));
+			}
+			
+		});
+		return dist(min, p1);
 	}
 	
 }
