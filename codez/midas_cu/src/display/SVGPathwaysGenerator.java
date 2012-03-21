@@ -9,15 +9,19 @@ import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SVGPathwaysGenerator {
   
   private List<List<Point>> paths = new ArrayList();
-  public static final int SPACING_WIDTH = 3;
 
   //todo: create a path class that's more efficient than storing ALL of the points
   
@@ -27,14 +31,88 @@ public class SVGPathwaysGenerator {
 	  g.setColor(Color.red);
 //	  System.out.println("Painting "+paths.size()+" paths!");
     for (List<Point> path : paths) {
-    	for(Point p : path) {
-    		g.drawRect(p.x, p.y, 1, 1); //todo: optimize
-    	}
 //      connector.paint(g);
+    	drawPath(path, g);
     }
-    g.setPaintMode();
+  }
+  private void drawPath(List<Point> path, Graphics2D g) {
+  	for(Point p : path) {
+  		g.fillRect(p.x, p.y, 1, 1); //todo: optimize
+  	}
   }
   
+  private int portDist(ArduinoSensorButton b, Point p1) {
+	  Point bp = b.upperLeft;
+	  return Math.abs(p1.x - bp.x) + Math.abs(p1.y - bp.y);
+  }
+  private Point closestPort(final ArduinoSensorButton b, Set<Point> P) {
+	  Point min = Collections.min(P, new Comparator<Point>() {
+		  public int compare(Point p1, Point p2) {
+			  return (new Integer(portDist(b, p1))).compareTo(
+					  new Integer(portDist(b, p2)));
+		  }
+	  });
+	  
+	  return min;
+  }
+  
+  /**
+   * Sort the input buttons.
+   * @param in
+   * @return
+   */
+  private List<ArduinoSensorButton> sort(List<ArduinoSensorButton> in) {
+
+//	  Collections.sort(in, new Comparator<ArduinoSensorButton>() {
+//
+//		@Override
+//		public int compare(ArduinoSensorButton arg0, ArduinoSensorButton arg1) {
+//			return (new Integer(arg0.upperLeft.x + arg0.upperLeft.y)).compareTo(new Integer(arg1.upperLeft.x + arg1.upperLeft.y));
+//		}
+//
+//	  });
+//	  return in;
+
+	  
+	  //--new method--
+	  //For a given set of buttons S and a set of ports P, find the one button B that has a minimum distance to a port T.
+	  //Give that button its choice, and recursively ask.
+	  ArduinoSensorButton[] sorted = new ArduinoSensorButton[in.size()];
+	  
+	  
+	  final Set<ArduinoSensorButton> S = new HashSet(); S.addAll(in);
+	  final Set<Point> P = new HashSet(); for(int x = 0; x < in.size(); x++) { P.add(new Point(5, x*5)); }
+	  
+	  while(!S.isEmpty()) {
+		  //Find button B that minimizes distance to any port
+		  ArduinoSensorButton closest = Collections.min(S, new Comparator<ArduinoSensorButton>() {
+	
+			@Override
+			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
+				// TODO Auto-generated method stub
+				int dist1 = portDist(o1, closestPort(o1, P));
+				int dist2 = portDist(o2, closestPort(o2, P));
+				return (new Integer(dist1)).compareTo(dist2);
+			}
+			  
+		  });
+		  //find the port it's closest to
+		  Point closestPort = closestPort(closest, P);
+		  int index = closestPort.y / 5;
+		  sorted[index] = closest;
+		  
+		  S.remove(closest);
+		  P.remove(closestPort);
+	  }
+	  
+	  return Arrays.asList(sorted);
+	  
+	  //Create all permutations of the input
+	  //	for each permutation, calculate the sum of (manhattan distances from each button to its corresponding port)
+	  //	find the permutation that minimizes that sum
+	  //	choose that
+	  
+  }
   public void generatePathways(List<SensorButtonGroup> buttonsToConnect) {
 //	  System.out.println("Pathways generating: "+buttonsToConnect);
 	  /* 
@@ -47,6 +125,8 @@ public class SVGPathwaysGenerator {
 	  List<ArduinoSensorButton> btns = new ArrayList();
 	  for(SensorButtonGroup s : buttonsToConnect)
 		  btns.addAll(s.triggerButtons);
+	  
+	  btns = sort(btns);
 	  
 	  if(btns.size() <= 12)
 		  paths.addAll(generateIndividual(btns));
@@ -105,32 +185,10 @@ public class SVGPathwaysGenerator {
 	      }
 	  }
 
-	  // areaSegments now contains all the line segments
 	  return areaSegments;
   }
-  
   private List<Point> outlineFor(ArduinoSensorButton b) {
-//	  Rectangle r = b.getShape().getBounds();
 	  List<Point> outline = new LinkedList<Point>();
-	  
-//	  int x = r.x;
-//	  int y = r.y;
-//	  
-//	  for( ; x < r.x + r.width; x++) { //from top-left corner to top-right
-//		  outline.add(new Point(x, y));
-//	  }
-//	  
-//	  for( ; y < r.y + r.height; y++) { //from top-right corner to bottom-right
-//		  outline.add(new Point(x, y));
-//	  }
-//
-//	  for(; x > r.x ; x--) { //from top-left corner to top-right
-//		  outline.add(new Point(x, y));
-//	  }
-//
-//	  for(; y > r.y ; y--) { //from top-left corner to top-right
-//		  outline.add(new Point(x, y));
-//	  }
 	  
 	  FlatteningPathIterator p = new FlatteningPathIterator(b.getShape().getPathIterator(null), 1);
 	  List<Line2D.Double> segments = toSegments(p);
@@ -191,20 +249,20 @@ public class SVGPathwaysGenerator {
 	  
 	  Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 	  for(ArduinoSensorButton b : buttons) {
-//		  for(Point p : outlineFor(b)) {
-//			  g.falsify(g.adjDiags(p));
-//		  }
-		  g.falsify(g.removeOutOfBounds(outlineFor(b)));
+		  for(Point p : outlineFor(b)) {
+			  g.falsify(g.adjDiags(p));
+		  }
+//		  g.falsify(g.removeOutOfBounds(outlineFor(b)));
 	  }
 	  
 	  int idx = 0;
 	  for(ArduinoSensorButton b : buttons) { //generate pathways for each button
-//		  List<Point> nearButton = new LinkedList();
-//		  for(Point p : outlineFor(b)) {
-//			  nearButton.addAll(g.adjDiags(p));
-//		  }
+		  List<Point> nearButton = new LinkedList();
+		  for(Point p : outlineFor(b)) {
+			  nearButton.addAll(g.adj(p));
+		  }
 		  
-		  List<Point> nearButton = outlineFor(b);
+//		  List<Point> nearButton = outlineFor(b);
 		  List<Point> path = g.findPath(nearButton, new Point(5, idx*5));
 		  
 		  if(path != null) { //yay we found one
@@ -334,8 +392,8 @@ public class SVGPathwaysGenerator {
 	   */
 	  private List<Point> adjDiags(Point p) {
 		  List<Point> list = new LinkedList();
-		  for(int x = p.x-SPACING_WIDTH; x <= p.x+SPACING_WIDTH; x++) {
-			  for(int y = p.y-SPACING_WIDTH; y <= p.y+SPACING_WIDTH; y++) {
+		  for(int x = p.x-1; x <= p.x+1; x++) {
+			  for(int y = p.y-1; y <= p.y+1; y++) {
 				  list.add(new Point(x, y));
 			  }
 		  }
