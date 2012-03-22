@@ -34,6 +34,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import pathway.SVGPathwaysGenerator;
+
 import serialtalk.SerialCommunication;
 import bridge.ArduinoToButtonBridge;
 import bridge.ArduinoToDisplayBridge;
