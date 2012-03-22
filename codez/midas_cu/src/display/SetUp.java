@@ -200,6 +200,7 @@ public class SetUp extends JFrame {
       public void actionPerformed(ActionEvent event) {
         cleanUpDeletions();
         if (displayedButtons.size() > 0) {
+        	generatePathways();
           // code related to desktop inspired by johnbokma.com
           if (!Desktop.isDesktopSupported()) {
             System.err.println("Can't get browser opener");
@@ -244,7 +245,7 @@ public class SetUp extends JFrame {
     for (ArduinoToDisplayBridge deleteable : bridgesToDelete) {
       bridgeObjects.remove(deleteable);
     }
-    generatePathways();
+//    generatePathways();
   }
 
   public void generatePathways() {

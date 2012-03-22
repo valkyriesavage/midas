@@ -155,7 +155,7 @@ public class SVGPathwaysGenerator {
 		}
 		
 
-	    if(PRINT_DEBUG) System.out.println("\tSetting up simplification...");
+	    if(PRINT_DEBUG) System.out.print("\tSetting up simplification... ");
 	  
 		Set<Point> allPointsSet = new HashSet();
 		for(List<Point> path : paths) for(Point p : path) allPointsSet.add(p);
@@ -165,17 +165,24 @@ public class SVGPathwaysGenerator {
 		Set<Line> lineSet = new HashSet();
 
 		
+		int ps = allPointsSet.size();
+		int i = 0;
 		for(Point p : allPointsSet) {
+			i++;
 			tryAdd(lineSet, new Line(p, 					  	new Point(p.x+1, p.y)));
 			tryAdd(lineSet, new Line(new Point(p.x+1, p.y), 	new Point(p.x+1, p.y+1)));
 			tryAdd(lineSet, new Line(new Point(p.x+1, p.y+1),   new Point(p.x, p.y+1)));
 			tryAdd(lineSet, new Line(new Point(p.x, p.y+1),		p));
+			if(i % (ps / 10) == 0) {
+				if(PRINT_DEBUG) System.out.print((100*i/ps)+"%... ");
+			}
 		}
+		if(PRINT_DEBUG) System.out.println("Done!");
 		
 		combine(lineSet);
 		
 		List<List<Line>> outlines = new LinkedList();
-		int i = 0;
+		i = 0;
 		for(Point p : ports) {
 			i++;
 			if(PRINT_DEBUG) System.out.println("\tSimplifying path "+i+" of "+ports.size());
@@ -281,8 +288,6 @@ public class SVGPathwaysGenerator {
   }
   
   private List<List<Point>> generateIndividual(List<ArduinoSensorButton> buttons, List<Point> ports) {
-	  
-	  
 	  List<List<Point>> paths = new ArrayList();
 	  
 	  Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
