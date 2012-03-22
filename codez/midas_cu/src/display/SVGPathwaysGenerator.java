@@ -1,5 +1,6 @@
 package display;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -8,6 +9,10 @@ import java.awt.Shape;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,22 +23,178 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 
-public class SVGPathwaysGenerator {
-  
-  private List<List<Point>> paths = new ArrayList();
 
-  //todo: create a path class that's more efficient than storing ALL of the points
+import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.batik.dom.GenericDOMImplementation;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.DOMImplementation;
+
+public class SVGPathwaysGenerator {
+	
+	public static boolean PRINT_DEBUG = true;
+	
+	private int sgn(int val) {
+		return (int)Math.signum(val);
+	}
+
+	private class Line {
+		Point start, end;
+
+		Line(Point start, Point end) {
+			this.start = start;
+			this.end = end;
+		}
+		
+		public int direction() {
+			return sgn(end.x - start.x) * 3 + sgn(end.y - start.y);
+		}
+		
+		public boolean isContinuation(Line l) {
+			return (direction() == l.direction()) && end.equals(l.start); 
+		}
+	}
+	
+	private void tryAdd(Set<Line> lines, Line l) {
+		for(Line temp : lines) {
+			if(temp.start.equals(l.end) && temp.end.equals(l.start)) { //removal: the two are opposites
+				lines.remove(temp);
+				return;
+			}
+//			if(sgn(temp.end.x - temp.start.x) == sgn(l.end.x - l.start.x) &&
+//			   sgn(temp.end.y - temp.start.y) == sgn(l.end.y - l.start.y)) { //make sure the two lines are in the same direction before trying extension
+//				if(temp.end.equals(l.start)) { //extension from temp's end
+//					lines.remove(temp);
+//					lines.add(new Line(temp.start, l.end));
+//					return;
+//				}
+//				else if(l.end.equals(temp.start)) { //extension from l's end
+//					lines.remove(temp);
+//					lines.add(new Line(l.start, temp.end));
+//					return;
+//				}
+//			}
+		}
+		lines.add(l);
+	}
+	
+	private void combine(Set<Line> lines) {
+		boolean repeat = true;
+		boolean found;
+		while(repeat) {
+			found = false;
+			
+			for(Line l : lines) {
+				for(Line temp : lines) {
+					if(l.isContinuation(temp)) { //make sure the two lines are in the same direction before trying extension
+						//temp is the continuation of l.
+						lines.remove(temp);
+						lines.remove(l);
+						lines.add(new Line(l.start, temp.end));
+						found = true;
+						break;
+					}
+				}
+				if(found) break;
+			}
+			
+			repeat = found;
+		}
+	}
+	
+	private List<Line> makeSinglePath(Set<Line> lineSet, Point startPoint) {
+
+		ArrayList<Line> lineList = new ArrayList();
+		//a) find the singular line whose start has the smallest x and y coordinate; let that line be the "current"
+		//	find the line connected to "current"; add current to list, set newly found line to current
+		//	keep going until you've found a line that already exists in the list. Your list is now done.
+
+//		Line current = Collections.min(lineSet, new Comparator<Line>() {
+//			@Override
+//			public int compare(Line arg0, Line arg1) {
+//				return (new Integer(arg0.start.x + arg0.start.y)).compareTo(arg1.start.x + arg1.start.y);
+//			}
+//		});
+		Line current = null;
+		for(Line l : lineSet) if(l.start.equals(startPoint)) { current = l; break; }
+		if(current == null) throw new RuntimeException("No line starts at "+startPoint+" in the lineSet!");
+		
+		
+		lineSet.remove(current);
+		lineList.add(current);
+		while(!current.end.equals(startPoint)) {
+			boolean found = false;
+			for(Line l : lineSet) {
+				if(l.start.equals(current.end)) {
+					current = l;
+					lineSet.remove(current);
+					lineList.add(current);
+					found = true;
+					break;
+				}
+			}
+			if(!found) {
+				throw new RuntimeException("Couldn't find a connector to "+current+"!");
+			}
+		}
+		
+		return lineList;
+	}
+	/**
+	 * Each List of Lines in the returned list will have a fully closed path.
+	 * @param paths
+	 * @param ports
+	 * @return
+	 */
+	private List<List<Line>> simplify(List<List<Point>> paths, List<Point> ports) {
+		if(paths.size() == 0) {
+			return new LinkedList();
+		}
+		
+
+	    if(PRINT_DEBUG) System.out.println("\tSetting up simplification...");
+	  
+		Set<Point> allPointsSet = new HashSet();
+		for(List<Point> path : paths) for(Point p : path) allPointsSet.add(p);
+		
+		//For each point, do a clockwise path around it, creating four "line" objects. Do special 
+		//insertion rules for each line you try to insert.
+		Set<Line> lineSet = new HashSet();
+
+		
+		for(Point p : allPointsSet) {
+			tryAdd(lineSet, new Line(p, 					  	new Point(p.x+1, p.y)));
+			tryAdd(lineSet, new Line(new Point(p.x+1, p.y), 	new Point(p.x+1, p.y+1)));
+			tryAdd(lineSet, new Line(new Point(p.x+1, p.y+1),   new Point(p.x, p.y+1)));
+			tryAdd(lineSet, new Line(new Point(p.x, p.y+1),		p));
+		}
+		
+		combine(lineSet);
+		
+		List<List<Line>> outlines = new LinkedList();
+		int i = 0;
+		for(Point p : ports) {
+			i++;
+			if(PRINT_DEBUG) System.out.println("\tSimplifying path "+i+" of "+ports.size());
+			outlines.add(makeSinglePath(lineSet, p));
+		}
+		return outlines;
+	}
+  
+  //private List<List<Point>> paths = new ArrayList();
+	private List<List<Line>> outlines = new ArrayList();
   
   public SVGPathwaysGenerator(List<SensorButtonGroup> displayedButtons) {}
   
   public void paint(Graphics2D g) {
-	  g.setColor(Color.red);
-//	  System.out.println("Painting "+paths.size()+" paths!");
-    for (List<Point> path : paths) {
-//      connector.paint(g);
-    	drawPath(path, g);
+    for (List<Line> list : outlines) {
+    	g.setColor(new Color((float)Math.random(), (float)Math.random(), (float)Math.random()));
+    	for(Line l : list) {
+	    	g.drawLine(l.start.x, l.start.y, l.end.x, l.end.y);
+    	}
     }
   }
   private void drawPath(List<Point> path, Graphics2D g) {
@@ -47,7 +208,7 @@ public class SVGPathwaysGenerator {
 	   * Recreate the connectors each time -
 	   * 	Get all of the groups' button's positions, and delegate to appropriate method
 	   */
-	  paths.clear();
+	  outlines.clear();
 	  
 	  
 	  List<ArduinoSensorButton> btns = new ArrayList();
@@ -59,10 +220,60 @@ public class SVGPathwaysGenerator {
 //	  (new GreedyMinSorter()).sort(buttons, ports);
 	  (new YSorter()).sort(btns, ports);
 	  
+	  List<List<Point>> allPaths = new ArrayList();
+	  
 	  if(btns.size() <= 12)
-		  paths.addAll(generateIndividual(btns, ports));
+		  allPaths.addAll(generateIndividual(btns, ports));
 	  else 
-		  paths.addAll(generateGrid(btns, ports));
+		  allPaths.addAll(generateGrid(btns, ports));
+	  
+	  if(PRINT_DEBUG) System.out.println("Paths generated! Simplifying paths...");
+	  
+	  for(ArduinoSensorButton b : btns) {
+		  allPaths.add(outlineFor(b));
+	  }
+	  
+	  outlines.addAll(simplify(allPaths, ports));
+
+	  File svg = new File("outline.svg").getAbsoluteFile();
+	  if(PRINT_DEBUG) System.out.println("Paths simplified! Writing SVG file to " + svg);
+
+	  
+	  //taken from http://xmlgraphics.apache.org/batik/using/svg-generator.html
+	  
+      // Get a DOMImplementation.
+      DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+
+      // Create an instance of org.w3c.dom.Document.
+      String svgNS = "http://www.w3.org/2000/svg";
+      Document document = domImpl.createDocument(svgNS, "svg", null);
+
+      // Create an instance of the SVG Generator.
+      SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+      svgGenerator.setStroke(new BasicStroke(.2f));
+
+      // Ask the test to render into the SVG Graphics2D implementation.
+      paint(svgGenerator);
+
+      // Finally, stream out SVG to the standard output using
+      // UTF-8 encoding.
+      boolean useCSS = true; // we want to use CSS style attributes
+      
+
+	  
+	try {
+	      Writer out = new FileWriter(svg);
+	      svgGenerator.stream(out, useCSS);
+	      out.flush();
+	      out.close();
+	      
+	      if(PRINT_DEBUG) System.out.println("SVG successfully written!");
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		System.out.println("An error " + e + " occured while trying to write the SVG file to disk.");
+	}
+      
   }
   
   private List<List<Point>> generateGrid(List<ArduinoSensorButton> buttons, List<Point> ports) {
@@ -83,7 +294,10 @@ public class SVGPathwaysGenerator {
 	  }
 
 	  Iterator<Point> portIterator = ports.iterator();
+	  int i = 0;
 	  for(ArduinoSensorButton b : buttons) { //generate pathways for each button
+		  i++;
+		  if(PRINT_DEBUG) System.out.println("\tGenerating path "+i+" of "+buttons.size());
 		  Point port = portIterator.next();
 		  List<Point> nearButton = new LinkedList();
 		  for(Point p : outlineFor(b)) {
