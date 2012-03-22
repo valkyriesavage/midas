@@ -1,11 +1,8 @@
 package pathway;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
@@ -14,65 +11,76 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
+import java.util.Set;
 
-import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.dom.GenericDOMImplementation;
-
-import org.w3c.dom.Document;
+import org.apache.batik.svggen.SVGGraphics2D;
 import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
 import display.SetUp;
 
 public class SVGPathwaysGenerator {
-
+	
 	public static boolean PRINT_DEBUG = true;
+	
+	public static final int LINE_EXTENT = 3;
+	
+	
+	
+	public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
+	public static final int INFLUENCE_WIDTH = LINE_WIDTH + LINE_EXTENT;
 
-	private List<List<Line>> outlines = new ArrayList();
-
-	public SVGPathwaysGenerator() {
+	private void line(Graphics2D g, int x1, int y1, int x2, int y2) {
+		int width = x2 - x1;
+		int height = y2 - y1;
+		g.drawRect(x1-LINE_EXTENT, y1-LINE_EXTENT, width + LINE_WIDTH, height + LINE_WIDTH);
 	}
-
-	public void paint(Graphics2D g) {
-		for (List<Line> list : outlines) {
-			g.setColor(new Color((float) Math.random(), (float) Math.random(),
-					(float) Math.random()));
-			for (Line l : list) {
-				g.drawLine(l.start.x, l.start.y, l.end.x, l.end.y);
+	
+	private static List<Point> cellsOfInfluence(Point p) {
+		List<Point> list = new LinkedList();
+		for (int x = p.x - INFLUENCE_WIDTH; x <= p.x + INFLUENCE_WIDTH; x++) {
+			for (int y = p.y - INFLUENCE_WIDTH; y <= p.y + INFLUENCE_WIDTH; y++) {
+				list.add(new Point(x, y));
 			}
 		}
+		list.remove(p);
+	
+		return list;
 	}
-
-	private void drawPath(List<Point> path, Graphics2D g) {
-		for (Point p : path) {
-			g.fillRect(p.x, p.y, 1, 1);
+	private static Iterable<Point> cellsOfInfluence(ArduinoSensorButton b) {
+		return cellsOfInfluence(outlineFor(b));
+	}
+	private static Iterable<Point> cellsOfInfluence(List<Point> path) {
+		Set<Point> flattened = new HashSet();
+		for(Point p : path) {
+			flattened.addAll(cellsOfInfluence(p));
 		}
+		return flattened;
 	}
 
 	public void generatePathways(List<SensorButtonGroup> buttonsToConnect) {
-		/*
-		 * Recreate the connectors each time - Get all of the groups' button's
-		 * positions, and delegate to appropriate method
-		 */
-		outlines.clear();
-
-		List<ArduinoSensorButton> btns = new ArrayList();
+		//We create the SVG file by simply using SVGGraphics2D, saving to a file, and using the following command:
+		//"inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
+		
+		
+		List<ArduinoSensorButton> allButtons = new ArrayList();
 		for (SensorButtonGroup s : buttonsToConnect)
-			btns.addAll(s.triggerButtons);
+			allButtons.addAll(s.triggerButtons);
 
-		List<Point> ports = new ArrayList(btns.size());
-		for (int x = 0; x < btns.size(); x++)
-			ports.add(new Point(1, 5 * x));
+		List<Point> allPorts = new ArrayList(allButtons.size());
+		for (int x = 0; x < allButtons.size(); x++)
+			allPorts.add(new Point(LINE_EXTENT, 2*LINE_WIDTH * x + LINE_EXTENT));
 
-		Collections.sort(btns, new Comparator<ArduinoSensorButton>() {
+		Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
 
 			@Override
 			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
@@ -84,58 +92,47 @@ public class SVGPathwaysGenerator {
 
 		List<List<Point>> allPaths = new ArrayList();
 
-		if (btns.size() <= 12)
-			allPaths.addAll(generateIndividual(btns, ports));
-		else
-			allPaths.addAll(generateGrid(btns, ports));
+//		if (btns.size() <= 12)
+			allPaths.addAll(generateIndividual(allButtons, allPorts));
+//		else
+//			allPaths.addAll(generateGrid(btns, ports));
 
 		if (PRINT_DEBUG)
 			System.out.println("Paths generated! Simplifying paths...");
 
-		for (ArduinoSensorButton b : btns) {
-			allPaths.add(outlineFor(b));
-		}
-
-		outlines.addAll((new Simplifier()).simplify(allPaths, ports));
-
-		writeSVG(new File("outline.svg").getAbsoluteFile());
+		writeSVG(new File("outline.svg").getAbsoluteFile(), allButtons, allPaths);
 	}
 
-	private List<List<Point>> generateGrid(List<ArduinoSensorButton> buttons,
-			List<Point> ports) {
-		throw new UnsupportedOperationException("Not implemented yet!");
-	}
-
-	private List<List<Point>> generateIndividual(List<ArduinoSensorButton> buttons, List<Point> ports) {
+	private List<List<Point>> generateIndividual(List<ArduinoSensorButton> allButtons, List<Point> allPorts) {
 		List<List<Point>> paths = new ArrayList();
 
 		Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
-		for (ArduinoSensorButton b : buttons) {
-			for (Point p : outlineFor(b)) {
-				g.falsify(g.removeOutOfBounds(adjDiags(p)));
-			}
+		//We take each button and set its cells of influence to “restricted to B”, where B is that button.
+		for (ArduinoSensorButton b : allButtons) {
+			g.restrict(cellsOfInfluence(b), b);
 		}
 
-		Iterator<Point> portIterator = ports.iterator();
+		Iterator<Point> portIterator = allPorts.iterator();
 		int i = 0;
-		for (ArduinoSensorButton b : buttons) { // generate pathways for each
+		for (ArduinoSensorButton button : allButtons) { // generate pathways for each
 												// button
 			i++;
-			if (PRINT_DEBUG)
-				System.out.println("\tGenerating path " + i + " of "
-						+ buttons.size());
+			if (PRINT_DEBUG) System.out.println("\tGenerating path " + i + " of " + allButtons.size());
 			Point port = portIterator.next();
-			List<Point> nearButton = new LinkedList();
-			for (Point p : outlineFor(b)) {
-				nearButton.addAll(g.removeOutOfBounds(adj(p)));
-			}
+			
+//			List<Point> nearButton = new LinkedList();
+//			for (Point p : outlineFor(b)) {
+//				nearButton.addAll(g.removeOutOfBounds(adj(p)));
+//			}
 
-			// List<Point> nearButton = outlineFor(b);
-			List<Point> path = g.findPath(nearButton, port);
+			List<Point> nearButton = outlineFor(button);
+			List<Point> path = g.findPath(nearButton, port, button);
 
 			if (path != null) { // yay we found one
 				paths.add(path);
-				g.falsifyPath(path);
+				g.close(cellsOfInfluence(path));
+			} else {
+				paths.add(null); //placeholder
 			}
 		}
 		assert (!portIterator.hasNext());
@@ -190,7 +187,6 @@ public class SVGPathwaysGenerator {
 
 		return areaSegments;
 	}
-
 	public static List<Point> outlineFor(ArduinoSensorButton b) {
 		List<Point> outline = new LinkedList<Point>();
 
@@ -253,44 +249,9 @@ public class SVGPathwaysGenerator {
 		return outline;
 	}
 
-	/**
-	 * Return the four adjacent neighbors of Point p.
-	 * 
-	 * @param p
-	 * @return
-	 */
-	public static List<Point> adj(Point p) {
-		// add all adjacent points
-		List<Point> list = new LinkedList();
-		list.add(new Point(p.x - 1, p.y));
-		list.add(new Point(p.x + 1, p.y));
-		list.add(new Point(p.x, p.y - 1));
-		list.add(new Point(p.x, p.y + 1));
 
-		return list;
-	}
-
-	/**
-	 * Return the eight adjacent neighbors of Point p.
-	 * 
-	 * @param p
-	 * @return
-	 */
-	public static List<Point> adjDiags(Point p) {
-		List<Point> list = new LinkedList();
-		for (int x = p.x - 1; x <= p.x + 1; x++) {
-			for (int y = p.y - 1; y <= p.y + 1; y++) {
-				list.add(new Point(x, y));
-			}
-		}
-		list.remove(p);
-
-		return list;
-	}
-
-	private void writeSVG(File svg) {
-		if (PRINT_DEBUG)
-			System.out.println("Paths simplified! Writing SVG file to " + svg);
+	private void writeSVG(File svg, List<ArduinoSensorButton> buttons, List<List<Point>> paths) {
+		if (PRINT_DEBUG) System.out.println("Paths simplified! Writing SVG file to " + svg);
 
 		// taken from
 		// http://xmlgraphics.apache.org/batik/using/svg-generator.html
@@ -304,11 +265,19 @@ public class SVGPathwaysGenerator {
 		Document document = domImpl.createDocument(svgNS, "svg", null);
 
 		// Create an instance of the SVG Generator.
-		SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-		svgGenerator.setStroke(new BasicStroke(.2f));
+		SVGGraphics2D g = new SVGGraphics2D(document);
 
-		// Ask the test to render into the SVG Graphics2D implementation.
-		paint(svgGenerator);
+		//draw all of the buttons
+		for(ArduinoSensorButton b : buttons) {
+			b.paint(g);
+		}
+
+		g.setStroke(new BasicStroke(.2f));
+		for(List<Point> path : paths) {
+			for(Point p : path) {
+				line(g, p.x, p.y, p.x, p.y);
+			}
+		}
 
 		// Finally, stream out SVG to the standard output using
 		// UTF-8 encoding.
@@ -316,17 +285,35 @@ public class SVGPathwaysGenerator {
 
 		try {
 			Writer out = new FileWriter(svg);
-			svgGenerator.stream(out, useCSS);
+			g.stream(out, useCSS);
 			out.flush();
 			out.close();
 
-			if (PRINT_DEBUG)
-				System.out.println("SVG successfully written!");
+			if (PRINT_DEBUG) System.out.println("SVG successfully written!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("An error " + e
-					+ " occured while trying to write the SVG file to disk.");
+			System.out.println("An error " + e + " occured while trying to write the SVG file to disk.");
 		}
 	}
 }
+
+//
+//
+///**
+// * Return the eight adjacent neighbors of Point p.
+// * 
+// * @param p
+// * @return
+// */
+//public static List<Point> adjDiags(Point p) {
+//	List<Point> list = new LinkedList();
+//	for (int x = p.x - 1; x <= p.x + 1; x++) {
+//		for (int y = p.y - 1; y <= p.y + 1; y++) {
+//			list.add(new Point(x, y));
+//		}
+//	}
+//	list.remove(p);
+//
+//	return list;
+//}

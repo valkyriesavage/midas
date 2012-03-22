@@ -113,7 +113,7 @@ public class SetUp extends JFrame {
   public void paintComponent(Graphics2D g) {
     super.paint(g);
     buttonCanvas.paint(g);
-    pathwaysGenerator.paint(g);
+//    pathwaysGenerator.paint(g);
   }
 
   private void setUpButtonCreator() {
