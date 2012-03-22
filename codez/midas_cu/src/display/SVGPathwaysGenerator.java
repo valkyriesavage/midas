@@ -177,9 +177,10 @@ public class SVGPathwaysGenerator {
 				if(PRINT_DEBUG) System.out.print((100*i/ps)+"%... ");
 			}
 		}
-		if(PRINT_DEBUG) System.out.println("Done!");
+		if(PRINT_DEBUG) System.out.print("Done!\n\tSimplifying combinations...");
 		
 		combine(lineSet);
+		if(PRINT_DEBUG) System.out.println("Done!");
 		
 		List<List<Line>> outlines = new LinkedList();
 		i = 0;
@@ -224,8 +225,14 @@ public class SVGPathwaysGenerator {
 	  
 	  List<Point> ports = new ArrayList(btns.size()); for(int x = 0; x < btns.size(); x++) ports.add(new Point(1, 5*x));
 
-//	  (new GreedyMinSorter()).sort(buttons, ports);
-	  (new YSorter()).sort(btns, ports);
+	  Collections.sort(btns, new Comparator<ArduinoSensorButton>() {
+
+			@Override
+			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
+				return (new Integer(o1.upperLeft.y)).compareTo(new Integer(o2.upperLeft.y));
+			}
+			
+		});
 	  
 	  List<List<Point>> allPaths = new ArrayList();
 	  
@@ -242,45 +249,7 @@ public class SVGPathwaysGenerator {
 	  
 	  outlines.addAll(simplify(allPaths, ports));
 
-	  File svg = new File("outline.svg").getAbsoluteFile();
-	  if(PRINT_DEBUG) System.out.println("Paths simplified! Writing SVG file to " + svg);
-
-	  
-	  //taken from http://xmlgraphics.apache.org/batik/using/svg-generator.html
-	  
-      // Get a DOMImplementation.
-      DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-
-      // Create an instance of org.w3c.dom.Document.
-      String svgNS = "http://www.w3.org/2000/svg";
-      Document document = domImpl.createDocument(svgNS, "svg", null);
-
-      // Create an instance of the SVG Generator.
-      SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-      svgGenerator.setStroke(new BasicStroke(.2f));
-
-      // Ask the test to render into the SVG Graphics2D implementation.
-      paint(svgGenerator);
-
-      // Finally, stream out SVG to the standard output using
-      // UTF-8 encoding.
-      boolean useCSS = true; // we want to use CSS style attributes
-      
-
-	  
-	try {
-	      Writer out = new FileWriter(svg);
-	      svgGenerator.stream(out, useCSS);
-	      out.flush();
-	      out.close();
-	      
-	      if(PRINT_DEBUG) System.out.println("SVG successfully written!");
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-		System.out.println("An error " + e + " occured while trying to write the SVG file to disk.");
-	}
-      
+	  writeSVG(new File("outline.svg").getAbsoluteFile());
   }
   
   private List<List<Point>> generateGrid(List<ArduinoSensorButton> buttons, List<Point> ports) {
@@ -561,128 +530,44 @@ public class SVGPathwaysGenerator {
 		  return list;
 	  }
   }
-}
+  
+  void writeSVG(File svg) {
+	  if(PRINT_DEBUG) System.out.println("Paths simplified! Writing SVG file to " + svg);
 
+	  
+	  //taken from http://xmlgraphics.apache.org/batik/using/svg-generator.html
+	  
+      // Get a DOMImplementation.
+      DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
 
-interface Sorter {
-	void sort(List<ArduinoSensorButton> in, List<Point> ports);
-}
+      // Create an instance of org.w3c.dom.Document.
+      String svgNS = "http://www.w3.org/2000/svg";
+      Document document = domImpl.createDocument(svgNS, "svg", null);
 
-class NoSorter implements Sorter {
-	@Override
-	public void sort(List<ArduinoSensorButton> in, List<Point> ports) {
-		//do nothing
+      // Create an instance of the SVG Generator.
+      SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+      svgGenerator.setStroke(new BasicStroke(.2f));
+
+      // Ask the test to render into the SVG Graphics2D implementation.
+      paint(svgGenerator);
+
+      // Finally, stream out SVG to the standard output using
+      // UTF-8 encoding.
+      boolean useCSS = true; // we want to use CSS style attributes
+      
+
+	  
+	try {
+	      Writer out = new FileWriter(svg);
+	      svgGenerator.stream(out, useCSS);
+	      out.flush();
+	      out.close();
+	      
+	      if(PRINT_DEBUG) System.out.println("SVG successfully written!");
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		System.out.println("An error " + e + " occured while trying to write the SVG file to disk.");
 	}
-}
-
-
-class YSorter implements Sorter {
-	@Override
-	public void sort(List<ArduinoSensorButton> in, List<Point> ports) {
-		Collections.sort(in, new Comparator<ArduinoSensorButton>() {
-
-			@Override
-			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
-				return (new Integer(o1.upperLeft.y)).compareTo(new Integer(o2.upperLeft.y));
-			}
-			
-		});
-	}
-}
-
-class GreedyMinSorter implements Sorter {
-
-	protected int dist(Point p1, Point bp) {
-		return Math.abs(p1.x - bp.x) + Math.abs(p1.y - bp.y);
-	}
-
-	protected int portDist(ArduinoSensorButton b, Point p1) {
-		return dist(p1, b.upperLeft);
-	}
-
-	protected Point closestPort(final ArduinoSensorButton b, Set<Point> P) {
-		Point min = Collections.min(P, new Comparator<Point>() {
-			public int compare(Point p1, Point p2) {
-				return (new Integer(portDist(b, p1))).compareTo(new Integer(
-						portDist(b, p2)));
-			}
-		});
-
-		return min;
-	}
-
-	/**
-	 * Sort the input buttons.
-	 * 
-	 * @param in
-	 * @return
-	 */
-	public void sort(List<ArduinoSensorButton> in, List<Point> ports) {
-		// For a given set of buttons S and a set of ports P, find the one
-		// button B that has a minimum distance to a port T.
-		// Give that button its choice, and recursively ask.
-		List<ArduinoSensorButton> sortedButtons = new ArrayList();
-		List<Point> sortedPorts = new ArrayList();
-
-		//S is the set of buttons
-		final Set<ArduinoSensorButton> S = new HashSet(); S.addAll(in);
-		
-		//P is the set of ports
-		final Set<Point> P = new HashSet(); P.addAll(ports);
-
-		while (!S.isEmpty()) {
-			// Find the button that minimizes distance to any port
-			ArduinoSensorButton closest = Collections.min(S,
-					new Comparator<ArduinoSensorButton>() {
-
-						@Override
-						public int compare(ArduinoSensorButton o1,
-								ArduinoSensorButton o2) {
-							// TODO Auto-generated method stub
-							int dist1 = portDist(o1, closestPort(o1, P));
-							int dist2 = portDist(o2, closestPort(o2, P));
-							return (new Integer(dist1)).compareTo(dist2);
-						}
-
-					});
-			// find the port it's closest to
-			Point closestPort = closestPort(closest, P);
-			
-			
-//			int index = closestPort.y / 5;
-//			sortedButtons[index] = closest;
-//			sortedPorts[index] = closestPort;
-			
-			sortedButtons.add(closest);
-			sortedPorts.add(closestPort);
-
-			S.remove(closest);
-			P.remove(closestPort);
-		}
-		
-		in.clear(); ports.clear();
-		in.addAll(sortedButtons);
-		ports.addAll(sortedPorts);
-//		in.addAll(Arrays.asList(sortedButtons));
-//		ports.addAll(Arrays.asList(sortedPorts));
-	}
-}
-
-class OutlinedGreedyMinSorter extends GreedyMinSorter {
-
-	@Override
-	protected int portDist(ArduinoSensorButton b, final Point p1) {
-		//outline the button, find the closest distance from anywhere on the outline to the given point
-		List<Point> outline = SVGPathwaysGenerator.outlineFor(b);
-		Point min = Collections.min(outline, new Comparator<Point>() {
-
-			@Override
-			public int compare(Point arg0, Point arg1) {
-				return (new Integer(dist(arg0, p1))).compareTo(dist(arg1, p1));
-			}
-			
-		});
-		return dist(min, p1);
-	}
-	
+  }
 }
