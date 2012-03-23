@@ -26,7 +26,7 @@ public class ArduinoSensorButton extends JButton {
   Image customImage = null;
   boolean locationChecked = false;
   
-  private Point upperLeft;
+  public Point upperLeft;
   private int size;
   
   private int width;
@@ -125,7 +125,7 @@ public class ArduinoSensorButton extends JButton {
     }
   }
   
-  private Shape getShape() {
+  public Shape getShape() {
     if (shape == null) {
       return new Rectangle2D.Double(upperLeft.x - width / 2, upperLeft.y - width/2, width, height);
     }
