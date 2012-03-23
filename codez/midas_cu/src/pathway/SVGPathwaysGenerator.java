@@ -7,9 +7,11 @@ import java.awt.Point;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -311,12 +313,37 @@ public class SVGPathwaysGenerator {
 			out.flush();
 			out.close();
 
-			if (PRINT_DEBUG) System.out.println("SVG successfully written!");
+			if (PRINT_DEBUG) System.out.println("SVG successfully written! Simplifying...");
+			
+			simplifySVG(svg.getName());
+			if (PRINT_DEBUG) System.out.println("Finished!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.out.println("An error " + e + " occured while trying to write the SVG file to disk.");
 		}
+	}
+	private void simplifySVG(String fileName) {
+	    try {
+	        String line;
+	        Process p = Runtime.getRuntime().exec("inkscape/inkscape "+fileName+" --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose");
+	        BufferedReader bri = new BufferedReader
+	          (new InputStreamReader(p.getInputStream()));
+	        BufferedReader bre = new BufferedReader
+	          (new InputStreamReader(p.getErrorStream()));
+	        while ((line = bri.readLine()) != null) {
+	          System.out.println("\t"+line);
+	        }
+	        bri.close();
+	        while ((line = bre.readLine()) != null) {
+	          System.out.println("\t"+line);
+	        }
+	        bre.close();
+	        p.waitFor();
+	      }
+	      catch (Exception err) {
+	        err.printStackTrace();
+	      }
 	}
 }
 
