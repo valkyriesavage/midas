@@ -1,6 +1,7 @@
 package pathway;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.FlatteningPathIterator;
@@ -35,20 +36,19 @@ public class SVGPathwaysGenerator {
 	public static final int LINE_EXTENT = 3;
 	
 	
-	
 	public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
-	public static final int INFLUENCE_WIDTH = LINE_WIDTH + LINE_EXTENT;
+	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH; //should be LINE_WIDTH + LINE_EXTENT
+	public static final int PATH_INFLUENCE_WIDTH = 2*LINE_WIDTH; //should be 2*LINE_WIDTH
 
-	private void line(Graphics2D g, int x1, int y1, int x2, int y2) {
-		int width = x2 - x1;
-		int height = y2 - y1;
-		g.drawRect(x1-LINE_EXTENT, y1-LINE_EXTENT, width + LINE_WIDTH, height + LINE_WIDTH);
+	private void point(Graphics2D g, int x1, int y1) {
+		g.drawRect(x1-LINE_EXTENT, y1-LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
 	}
 	
-	private static List<Point> cellsOfInfluence(Point p) {
+	private static List<Point> cellsOfInfluence(Point p, int extent) {
+		
 		List<Point> list = new LinkedList();
-		for (int x = p.x - INFLUENCE_WIDTH; x <= p.x + INFLUENCE_WIDTH; x++) {
-			for (int y = p.y - INFLUENCE_WIDTH; y <= p.y + INFLUENCE_WIDTH; y++) {
+		for (int x = p.x - extent; x <= p.x + extent; x++) {
+			for (int y = p.y - extent; y <= p.y + extent; y++) {
 				list.add(new Point(x, y));
 			}
 		}
@@ -57,16 +57,33 @@ public class SVGPathwaysGenerator {
 		return list;
 	}
 	private static Iterable<Point> cellsOfInfluence(ArduinoSensorButton b) {
-		return cellsOfInfluence(outlineFor(b));
+		Set<Point> flattened = new HashSet();
+		for(Point p : outlineFor(b)) {
+			flattened.addAll(cellsOfInfluence(p, BUTTON_INFLUENCE_WIDTH));
+		}
+		return flattened;
 	}
 	private static Iterable<Point> cellsOfInfluence(List<Point> path) {
 		Set<Point> flattened = new HashSet();
 		for(Point p : path) {
-			flattened.addAll(cellsOfInfluence(p));
+			flattened.addAll(cellsOfInfluence(p, PATH_INFLUENCE_WIDTH));
 		}
 		return flattened;
 	}
 
+	private List<List<Point>> allPaths = new ArrayList();
+	
+	public void paint(Graphics2D g) {
+		g.setColor(Color.red);
+		for(List<Point> path : allPaths) {
+			if(path != null) {
+				for(Point p : path) {
+					point(g, p.x, p.y);
+				}
+			}
+		}
+	}
+	
 	public void generatePathways(List<SensorButtonGroup> buttonsToConnect) {
 		//We create the SVG file by simply using SVGGraphics2D, saving to a file, and using the following command:
 		//"inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
@@ -78,7 +95,7 @@ public class SVGPathwaysGenerator {
 
 		List<Point> allPorts = new ArrayList(allButtons.size());
 		for (int x = 0; x < allButtons.size(); x++)
-			allPorts.add(new Point(LINE_EXTENT, 2*LINE_WIDTH * x + LINE_EXTENT));
+			allPorts.add(new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT));
 
 		Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
 
@@ -90,7 +107,7 @@ public class SVGPathwaysGenerator {
 
 		});
 
-		List<List<Point>> allPaths = new ArrayList();
+		allPaths.clear();
 
 //		if (btns.size() <= 12)
 			allPaths.addAll(generateIndividual(allButtons, allPorts));
@@ -268,16 +285,21 @@ public class SVGPathwaysGenerator {
 		SVGGraphics2D g = new SVGGraphics2D(document);
 
 		//draw all of the buttons
+		Iterator<List<Point>> pathsIterator = paths.iterator();
 		for(ArduinoSensorButton b : buttons) {
+			List<Point> path = pathsIterator.next();
+			g.setStroke(new BasicStroke(1));
 			b.paint(g);
-		}
+			g.setColor(new Color((float)Math.random(), (float)Math.random(), (float)Math.random()));
 
-		g.setStroke(new BasicStroke(.2f));
-		for(List<Point> path : paths) {
-			for(Point p : path) {
-				line(g, p.x, p.y, p.x, p.y);
+			if(path != null) {
+				g.setStroke(new BasicStroke(.2f));
+				for(Point p : path) {
+					point(g, p.x, p.y);
+				}
 			}
 		}
+
 
 		// Finally, stream out SVG to the standard output using
 		// UTF-8 encoding.

@@ -112,6 +112,7 @@ class Grid {
 		Point p = end;
 
 		if (!flood.containsKey(p)) {
+			if(SVGPathwaysGenerator.PRINT_DEBUG) System.out.println("\t\t:( Floodfill couldn't get to "+p);
 			return null;
 		}
 
@@ -127,8 +128,10 @@ class Grid {
 					break;
 				}
 			}
-			if (!found)
+			if (!found) {
+				if(SVGPathwaysGenerator.PRINT_DEBUG) System.out.println("\t\t:(Backtracking got stuck at "+p);
 				return null;
+			}
 		}
 		return backtrack;
 	}
