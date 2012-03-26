@@ -325,7 +325,22 @@ public class SVGPathwaysGenerator {
 	private void simplifySVG(String fileName) {
 	    try {
 	        String line;
-	        Process p = Runtime.getRuntime().exec("inkscape/inkscape "+fileName+" --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose");
+	        String commandStart;
+	        String osName = System.getProperty("os.name").toLowerCase();
+	        
+	        if(osName.startsWith("windows")) {
+	        	commandStart = "inkscape/inkscape";
+	        } else if(osName.startsWith("mac")) {
+	        	commandStart = "inkscape/Inkscape.app/Contents/Resources/bin/inkscape";
+	        } else {
+	        	System.err.println("Unrecognised OS " + osName+"... aborting SVG simplification!");
+	        	return;
+	        }
+	        
+	        String commandEnd = fileName+" --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose";
+	        
+	        String command = commandStart + " " + commandEnd;
+	        Process p = Runtime.getRuntime().exec(command);
 	        BufferedReader bri = new BufferedReader
 	          (new InputStreamReader(p.getInputStream()));
 	        BufferedReader bre = new BufferedReader
