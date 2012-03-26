@@ -331,7 +331,7 @@ public class SVGPathwaysGenerator {
 	        if(osName.startsWith("windows")) {
 	        	commandStart = "inkscape/inkscape";
 	        } else if(osName.startsWith("mac")) {
-	        	commandStart = "inkscape/Inkscape.app/Contents/Resources/bin/inkscape";
+	        	commandStart = "Inkscape.app/Contents/Resources/bin/inkscape";
 	        } else {
 	        	System.err.println("Unrecognised OS " + osName+"... aborting SVG simplification!");
 	        	return;
