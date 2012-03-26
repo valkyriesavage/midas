@@ -133,8 +133,7 @@ public class SVGPathwaysGenerator {
 
 		Iterator<Point> portIterator = allPorts.iterator();
 		int i = 0;
-		for (ArduinoSensorButton button : allButtons) { // generate pathways for each
-												// button
+		for (ArduinoSensorButton button : allButtons) { // generate pathways for each button
 			i++;
 			if (PRINT_DEBUG) System.out.println("\tGenerating path " + i + " of " + allButtons.size());
 			Point port = portIterator.next();
