@@ -33,7 +33,7 @@ public class UISlider {
     return ((highEndOfSlider.y - lowEndOfSlider.y) < (highEndOfSlider.x - lowEndOfSlider.x));
   }
   
-  public void execute(int whichPad) {
+  public void execute(int whichPad) {    
     Point clickPoint;
     if (this.isHorizontal()) {
       clickPoint = new Point((highEndOfSlider.x-lowEndOfSlider.x)/(sensitivity-1)*whichPad + lowEndOfSlider.x, highEndOfSlider.y);

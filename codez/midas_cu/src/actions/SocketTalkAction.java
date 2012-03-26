@@ -10,7 +10,6 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
 
 import serialtalk.ArduinoDispatcher;
-import display.SetUp;
 
 public class SocketTalkAction extends WebSocketClient implements UIAction {
   
@@ -41,12 +40,19 @@ public class SocketTalkAction extends WebSocketClient implements UIAction {
 	@Override
 	public void onError(Exception ex) { }
 	
+	private String buildJSon() {
+	  String retStr = "{";
+	  
+	  retStr += "};";
+	  return retStr;
+	}
+	
 	public void doAction() {
 	  try {
 	    if(dispatcher.lastEvent != null) {
-	      send(dispatcher.lastEvent.toString());
+	      send(buildJSon());
 	    } else {
-	      send("hurdy durdy");
+	      send("errorrrr");
 	    }
     } catch (NotYetConnectedException e) {
       e.printStackTrace();

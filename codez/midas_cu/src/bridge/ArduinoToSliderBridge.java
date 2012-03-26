@@ -56,6 +56,11 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
     this.sensitivity = sensitivity;
     this.interactivePiece.sensitivity = sensitivity;
     this.interfacePiece.setSensitivity(sensitivity);
+    
+    isHellaSlider = (sensitivity == SetUp.HELLA_SLIDER);
+    if (isHellaSlider) {
+      arduinoPiece = ArduinoSetup.hellaSlider;
+    }
   }
 
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {
@@ -119,9 +124,14 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
 
   public void execute(ArduinoSensorButton button) {
     if (this.contains(button)) {
-      // we might not need this at the moment, we aren't executing on click
-      // this.interactivePiece.execute(whichPad)
+      // this does not work.  we also don't need it because we're not activating on click
+      //this.interactivePiece.execute(button);
     }
+  }
+  
+  public void execute(int hellaSliderValue) {
+    System.out.println("handling an event, bitches : " + hellaSliderValue);
+    interactivePiece.execute(hellaSliderValue);
   }
   
   private void initWebsocketField() {

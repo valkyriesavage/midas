@@ -13,6 +13,8 @@ public class ArduinoSetup {
   public static List<ArduinoSlider> sliders = new ArrayList<ArduinoSlider>();
   public static List<ArduinoPad> pads = new ArrayList<ArduinoPad>();
   
+  public static ArduinoSlider hellaSlider;
+  
   public static void initialize(boolean test) {
     if (gridSensors[0][0] == null) {
       for(int i=0; i<NUM_TERMINALS; i++) {

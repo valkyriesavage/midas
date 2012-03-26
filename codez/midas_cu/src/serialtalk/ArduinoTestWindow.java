@@ -5,6 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import util.StorageJButton;
 
@@ -52,5 +55,15 @@ public class ArduinoTestWindow extends JFrame {
       add(pinTouch);
       //add(pinRelease);
     }
+    JSlider hellaSlider = new JSlider(0, 255);
+    hellaSlider.addChangeListener(new ChangeListener() {
+      @Override
+      public void stateChanged(ChangeEvent event) {
+        JSlider hellaSlider = (JSlider)event.getSource();
+        int value = hellaSlider.getValue();
+        dispatcher.handleFakeEvent(value);
+      }
+    });
+    add(hellaSlider);
   }
 }

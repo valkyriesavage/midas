@@ -3,7 +3,7 @@ package display;
 /**
  * TODO
  *  make sure gridded registration works
- *  make sure hella slider events send properly
+ *  enforce single hellaslider
  */
 
 import java.awt.AWTException;

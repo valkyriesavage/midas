@@ -38,22 +38,22 @@ public class ArduinoEvent implements ArduinoObject {
   
   @Override
   public String toString() {
-    String retVal = "";
+    String retStr = "";
     if (touchDirection == TouchDirection.TOUCH){
-      retVal += "touch ";
+      retStr += "touch ";
     } else if (touchDirection == TouchDirection.RELEASE) {
-      retVal += "release ";
+      retStr += "release ";
     }
     if (whichSensor != null && whichSensor.location != null) {
-      retVal += whichSensor.location.x;
+      retStr += whichSensor.location.x;
       if (whichSensor.location.y >= 0) {
-        retVal += ", " + whichSensor.location.y;
+        retStr += ", " + whichSensor.location.y;
       }
     } else if (hellaSliderLocation >= 0) {
-      retVal += " slider " + hellaSliderLocation;
+      retStr += " slider " + hellaSliderLocation;
     }
 
-    return retVal;
+    return retStr;
   }
   
   @Override
