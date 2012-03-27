@@ -8,6 +8,7 @@
 *.out
 *.jpg
 *.pdf
+*.gz
 codez/midas_cu/bin/*
 codez/cad/*
 codez/midas_cu/src/examples/*
