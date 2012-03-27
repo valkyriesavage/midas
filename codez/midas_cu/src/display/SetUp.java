@@ -34,6 +34,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import pathway.SVGPathwaysGenerator;
+
 import serialtalk.SerialCommunication;
 import bridge.ArduinoToButtonBridge;
 import bridge.ArduinoToDisplayBridge;
@@ -64,8 +66,7 @@ public class SetUp extends JFrame {
   JPanel propertiesPane = new JPanel();
   JPanel tempButtonDisplay = new JPanel();
 
-  SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator(
-      displayedButtons);
+  SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator();
 
   SensorShape.shapes queuedShape;
 
