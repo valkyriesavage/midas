@@ -119,7 +119,12 @@ public class SVGPathwaysGenerator {
 		if (PRINT_DEBUG)
 			System.out.println("Paths generated! Simplifying paths...");
 
-		writeSVG(new File("outline.svg").getAbsoluteFile(), allButtons, allPaths);
+		try {
+      writeSVG(File.createTempFile("midas-cu", "outline.svg").getAbsoluteFile(), allButtons, allPaths);
+    } catch (IOException e) {
+      // well, poop
+      e.printStackTrace();
+    }
 	}
 
 	private List<List<Point>> generateIndividual(List<ArduinoSensorButton> allButtons, List<Point> allPorts) {
