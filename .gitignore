@@ -18,4 +18,5 @@ codez/midas_cu/src/examples/*
 *.settings*
 testdata/*
 .~lock.*
-Inkscape.app/*
+*Inkscape.app*
+outline.svg
