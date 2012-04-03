@@ -20,7 +20,7 @@ public class InstructionsGenerator {
     ret += "<ol>";
     ret += "<li>Stick a piece of copper on top of a piece of vinyl, ensuring there are as few bubbles as possible</li>";
     ret += "<li>Load this sheet into the cutter</li>";
-    ret += "<li>Cut out <a href=''>this file</a> from the copper/vinyl sheet using SignCut Pro</li>";
+    ret += "<li>Open SignCut Pro and click 'Import', then cut out the file</li>";
     ret += "<li>Remove the unnecessary background pieces from the sensors and tails, leaving the sensors undisturbed if possible</li>";
     ret += "<li>Using the transfer tape, put the newly-cut sensors onto your object</li>";
     ret += "<li>Attach one rainbow wire to each copper tail that leads to a button, as in <img src=''></li>";
