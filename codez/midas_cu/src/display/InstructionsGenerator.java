@@ -18,12 +18,11 @@ public class InstructionsGenerator {
   private static String body() {
     String ret = "<body><h2>Instructions to make shiny new sensors</h2>";
     ret += "<ol>";
-    ret += "<li>Stick a piece of copper on top of a piece of vinyl, ensuring there are as few bubbles as possible</li>";
-    ret += "<li>Load this sheet into the cutter</li>";
+    ret += "<li>Load the copper sheet into the cutter</li>";
     ret += "<li>Open SignCut Pro and click 'Import', then cut out the file</li>";
     ret += "<li>Remove the unnecessary background pieces from the sensors and tails, leaving the sensors undisturbed if possible</li>";
     ret += "<li>Using the transfer tape, put the newly-cut sensors onto your object</li>";
-    ret += "<li>Attach one rainbow wire to each copper tail that leads to a button, as in <img src=''></li>";
+    ret += "<li>Attach one rainbow wire to each copper tail that leads to a button, as in <img src=''></li>.  Note that you should begin with the brown wire attaching to the top tail.";
     ret += "<li>Attach the grey, white, and black wires to the copper tails leading to the slider</li>";
     ret += "<li>Return to the interface to confirm locations!</li>";
     ret += "</body></html>";

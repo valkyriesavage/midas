@@ -33,16 +33,16 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import pathway.SVGPathwaysGenerator;
-
 import serialtalk.SerialCommunication;
+import util.ExtensionFileFilter;
 import bridge.ArduinoToButtonBridge;
 import bridge.ArduinoToDisplayBridge;
 import bridge.ArduinoToPadBridge;
 import bridge.ArduinoToSliderBridge;
 import display.SensorShape.shapes;
-import util.ExtensionFileFilter;
 
 public class SetUp extends JFrame {
   private static final long serialVersionUID = -7176602414855781819L;
@@ -301,11 +301,14 @@ public class SetUp extends JFrame {
     propertiesPane.removeAll();
     JComboBox interactionType = bridge.chooseInteractionType();
     interactionType.addActionListener(refreshSelected());
-
+    JPanel namePanel = new JPanel();
+    namePanel.setBorder(new EmptyBorder(45, 0, 45, 0));
+    
     if (bridge.isCustom) {
       ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
       propertiesPane.add(new JLabel("name"));
-      propertiesPane.add(buttonBridge.interfacePiece.nameField);
+      namePanel.add(buttonBridge.interfacePiece.nameField);
+      propertiesPane.add(namePanel);
 
       propertiesPane.add(interactionType);
       propertiesPane.add(placeholder());
@@ -320,8 +323,9 @@ public class SetUp extends JFrame {
     } else if (bridge.interfacePiece.isSlider) {
       ArduinoToSliderBridge sliderBridge = (ArduinoToSliderBridge) bridge;
       propertiesPane.add(new JLabel("name"));
-      propertiesPane.add(sliderBridge.interfacePiece.nameField);
-
+      namePanel.add(sliderBridge.interfacePiece.nameField);
+      propertiesPane.add(namePanel);
+      
       propertiesPane.add(interactionType);
       propertiesPane.add(placeholder());
 
@@ -353,7 +357,8 @@ public class SetUp extends JFrame {
     } else if (bridge.interfacePiece.isPad) {
       ArduinoToPadBridge padBridge = (ArduinoToPadBridge) bridge;
       propertiesPane.add(new JLabel("name"));
-      propertiesPane.add(bridge.interfacePiece.nameField);
+      namePanel.add(padBridge.interfacePiece.nameField);
+      propertiesPane.add(namePanel);
 
       propertiesPane.add(interactionType);
       propertiesPane.add(placeholder());
@@ -380,7 +385,8 @@ public class SetUp extends JFrame {
     } else {
       ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
       propertiesPane.add(new JLabel("name"));
-      propertiesPane.add(bridge.interfacePiece.nameField);
+      namePanel.add(buttonBridge.interfacePiece.nameField);
+      propertiesPane.add(namePanel);
 
       propertiesPane.add(interactionType);
       propertiesPane.add(placeholder());

@@ -23,6 +23,7 @@ public class SensorButtonGroup extends JPanel {
   private static final int MIN_SIZE = 30;
   public static final int SIZE_CHANGE = 5;
   public static final int BUFFER = 2;
+  private static final int WIDTH_OF_NAME_FIELD = 10;
 
   public List<ArduinoSensorButton> triggerButtons = new ArrayList<ArduinoSensorButton>();
   private Point base = new Point(BASE, BASE);
@@ -74,7 +75,8 @@ public class SensorButtonGroup extends JPanel {
   private void generalSetup() {
     initializeButtons();
 
-    nameField = new JTextField(name);
+    nameField = new JTextField(WIDTH_OF_NAME_FIELD);
+    nameField.setText(name);
     nameField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void changedUpdate(DocumentEvent event) {
