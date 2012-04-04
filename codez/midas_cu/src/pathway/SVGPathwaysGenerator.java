@@ -33,10 +33,15 @@ import display.SetUp;
 
 public class SVGPathwaysGenerator {
 	
+
+	SetUp mySetup;
+	public SVGPathwaysGenerator(SetUp s) {
+		mySetup = s;
+	}
+	
 	public static boolean PRINT_DEBUG = true;
 	
 	public static final int LINE_EXTENT = 3;
-	
 	
 	public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
 	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH; //should be LINE_WIDTH + LINE_EXTENT
@@ -92,8 +97,13 @@ public class SVGPathwaysGenerator {
 		
 		
 		List<ArduinoSensorButton> allButtons = new ArrayList();
-		for (SensorButtonGroup s : buttonsToConnect)
-			allButtons.addAll(s.triggerButtons);
+		for (SensorButtonGroup s : buttonsToConnect) {
+			if(s.sensitivity == SetUp.HELLA_SLIDER) {
+//				s.triggerButtons
+			} else {
+				allButtons.addAll(s.triggerButtons);
+			}
+		}
 
 		List<Point> allPorts = new ArrayList(allButtons.size());
 		for (int x = 0; x < allButtons.size(); x++)
@@ -111,15 +121,17 @@ public class SVGPathwaysGenerator {
 
 		allPaths.clear();
 
+		if(generatePathways) {
 //		if (btns.size() <= 12)
 			allPaths.addAll(generateIndividual(allButtons, allPorts));
 //		else
 //			allPaths.addAll(generateGrid(btns, ports));
-
+		}
+		
 		if (PRINT_DEBUG)
-			System.out.println("Paths generated! Simplifying paths...");
+			System.out.println("Paths generated!");
 
-		writeSVG(new File("outline.svg").getAbsoluteFile(), allButtons, allPaths);
+		writeSVG(new File("outline.svg").getAbsoluteFile(), allButtons, allPaths, generatePathways);
 	}
 
 	private List<List<Point>> generateIndividual(List<ArduinoSensorButton> allButtons, List<Point> allPorts) {
@@ -268,8 +280,8 @@ public class SVGPathwaysGenerator {
 	}
 
 
-	private void writeSVG(File svg, List<ArduinoSensorButton> buttons, List<List<Point>> paths) {
-		if (PRINT_DEBUG) System.out.println("Paths simplified! Writing SVG file to " + svg);
+	private void writeSVG(File svg, List<ArduinoSensorButton> buttons, List<List<Point>> paths, boolean generatePathways) {
+		if (PRINT_DEBUG) System.out.println("Writing SVG file to " + svg);
 
 		// taken from
 		// http://xmlgraphics.apache.org/batik/using/svg-generator.html
@@ -288,15 +300,18 @@ public class SVGPathwaysGenerator {
 		//draw all of the buttons
 		Iterator<List<Point>> pathsIterator = paths.iterator();
 		for(ArduinoSensorButton b : buttons) {
-			List<Point> path = pathsIterator.next();
 			g.setStroke(new BasicStroke(1));
 			b.paint(g);
-			g.setColor(new Color((float)Math.random(), (float)Math.random(), (float)Math.random()));
+			
+			if(generatePathways) {
+				g.setColor(new Color((float)Math.random(), (float)Math.random(), (float)Math.random()));
 
-			if(path != null) {
-				g.setStroke(new BasicStroke(.2f));
-				for(Point p : path) {
-					point(g, p.x, p.y);
+				List<Point> path = pathsIterator.next();
+				if(path != null) {
+					g.setStroke(new BasicStroke(.2f));
+					for(Point p : path) {
+						point(g, p.x, p.y);
+					}
 				}
 			}
 		}
@@ -312,10 +327,12 @@ public class SVGPathwaysGenerator {
 			out.flush();
 			out.close();
 
-			if (PRINT_DEBUG) System.out.println("SVG successfully written! Simplifying...");
+			if (PRINT_DEBUG)
+				System.out.println("SVG successfully written!" + (generatePathways ? " Simplifying..." : ""));	
 			
-			simplifySVG(svg.getName());
+			if(generatePathways) simplifySVG(svg.getName());
 			if (PRINT_DEBUG) System.out.println("Finished!");
+			mySetup.repaint();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

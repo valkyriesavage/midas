@@ -68,7 +68,7 @@ public class SetUp extends JFrame {
   JPanel tempButtonDisplay = new JPanel();
   JCheckBox generatePathways = new JCheckBox("generate traces", true);
 
-  SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator();
+  SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator(this);
 
   SensorShape.shapes queuedShape;
 
