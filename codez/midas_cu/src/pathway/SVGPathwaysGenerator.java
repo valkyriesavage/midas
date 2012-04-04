@@ -86,7 +86,7 @@ public class SVGPathwaysGenerator {
 		}
 	}
 	
-	public void generatePathways(List<SensorButtonGroup> buttonsToConnect) {
+	public void generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
 		//We create the SVG file by simply using SVGGraphics2D, saving to a file, and using the following command:
 		//"inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
 		

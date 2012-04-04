@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -65,6 +66,7 @@ public class SetUp extends JFrame {
   JPanel listsOfThingsHappening = new JPanel();
   JPanel propertiesPane = new JPanel();
   JPanel tempButtonDisplay = new JPanel();
+  JCheckBox generatePathways = new JCheckBox("generate traces", true);
 
   SVGPathwaysGenerator pathwaysGenerator = new SVGPathwaysGenerator();
 
@@ -224,6 +226,7 @@ public class SetUp extends JFrame {
       }
     });
     printingPanel.add(printSensors);
+    printingPanel.add(generatePathways);
     buttonCreatorPanel.add(printingPanel);
   }
 
@@ -250,7 +253,7 @@ public class SetUp extends JFrame {
   }
 
   public void generatePathways() {
-    pathwaysGenerator.generatePathways(displayedButtons);
+    pathwaysGenerator.generatePathways(displayedButtons, generatePathways.isSelected());
   }
 
   private URI generateInstructionsPage() {

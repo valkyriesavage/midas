@@ -57,6 +57,7 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
       JButton change;
       if (interactiveScript.actions.size() > 0) {
         change = new JButton(interactiveScript.icon());
+        change.setToolTipText(interactiveScript.toString());
       } else {
         change = new JButton("record interaction");
       }
@@ -74,6 +75,7 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
             interactiveScript.stopRecording();            
             ((JButton) event.getSource()).setText("");
             ((JButton) event.getSource()).setIcon(interactiveScript.icon());
+            ((JButton) event.getSource()).setToolTipText(interactiveScript.toString());
           }
         }
       });

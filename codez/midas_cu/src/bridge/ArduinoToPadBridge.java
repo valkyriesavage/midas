@@ -73,6 +73,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
       JButton capturePad;
       if (interactivePiece.icon() != null) {
         capturePad = new JButton(interactivePiece.icon());
+        capturePad.setToolTipText(interactivePiece.toString());
       } else {
         capturePad = new JButton("capture pad");
       }
@@ -90,6 +91,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
             interactivePiece.stopRecording();
             ((JButton) event.getSource()).setText("");
             ((JButton) event.getSource()).setIcon(interactivePiece.icon());
+            ((JButton) event.getSource()).setToolTipText(interactivePiece.toString());
           }
         }
       });

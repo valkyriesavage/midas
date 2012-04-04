@@ -76,6 +76,7 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
       JButton captureSlider;
       if (interactivePiece.icon() != null) {
         captureSlider = new JButton(interactivePiece.icon());
+        captureSlider.setToolTipText(interactivePiece.toString());
       } else {
         captureSlider = new JButton("capture slider");
       }
@@ -94,6 +95,7 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
             interactivePiece.stopRecording();
             ((JButton) event.getSource()).setText("");
             ((JButton) event.getSource()).setIcon(interactivePiece.icon());
+            ((JButton) event.getSource()).setToolTipText(interactivePiece.toString());
           }
         }
       });
