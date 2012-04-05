@@ -38,7 +38,7 @@ public class SensorButtonGroup extends JPanel {
   private Image customImage;
   private int spacing = 5;
   private int size = MIN_SIZE + 4 * SIZE_CHANGE;
-  private Direction orientation = Direction.VERTICAL;
+  public Direction orientation = Direction.VERTICAL;
 
   public String name;
 

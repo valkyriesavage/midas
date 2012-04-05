@@ -4,15 +4,19 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,37 +26,53 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JFrame;
+
+import org.apache.batik.bridge.BridgeContext;
+import org.apache.batik.bridge.DocumentLoader;
+import org.apache.batik.bridge.UserAgentAdapter;
 import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.gvt.GraphicsNode;
+import org.apache.batik.parser.AWTPathProducer;
+import org.apache.batik.parser.PathParser;
 import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.batik.swing.JSVGCanvas;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import util.Direction;
 
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
 import display.SetUp;
 
 public class SVGPathwaysGenerator {
-	
 
 	SetUp mySetup;
+
 	public SVGPathwaysGenerator(SetUp s) {
 		mySetup = s;
 	}
-	
+
 	public static boolean PRINT_DEBUG = true;
-	
+
 	public static final int LINE_EXTENT = 3;
-	
+
 	public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
-	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH; //should be LINE_WIDTH + LINE_EXTENT
-	public static final int PATH_INFLUENCE_WIDTH = 2*LINE_WIDTH; //should be 2*LINE_WIDTH
+	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH; // should be
+																	// LINE_WIDTH
+																	// +
+																	// LINE_EXTENT
+	public static final int PATH_INFLUENCE_WIDTH = 2 * LINE_WIDTH; // should be
+																	// 2*LINE_WIDTH
 
 	private void point(Graphics2D g, int x1, int y1) {
-		g.drawRect(x1-LINE_EXTENT, y1-LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
+		g.drawRect(x1 - LINE_EXTENT, y1 - LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
 	}
-	
+
 	private static List<Point> cellsOfInfluence(Point p, int extent) {
-		
+
 		List<Point> list = new LinkedList();
 		for (int x = p.x - extent; x <= p.x + extent; x++) {
 			for (int y = p.y - extent; y <= p.y + extent; y++) {
@@ -60,46 +80,163 @@ public class SVGPathwaysGenerator {
 			}
 		}
 		list.remove(p);
-	
+
 		return list;
 	}
+
 	private static Iterable<Point> cellsOfInfluence(ArduinoSensorButton b) {
 		Set<Point> flattened = new HashSet();
-		for(Point p : outlineFor(b)) {
+		for (Point p : outlineFor(b)) {
 			flattened.addAll(cellsOfInfluence(p, BUTTON_INFLUENCE_WIDTH));
 		}
 		return flattened;
 	}
+
 	private static Iterable<Point> cellsOfInfluence(List<Point> path) {
 		Set<Point> flattened = new HashSet();
-		for(Point p : path) {
+		for (Point p : path) {
 			flattened.addAll(cellsOfInfluence(p, PATH_INFLUENCE_WIDTH));
 		}
 		return flattened;
 	}
 
 	private List<List<Point>> allPaths = new ArrayList();
-	
+
 	public void paint(Graphics2D g) {
 		g.setColor(Color.red);
-		for(List<Point> path : allPaths) {
-			if(path != null) {
-				for(Point p : path) {
+		for (List<Point> path : allPaths) {
+			if (path != null) {
+				for (Point p : path) {
 					point(g, p.x, p.y);
 				}
 			}
 		}
+		for(Shape s : shapee)
+			g.draw(s);
 	}
 	
+	private Set<Shape> shapee = new HashSet();
+	private class HellaSlider {
+		Shape seg1, seg2, outer;
+
+		public HellaSlider(Shape seg1, Shape seg2, Shape outer) {
+			super();
+			this.seg1 = seg1;
+			this.seg2 = seg2;
+			this.outer = outer;
+		}
+		
+		public HellaSlider() {
+			try {
+				UserAgentAdapter ua = new UserAgentAdapter();
+				DocumentLoader loader = new DocumentLoader(ua);
+				String svgURI;
+				svgURI = new File("slider.svg").toURL().toString();
+				System.out.println(svgURI);
+				Document doc = loader.loadDocument(svgURI);
+	
+				PathParser pp = new PathParser();
+				AWTPathProducer producer = new AWTPathProducer();
+				pp.setPathHandler(producer);
+				pp.parse(doc.getElementById("seg1").getAttribute("d"));
+				seg1 = producer.getShape();
+				pp.parse(doc.getElementById("seg2").getAttribute("d"));
+				seg2 = producer.getShape();
+				pp.parse(doc.getElementById("outer").getAttribute("d"));
+				outer = producer.getShape();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public void setDimension(double width, double height) {
+			Rectangle2D oldBounds = bounds();
+			moveToOrigin();
+			transformed(AffineTransform.getScaleInstance(width / bounds().getWidth(), height / bounds().getHeight()));
+			transformed(AffineTransform.getTranslateInstance(oldBounds.getX(), oldBounds.getY()));
+		}
+		
+		public void transformed(AffineTransform trans) {
+			seg1 = trans.createTransformedShape(seg1);
+			seg2 = trans.createTransformedShape(seg2);
+			outer = trans.createTransformedShape(outer);
+		}
+		
+		Rectangle2D bounds() {
+			return seg1.getBounds2D().createUnion(seg2.getBounds2D()).createUnion(outer.getBounds2D());
+		}
+
+		//moves the top-left of the slider to the origin.
+		void moveToOrigin() {
+			Rectangle2D b = bounds();
+			transformed(AffineTransform.getTranslateInstance(-b.getX(), -b.getY()));
+		}
+	}
+
 	public void generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
-		//We create the SVG file by simply using SVGGraphics2D, saving to a file, and using the following command:
-		//"inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
-		
-		
+		// We create the SVG file by simply using SVGGraphics2D, saving to a
+		// file, and using the following command:
+		// "inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
+
 		List<ArduinoSensorButton> allButtons = new ArrayList();
 		for (SensorButtonGroup s : buttonsToConnect) {
-			if(s.sensitivity == SetUp.HELLA_SLIDER) {
-//				s.triggerButtons
+			if (s.sensitivity == SetUp.HELLA_SLIDER) {
+				shapee.clear();
+
+				// step 1: find the bounding rectangle of the whole slider
+				//wantedBounds is the rectangle that you want to conform to
+				Rectangle2D wantedBounds = null;
+				for( ArduinoSensorButton b : s.triggerButtons) {
+					Rectangle2D temp = b.getShape().getBounds2D();
+					if(wantedBounds == null) wantedBounds = temp;
+					else wantedBounds = wantedBounds.createUnion(temp);
+				}
+				
+				try {
+					HellaSlider h = new HellaSlider();
+
+					h.moveToOrigin();
+					//the current bounds; could be anywhere. We bring it to the origin.
+					//If the slider should be vertical, we rotate 90 degrees, bring it back to the origin
+					//we then scale it such that the width and height are equal to the wanted bounds' dimensions,
+					//and finally translate to the wanted bounds' position
+					
+					
+					if(s.orientation == Direction.VERTICAL) { //vertical
+						h.transformed(AffineTransform.getRotateInstance(Math.PI/2));
+						h.moveToOrigin();
+					} else { //horizontal
+						h.transformed(AffineTransform.getRotateInstance(Math.PI));
+						h.moveToOrigin();
+					}
+					
+					h.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
+					h.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(), wantedBounds.getY()));
+					
+					shapee.add(h.seg1); shapee.add(h.seg2); shapee.add(h.outer);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+//				try {
+//
+//					JSVGCanvas c = new JSVGCanvas();
+//					c.setDocumentState(c.ALWAYS_DYNAMIC);
+//					c.setDocument(doc);
+//					JFrame f = new JFrame();
+//					f.add(c);
+//					f.setVisible(true);
+//					f.paint(f.getGraphics());
+//					BridgeContext bc = c.getUpdateManager().getBridgeContext();
+//					Element slider = doc.getElementById("slider");
+//					GraphicsNode gn = bc.getGraphicsNode(slider);
+//					
+//					Shape shape = ((org.apache.batik.gvt.ShapeNode)gn).getShape();
+//					shapee = shape;
+//					f.setVisible(false);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+				// s.triggerButtons
 			} else {
 				allButtons.addAll(s.triggerButtons);
 			}
@@ -107,7 +244,8 @@ public class SVGPathwaysGenerator {
 
 		List<Point> allPorts = new ArrayList(allButtons.size());
 		for (int x = 0; x < allButtons.size(); x++)
-			allPorts.add(new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT));
+			allPorts.add(new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x
+					+ LINE_EXTENT));
 
 		Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
 
@@ -121,39 +259,45 @@ public class SVGPathwaysGenerator {
 
 		allPaths.clear();
 
-		if(generatePathways) {
-//		if (btns.size() <= 12)
+		if (generatePathways) {
+			// if (btns.size() <= 12)
 			allPaths.addAll(generateIndividual(allButtons, allPorts));
-//		else
-//			allPaths.addAll(generateGrid(btns, ports));
+			// else
+			// allPaths.addAll(generateGrid(btns, ports));
 		}
-		
+
 		if (PRINT_DEBUG)
 			System.out.println("Paths generated!");
 
-		writeSVG(new File("outline.svg").getAbsoluteFile(), allButtons, allPaths, generatePathways);
+		writeSVG(new File("outline.svg").getAbsoluteFile(), allButtons,
+				allPaths, generatePathways);
 	}
 
-	private List<List<Point>> generateIndividual(List<ArduinoSensorButton> allButtons, List<Point> allPorts) {
+	private List<List<Point>> generateIndividual(
+			List<ArduinoSensorButton> allButtons, List<Point> allPorts) {
 		List<List<Point>> paths = new ArrayList();
 
 		Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
-		//We take each button and set its cells of influence to “restricted to B”, where B is that button.
+		// We take each button and set its cells of influence to “restricted to
+		// B”, where B is that button.
 		for (ArduinoSensorButton b : allButtons) {
 			g.restrict(cellsOfInfluence(b), b);
 		}
 
 		Iterator<Point> portIterator = allPorts.iterator();
 		int i = 0;
-		for (ArduinoSensorButton button : allButtons) { // generate pathways for each button
+		for (ArduinoSensorButton button : allButtons) { // generate pathways for
+														// each button
 			i++;
-			if (PRINT_DEBUG) System.out.println("\tGenerating path " + i + " of " + allButtons.size());
+			if (PRINT_DEBUG)
+				System.out.println("\tGenerating path " + i + " of "
+						+ allButtons.size());
 			Point port = portIterator.next();
-			
-//			List<Point> nearButton = new LinkedList();
-//			for (Point p : outlineFor(b)) {
-//				nearButton.addAll(g.removeOutOfBounds(adj(p)));
-//			}
+
+			// List<Point> nearButton = new LinkedList();
+			// for (Point p : outlineFor(b)) {
+			// nearButton.addAll(g.removeOutOfBounds(adj(p)));
+			// }
 
 			List<Point> nearButton = outlineFor(button);
 			List<Point> path = g.findPath(nearButton, port, button);
@@ -162,7 +306,7 @@ public class SVGPathwaysGenerator {
 				paths.add(path);
 				g.close(cellsOfInfluence(path));
 			} else {
-				paths.add(null); //placeholder
+				paths.add(null); // placeholder
 			}
 		}
 		assert (!portIterator.hasNext());
@@ -217,6 +361,7 @@ public class SVGPathwaysGenerator {
 
 		return areaSegments;
 	}
+
 	public static List<Point> outlineFor(ArduinoSensorButton b) {
 		List<Point> outline = new LinkedList<Point>();
 
@@ -279,9 +424,10 @@ public class SVGPathwaysGenerator {
 		return outline;
 	}
 
-
-	private void writeSVG(File svg, List<ArduinoSensorButton> buttons, List<List<Point>> paths, boolean generatePathways) {
-		if (PRINT_DEBUG) System.out.println("Writing SVG file to " + svg);
+	private void writeSVG(File svg, List<ArduinoSensorButton> buttons,
+			List<List<Point>> paths, boolean generatePathways) {
+		if (PRINT_DEBUG)
+			System.out.println("Writing SVG file to " + svg);
 
 		// taken from
 		// http://xmlgraphics.apache.org/batik/using/svg-generator.html
@@ -297,25 +443,25 @@ public class SVGPathwaysGenerator {
 		// Create an instance of the SVG Generator.
 		SVGGraphics2D g = new SVGGraphics2D(document);
 
-		//draw all of the buttons
+		// draw all of the buttons
 		Iterator<List<Point>> pathsIterator = paths.iterator();
-		for(ArduinoSensorButton b : buttons) {
+		for (ArduinoSensorButton b : buttons) {
 			g.setStroke(new BasicStroke(1));
 			b.paint(g);
-			
-			if(generatePathways) {
-				g.setColor(new Color((float)Math.random(), (float)Math.random(), (float)Math.random()));
+
+			if (generatePathways) {
+				g.setColor(new Color((float) Math.random(), (float) Math
+						.random(), (float) Math.random()));
 
 				List<Point> path = pathsIterator.next();
-				if(path != null) {
+				if (path != null) {
 					g.setStroke(new BasicStroke(.2f));
-					for(Point p : path) {
+					for (Point p : path) {
 						point(g, p.x, p.y);
 					}
 				}
 			}
 		}
-
 
 		// Finally, stream out SVG to the standard output using
 		// UTF-8 encoding.
@@ -328,72 +474,78 @@ public class SVGPathwaysGenerator {
 			out.close();
 
 			if (PRINT_DEBUG)
-				System.out.println("SVG successfully written!" + (generatePathways ? " Simplifying..." : ""));	
-			
-			if(generatePathways) simplifySVG(svg.getName());
-			if (PRINT_DEBUG) System.out.println("Finished!");
+				System.out.println("SVG successfully written!"
+						+ (generatePathways ? " Simplifying..." : ""));
+
+			if (generatePathways)
+				simplifySVG(svg.getName());
+			if (PRINT_DEBUG)
+				System.out.println("Finished!");
 			mySetup.repaint();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("An error " + e + " occured while trying to write the SVG file to disk.");
+			System.out.println("An error " + e
+					+ " occured while trying to write the SVG file to disk.");
 		}
 	}
+
 	private void simplifySVG(String fileName) {
-	    try {
-	        String line;
-	        String commandStart;
-	        String osName = System.getProperty("os.name").toLowerCase();
-	        
-	        if(osName.startsWith("windows")) {
-	        	commandStart = "inkscape/inkscape";
-	        } else if(osName.startsWith("mac")) {
-	        	commandStart = "Inkscape.app/Contents/Resources/bin/inkscape";
-	        } else {
-	        	System.err.println("Unrecognised OS " + osName+"... aborting SVG simplification!");
-	        	return;
-	        }
-	        
-	        String commandEnd = fileName+" --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose";
-	        
-	        String command = commandStart + " " + commandEnd;
-	        Process p = Runtime.getRuntime().exec(command);
-	        BufferedReader bri = new BufferedReader
-	          (new InputStreamReader(p.getInputStream()));
-	        BufferedReader bre = new BufferedReader
-	          (new InputStreamReader(p.getErrorStream()));
-	        while ((line = bri.readLine()) != null) {
-	          System.out.println("\t"+line);
-	        }
-	        bri.close();
-	        while ((line = bre.readLine()) != null) {
-	          System.out.println("\t"+line);
-	        }
-	        bre.close();
-	        p.waitFor();
-	      }
-	      catch (Exception err) {
-	        err.printStackTrace();
-	      }
+		try {
+			String line;
+			String commandStart;
+			String osName = System.getProperty("os.name").toLowerCase();
+
+			if (osName.startsWith("windows")) {
+				commandStart = "inkscape/inkscape";
+			} else if (osName.startsWith("mac")) {
+				commandStart = "Inkscape.app/Contents/Resources/bin/inkscape";
+			} else {
+				System.err.println("Unrecognised OS " + osName
+						+ "... aborting SVG simplification!");
+				return;
+			}
+
+			String commandEnd = fileName
+					+ " --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose";
+
+			String command = commandStart + " " + commandEnd;
+			Process p = Runtime.getRuntime().exec(command);
+			BufferedReader bri = new BufferedReader(new InputStreamReader(
+					p.getInputStream()));
+			BufferedReader bre = new BufferedReader(new InputStreamReader(
+					p.getErrorStream()));
+			while ((line = bri.readLine()) != null) {
+				System.out.println("\t" + line);
+			}
+			bri.close();
+			while ((line = bre.readLine()) != null) {
+				System.out.println("\t" + line);
+			}
+			bre.close();
+			p.waitFor();
+		} catch (Exception err) {
+			err.printStackTrace();
+		}
 	}
 }
 
 //
 //
-///**
+// /**
 // * Return the eight adjacent neighbors of Point p.
-// * 
+// *
 // * @param p
 // * @return
 // */
-//public static List<Point> adjDiags(Point p) {
-//	List<Point> list = new LinkedList();
-//	for (int x = p.x - 1; x <= p.x + 1; x++) {
-//		for (int y = p.y - 1; y <= p.y + 1; y++) {
-//			list.add(new Point(x, y));
-//		}
-//	}
-//	list.remove(p);
+// public static List<Point> adjDiags(Point p) {
+// List<Point> list = new LinkedList();
+// for (int x = p.x - 1; x <= p.x + 1; x++) {
+// for (int y = p.y - 1; y <= p.y + 1; y++) {
+// list.add(new Point(x, y));
+// }
+// }
+// list.remove(p);
 //
-//	return list;
-//}
+// return list;
+// }
