@@ -3,6 +3,7 @@ package bridge;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -14,6 +15,7 @@ import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoObject;
 import serialtalk.ArduinoSensor;
+import serialtalk.TouchDirection;
 import actions.UIAction;
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
@@ -91,7 +93,15 @@ public abstract class ArduinoToDisplayBridge {
             src.setText("done");
             dispatcher.beginCapturing();
           } else { // src.getText().equals("done")
-            setArduinoSequence(dispatcher.endCaptureAndReport());
+            List<ArduinoEvent> report = dispatcher.endCaptureAndReport();
+            List<ArduinoEvent> sendAlong = new ArrayList<ArduinoEvent>();
+            for (ArduinoEvent e : report) {
+              if (e.touchDirection == TouchDirection.TOUCH) {
+                //keep it
+                sendAlong.add(e);
+              }
+            }
+            setArduinoSequence(sendAlong);
             src.setText("registered (change)");
           }
         }

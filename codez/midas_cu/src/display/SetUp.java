@@ -102,7 +102,7 @@ public class SetUp extends JFrame {
     prepPropertiesPane();
     add(propertiesPane, BorderLayout.EAST);
 
-    add(serialCommunication.whatISee(), BorderLayout.SOUTH);
+    //add(serialCommunication.whatISee(), BorderLayout.SOUTH);
   }
 
   private void setUpTheGrid() {
