@@ -127,7 +127,9 @@ public class SVGPathwaysGenerator {
 				//wantedBounds is the rectangle that you want to conform to
 				
 				HellaSliderPositioner h = s.getHSP();
-				allButtons.add(h.getSeg1()); allButtons.add(h.getSeg2()); allButtons.add(h.getOuter());
+				allButtons.add(h.getOuter());
+				allButtons.add(h.getSeg1());
+				allButtons.add(h.getSeg2());
 			} else {
 				for(ArduinoSensorButton b : s.triggerButtons) {
 					allButtons.add(b.getShape());
@@ -335,7 +337,7 @@ public class SVGPathwaysGenerator {
 
 		// draw all of the buttons
 		Iterator<List<Point>> pathsIterator = paths.iterator();
-		g.setStroke(new BasicStroke(1));
+		g.setStroke(new BasicStroke(.5f));
 		for (Shape b : buttons) {
 			g.setColor(new Color((float) Math.random(), (float) Math.random(), (float) Math.random()));
 //			b.paint(g);
