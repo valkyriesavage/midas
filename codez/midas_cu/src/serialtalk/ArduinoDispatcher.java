@@ -75,11 +75,6 @@ public class ArduinoDispatcher {
     }
     recentEvents = recentEvents.subList(newestReasonableEvent, recentEvents.size());
     lastEvent = e;
-       
-    if(e.touchDirection == TouchDirection.RELEASE) {
-      //ignore these for right now...
-      return;
-    }
 
     recentEvents.add(e);
     setWhatISee();
@@ -93,7 +88,7 @@ public class ArduinoDispatcher {
     } else {
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
         if (bridge.contains(e.whichSensor)) {
-          bridge.execute(e.whichSensor);
+          bridge.execute(e.whichSensor, e.touchDirection);
         }
       }
     }

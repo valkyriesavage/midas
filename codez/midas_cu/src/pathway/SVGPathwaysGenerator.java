@@ -5,18 +5,15 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,18 +23,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
-import org.apache.batik.bridge.BridgeContext;
 import org.apache.batik.dom.GenericDOMImplementation;
-import org.apache.batik.gvt.GraphicsNode;
 import org.apache.batik.svggen.SVGGraphics2D;
-import org.apache.batik.swing.JSVGCanvas;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import util.Direction;
 
 import display.ArduinoSensorButton;
 import display.HellaSliderPositioner;
@@ -69,8 +60,7 @@ public class SVGPathwaysGenerator {
 	}
 
 	private static List<Point> cellsOfInfluence(Point p, int extent) {
-
-		List<Point> list = new LinkedList();
+		List<Point> list = new LinkedList<Point>();
 		for (int x = p.x - extent; x <= p.x + extent; x++) {
 			for (int y = p.y - extent; y <= p.y + extent; y++) {
 				list.add(new Point(x, y));
@@ -80,9 +70,8 @@ public class SVGPathwaysGenerator {
 
 		return list;
 	}
-
 	private static Iterable<Point> cellsOfInfluence(Shape s) {
-		Set<Point> flattened = new HashSet();
+		Set<Point> flattened = new HashSet<Point>();
 		for (Point p : outlineFor(s)) {
 			flattened.addAll(cellsOfInfluence(p, BUTTON_INFLUENCE_WIDTH));
 		}
@@ -90,15 +79,15 @@ public class SVGPathwaysGenerator {
 	}
 
 	private static Iterable<Point> cellsOfInfluence(List<Point> path) {
-		Set<Point> flattened = new HashSet();
+		Set<Point> flattened = new HashSet<Point>();
 		for (Point p : path) {
 			flattened.addAll(cellsOfInfluence(p, PATH_INFLUENCE_WIDTH));
 		}
 		return flattened;
 	}
 
-	private List<List<Point>> allPaths = new ArrayList();
-
+	private List<List<Point>> allPaths = new ArrayList<List<Point>>();
+	
 	public void paint(Graphics2D g) {
 		g.setColor(Color.red);
 		for (List<Point> path : allPaths) {
@@ -112,13 +101,13 @@ public class SVGPathwaysGenerator {
 			g.draw(s);
 	}
 	
-	private Set<Shape> shapee = new HashSet();
+	private Set<Shape> shapee = new HashSet<Shape>();
 	public void generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
 		// We create the SVG file by simply using SVGGraphics2D, saving to a
 		// file, and using the following command:
 		// "inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
 
-		List<Shape> allButtons = new ArrayList();
+		List<Shape> allButtons = new ArrayList<Shape>();
 		for (SensorButtonGroup s : buttonsToConnect) {
 			if (s.sensitivity == SetUp.HELLA_SLIDER) {
 				shapee.clear();
@@ -137,7 +126,7 @@ public class SVGPathwaysGenerator {
 			}
 		}
 
-		List<Point> allPorts = new ArrayList(allButtons.size());
+		List<Point> allPorts = new ArrayList<Point>(allButtons.size());
 		for (int x = 0; x < allButtons.size(); x++)
 			allPorts.add(new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x
 					+ LINE_EXTENT));
@@ -154,10 +143,15 @@ public class SVGPathwaysGenerator {
 		allPaths.clear();
 
 		if (generatePathways) {
+			try{
 			// if (btns.size() <= 12)
 			allPaths.addAll(generateIndividual(allButtons, allPorts));
 			// else
 			// allPaths.addAll(generateGrid(btns, ports));
+			}catch(PathwayGenerationException e) {
+				JOptionPane.showMessageDialog(null, "buttons could not be routed! you will have to route your own buttons.",
+						"button routing failure", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 
 		if (PRINT_DEBUG)
@@ -167,8 +161,8 @@ public class SVGPathwaysGenerator {
 				allPaths, generatePathways);
 	}
 
-	private List<List<Point>> generateIndividual(List<Shape> allButtons, List<Point> allPorts) {
-		List<List<Point>> paths = new ArrayList();
+	private List<List<Point>> generateIndividual(List<Shape> allButtons, List<Point> allPorts) throws PathwayGenerationException {
+		List<List<Point>> paths = new ArrayList<List<Point>>();
 
 		Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 		// We take each button and set its cells of influence to “restricted to
@@ -187,11 +181,6 @@ public class SVGPathwaysGenerator {
 						+ allButtons.size());
 			Point port = portIterator.next();
 
-			// List<Point> nearButton = new LinkedList();
-			// for (Point p : outlineFor(b)) {
-			// nearButton.addAll(g.removeOutOfBounds(adj(p)));
-			// }
-
 			List<Point> nearButton = outlineFor(button);
 			List<Point> path = g.findPath(nearButton, port, button);
 
@@ -199,14 +188,33 @@ public class SVGPathwaysGenerator {
 				paths.add(path);
 				g.close(cellsOfInfluence(path));
 			} else {
-				paths.add(null); // placeholder
+				throw new PathwayGenerationException();
 			}
 		}
 		assert (!portIterator.hasNext());
 
 		return paths;
 	}
+	
 
+//	public List<ArduinoSensorButton> sortButtonsByUpperLeft (List<SensorButtonGroup> buttonsToSort) {
+//		List<ArduinoSensorButton> allButtons = new ArrayList<ArduinoSensorButton>();
+//	    for (SensorButtonGroup s : buttonsToSort)
+//	      allButtons.addAll(s.triggerButtons);
+//	
+//	    Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
+//	
+//	      @Override
+//	      public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
+//	        return (new Integer(o1.upperLeft.y)).compareTo(new Integer(
+//	            o2.upperLeft.y));
+//	      }
+//	
+//	    });
+//	    
+//	    return allButtons;
+//	}
+	
 	// taken from
 	// http://stackoverflow.com/questions/8144156/using-pathiterator-to-return-all-line-segments-that-constrain-an-area
 	private static List<Line2D.Double> toSegments(FlatteningPathIterator pi) {
@@ -420,23 +428,3 @@ public class SVGPathwaysGenerator {
 		}
 	}
 }
-
-//
-//
-// /**
-// * Return the eight adjacent neighbors of Point p.
-// *
-// * @param p
-// * @return
-// */
-// public static List<Point> adjDiags(Point p) {
-// List<Point> list = new LinkedList();
-// for (int x = p.x - 1; x <= p.x + 1; x++) {
-// for (int y = p.y - 1; y <= p.y + 1; y++) {
-// list.add(new Point(x, y));
-// }
-// }
-// list.remove(p);
-//
-// return list;
-// }

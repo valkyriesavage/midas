@@ -1,21 +1,15 @@
-/*
-
-  Derived from the 7 Key Slider/Wheel example code at Rachel's Electronics
-  
-      PIN CONNECTIONS TO ARDUINO:
-  BREAKOUT PIN        ARDUINO PIN
-    CHNG                 8
-    DRDY                 9
-    SS                  10
-    MOSI                11
-    MISO                12
-    SCLK                13
-    
-*/
-
 #include <QT1106.h>
+
+// TEENSY
+int CHNG = 9;
+int DRDY = 10;
+
+// Arduino
+/*int CHNG = 8;
+int DRDY = 9;*/
+
 //QT1106 instanceName(CHNG pin, DRDY pin, 1 for slider/0 for wheel)
-QT1106 QT(8,9,1);
+QT1106 QT(CHNG,DRDY,1);
 
 byte lastKeys = 0;
 byte lastSlide = 0;
@@ -25,11 +19,12 @@ boolean slideOff = true;
 void setup()
 {
   Serial.begin(9600);
+  Serial.write("here we go!\n");
   
   QT.Setup();		// go establish default settings
   QT.DI(0x01);          // set it to be more noise-tolerant
   QT.RES(0x08);         // set resolution to 8 bytes (0...255)
-  Serial.println("it's on!");
+  Serial.write("it's on!\n");
 }
 
 void loop()

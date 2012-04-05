@@ -32,6 +32,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
   SetUp setUp;
   
   private SensorButtonGroup draggingGroup;
+  
+  public boolean isInteractive = true;
 
   public CanvasPanel(SetUp setUp, List<SensorButtonGroup> buttonsToDisplay) {
     super();
@@ -106,6 +108,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
  
   @Override
   public void mouseClicked(MouseEvent event) {
+    
     SensorButtonGroup intersectedGroup;
     if ((intersectedGroup = determineIntersection(event.getPoint())) != null) {
       // if the mouse clicks, we probably don't want to trigger the event, that would be annoying
@@ -145,6 +148,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 
   @Override
   public void mouseDragged(MouseEvent event) {
+    if (!isInteractive) { return; }
+
     if(draggingGroup != null) {
       draggingGroup.moveTo(event.getPoint());
       repaint();
