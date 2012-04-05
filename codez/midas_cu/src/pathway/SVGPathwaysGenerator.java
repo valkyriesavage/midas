@@ -197,11 +197,11 @@ public class SVGPathwaysGenerator {
 	}
 	
 
-//	public List<ArduinoSensorButton> sortButtonsByUpperLeft (List<SensorButtonGroup> buttonsToSort) {
-//		List<ArduinoSensorButton> allButtons = new ArrayList<ArduinoSensorButton>();
-//	    for (SensorButtonGroup s : buttonsToSort)
-//	      allButtons.addAll(s.triggerButtons);
-//	
+	public List<ArduinoSensorButton> sortButtonsByUpperLeft (List<SensorButtonGroup> buttonsToSort) {
+		List<ArduinoSensorButton> allButtons = new ArrayList<ArduinoSensorButton>();
+	    for (SensorButtonGroup s : buttonsToSort)
+	      allButtons.addAll(s.triggerButtons);
+	
 //	    Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
 //	
 //	      @Override
@@ -211,9 +211,18 @@ public class SVGPathwaysGenerator {
 //	      }
 //	
 //	    });
-//	    
-//	    return allButtons;
-//	}
+	    
+	    Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
+
+			@Override
+			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
+				return (new Double(o1.getShape().getBounds2D().getY())).compareTo(o2.getShape().getBounds2D().getY());
+			}
+
+		});
+	    
+	    return allButtons;
+	}
 	
 	// taken from
 	// http://stackoverflow.com/questions/8144156/using-pathiterator-to-return-all-line-segments-that-constrain-an-area
