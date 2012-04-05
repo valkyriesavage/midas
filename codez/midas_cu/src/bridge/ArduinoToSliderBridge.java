@@ -17,6 +17,7 @@ import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.ArduinoSlider;
+import serialtalk.TouchDirection;
 import capture.UISlider;
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
@@ -56,7 +57,7 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
     this.sensitivity = sensitivity;
     this.interactivePiece.sensitivity = sensitivity;
     this.interfacePiece.setSensitivity(sensitivity);
-    
+
     isHellaSlider = (sensitivity == SetUp.HELLA_SLIDER);
     if (isHellaSlider) {
       arduinoPiece = ArduinoSetup.hellaSlider;
@@ -95,7 +96,8 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
             interactivePiece.stopRecording();
             ((JButton) event.getSource()).setText("");
             ((JButton) event.getSource()).setIcon(interactivePiece.icon());
-            ((JButton) event.getSource()).setToolTipText(interactivePiece.toString());
+            ((JButton) event.getSource()).setToolTipText(interactivePiece
+                .toString());
           }
         }
       });
@@ -119,23 +121,25 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
     return show;
   }
 
-  public void execute(ArduinoSensor sensor) {
-    interactivePiece.execute(((ArduinoSlider) arduinoPiece)
-        .whichInSlider(sensor));
+  public void execute(ArduinoSensor sensor, TouchDirection direction) {
+    if (direction == TouchDirection.TOUCH) {
+      interactivePiece.execute(((ArduinoSlider) arduinoPiece)
+          .whichInSlider(sensor));
+    }
   }
 
   public void execute(ArduinoSensorButton button) {
     if (this.contains(button)) {
-      // this does not work.  we also don't need it because we're not activating on click
-      //this.interactivePiece.execute(button);
+      // this does not work. we also don't need it because we're not activating
+      // on click
+      // this.interactivePiece.execute(button);
     }
   }
-  
+
   public void execute(int hellaSliderValue) {
-    System.out.println("handling an event, bitches : " + hellaSliderValue);
     interactivePiece.execute(hellaSliderValue);
   }
-  
+
   private void initWebsocketField() {
     websocketField.getDocument().addDocumentListener(new DocumentListener() {
       @Override

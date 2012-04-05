@@ -15,6 +15,7 @@ import javax.swing.text.BadLocationException;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
+import serialtalk.TouchDirection;
 import actions.SocketTalkAction;
 import actions.UIScript;
 import display.ArduinoSensorButton;
@@ -137,8 +138,10 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
     return register;
   }
 
-  public void execute(ArduinoSensor sensor) {
-    executeScript();
+  public void execute(ArduinoSensor sensor, TouchDirection direction) {
+    if (direction == TouchDirection.TOUCH) {
+      executeScript();
+    }
   }
 
   public void setArduinoSequence(List<ArduinoEvent> events) {

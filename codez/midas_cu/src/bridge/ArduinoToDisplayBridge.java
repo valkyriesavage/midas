@@ -53,7 +53,7 @@ public abstract class ArduinoToDisplayBridge {
     interfacePiece.paint(g);
   }
 
-  public abstract void execute(ArduinoSensor sensor);
+  public abstract void execute(ArduinoSensor sensor, TouchDirection direction);
 
   public abstract void execute(ArduinoSensorButton button);
 

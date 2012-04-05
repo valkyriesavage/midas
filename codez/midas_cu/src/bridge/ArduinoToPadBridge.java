@@ -117,8 +117,10 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
     return show;
   }
 
-  public void execute(ArduinoSensor sensor) {
-    interactivePiece.execute(((ArduinoPad) arduinoPiece).locationOnPad(sensor));
+  public void execute(ArduinoSensor sensor, TouchDirection direction) {
+    if (direction == TouchDirection.TOUCH) {
+      interactivePiece.execute(((ArduinoPad) arduinoPiece).locationOnPad(sensor));
+    }
   }
 
   public void execute(ArduinoSensorButton button) {
