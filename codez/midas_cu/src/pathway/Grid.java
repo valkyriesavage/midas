@@ -73,7 +73,7 @@ class Grid {
 	 * @param end
 	 * @return
 	 */
-	public List<Point> findPath(List<Point> starts, Point end, Shape button) {
+	public List<Point> findPath(List<Point> starts, Point end, Shape button) throws PathwayGenerationException {
 		// step 1: wave expansion to create a mapping between locations and tags
 		Map<Point, Integer> edges = new HashMap();
 		for (Point p : starts)
@@ -112,7 +112,7 @@ class Grid {
 
 		if (!flood.containsKey(p)) {
 			if(SVGPathwaysGenerator.PRINT_DEBUG) System.out.println("\t\t:( Floodfill couldn't get to "+p);
-			return null;
+			throw new PathwayGenerationException();
 		}
 
 		backtrack.add(p);
@@ -129,7 +129,7 @@ class Grid {
 			}
 			if (!found) {
 				if(SVGPathwaysGenerator.PRINT_DEBUG) System.out.println("\t\t:(Backtracking got stuck at "+p);
-				return null;
+				throw new PathwayGenerationException();
 			}
 		}
 		return backtrack;

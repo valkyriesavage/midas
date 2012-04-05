@@ -97,20 +97,20 @@ public class SVGPathwaysGenerator {
 				}
 			}
 		}
-		for(Shape s : shapee)
-			g.draw(s);
 	}
 	
-	private Set<Shape> shapee = new HashSet<Shape>();
-	public void generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
-		// We create the SVG file by simply using SVGGraphics2D, saving to a
-		// file, and using the following command:
-		// "inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
-
+	/**
+	 * Returns true if the pathways were successfully generated; false otherwise.
+	 * @param buttonsToConnect
+	 * @param generatePathways
+	 * @return
+	 */
+	public boolean generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
+		allPaths.clear();
+		
 		List<Shape> allButtons = new ArrayList<Shape>();
 		for (SensorButtonGroup s : buttonsToConnect) {
 			if (s.sensitivity == SetUp.HELLA_SLIDER) {
-				shapee.clear();
 
 				// step 1: find the bounding rectangle of the whole slider
 				//wantedBounds is the rectangle that you want to conform to
@@ -140,8 +140,6 @@ public class SVGPathwaysGenerator {
 
 		});
 
-		allPaths.clear();
-
 		if (generatePathways) {
 			try{
 			// if (btns.size() <= 12)
@@ -151,6 +149,7 @@ public class SVGPathwaysGenerator {
 			}catch(PathwayGenerationException e) {
 				JOptionPane.showMessageDialog(null, "buttons could not be routed! you will have to route your own buttons.",
 						"button routing failure", JOptionPane.ERROR_MESSAGE);
+				return false;
 			}
 		}
 
@@ -159,6 +158,8 @@ public class SVGPathwaysGenerator {
 
 		writeSVG(new File("outline.svg").getAbsoluteFile(), allButtons,
 				allPaths, generatePathways);
+		
+		return true;
 	}
 
 	private List<List<Point>> generateIndividual(List<Shape> allButtons, List<Point> allPorts) throws PathwayGenerationException {
@@ -184,12 +185,8 @@ public class SVGPathwaysGenerator {
 			List<Point> nearButton = outlineFor(button);
 			List<Point> path = g.findPath(nearButton, port, button);
 
-			if (path != null) { // yay we found one
-				paths.add(path);
-				g.close(cellsOfInfluence(path));
-			} else {
-				throw new PathwayGenerationException();
-			}
+			paths.add(path);
+			g.close(cellsOfInfluence(path));
 		}
 		assert (!portIterator.hasNext());
 
