@@ -32,7 +32,7 @@ public class InstructionsGenerator {
     
     if(hellaSlider)
       ret += "<li>Attach the grey, white, and black wires to the copper tails leading to the slider</li>";
-    ret += "<li>Return to the interface to confirm locations!</li>";
+
     ret += "</body></html>";
     return ret;
   }

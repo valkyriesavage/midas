@@ -37,7 +37,7 @@ void loop()
 {
   QT.Check();
   if (QT.keyChange == true && QT.Keys != lastKeys){
-      for(int i=0; i<=7; i++) {
+      for(int i=0; i<7; i++) {
          if((QT.Keys >> i & 1) && !(lastKeys >> i & 1)){
            Serial.print("K:");
            Serial.print(i);
