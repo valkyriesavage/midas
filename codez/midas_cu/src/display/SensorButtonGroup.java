@@ -6,6 +6,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,9 +189,17 @@ public class SensorButtonGroup extends JPanel {
 
   public void paint(Graphics2D g) {
     if (!deleteMe) {
-      for (ArduinoSensorButton button : triggerButtons) {
-        button.paint(g);
-      }
+    	if(sensitivity == SetUp.HELLA_SLIDER) {
+    		HellaSliderPositioner hsp = getHSP();
+    		g.setColor(triggerButtons.get(0).relevantColor);
+    		g.fill(hsp.getSeg1());
+    		g.fill(hsp.getSeg2());
+    		g.fill(hsp.getOuter());
+    	} else {
+	      for (ArduinoSensorButton button : triggerButtons) {
+	        button.paint(g);
+	      }
+    	}
     }
   }
 
@@ -278,6 +288,38 @@ public class SensorButtonGroup extends JPanel {
       }
     }
     return false;
+  }
+  
+  public HellaSliderPositioner getHSP() {
+		HellaSliderPositioner h = new HellaSliderPositioner();
+
+		h.moveToOrigin();
+		//the current bounds; could be anywhere. We bring it to the origin.
+		//If the slider should be vertical, we rotate 90 degrees, bring it back to the origin
+		//we then scale it such that the width and height are equal to the wanted bounds' dimensions,
+		//and finally translate to the wanted bounds' position
+		
+		
+		if(orientation == Direction.VERTICAL) { //vertical
+			h.transformed(AffineTransform.getRotateInstance(Math.PI/2));
+			h.moveToOrigin();
+		} else { //horizontal
+			h.transformed(AffineTransform.getRotateInstance(Math.PI));
+			h.moveToOrigin();
+		}
+		
+
+		Rectangle2D wantedBounds = null;
+		for( ArduinoSensorButton b : triggerButtons) {
+			Rectangle2D temp = b.getShape().getBounds2D();
+			if(wantedBounds == null) wantedBounds = temp;
+			else wantedBounds = wantedBounds.createUnion(temp);
+		}
+		
+		h.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
+		h.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(), wantedBounds.getY()));
+		
+		return h;
   }
 
   @Override

@@ -29,12 +29,8 @@ import java.util.Set;
 import javax.swing.JFrame;
 
 import org.apache.batik.bridge.BridgeContext;
-import org.apache.batik.bridge.DocumentLoader;
-import org.apache.batik.bridge.UserAgentAdapter;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.gvt.GraphicsNode;
-import org.apache.batik.parser.AWTPathProducer;
-import org.apache.batik.parser.PathParser;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.swing.JSVGCanvas;
 import org.w3c.dom.DOMImplementation;
@@ -44,6 +40,7 @@ import org.w3c.dom.Element;
 import util.Direction;
 
 import display.ArduinoSensorButton;
+import display.HellaSliderPositioner;
 import display.SensorButtonGroup;
 import display.SetUp;
 
@@ -116,63 +113,6 @@ public class SVGPathwaysGenerator {
 	}
 	
 	private Set<Shape> shapee = new HashSet();
-	private class HellaSlider {
-		Shape seg1, seg2, outer;
-
-		public HellaSlider(Shape seg1, Shape seg2, Shape outer) {
-			super();
-			this.seg1 = seg1;
-			this.seg2 = seg2;
-			this.outer = outer;
-		}
-		
-		public HellaSlider() {
-			try {
-				UserAgentAdapter ua = new UserAgentAdapter();
-				DocumentLoader loader = new DocumentLoader(ua);
-				String svgURI;
-				svgURI = new File("slider.svg").toURL().toString();
-				System.out.println(svgURI);
-				Document doc = loader.loadDocument(svgURI);
-	
-				PathParser pp = new PathParser();
-				AWTPathProducer producer = new AWTPathProducer();
-				pp.setPathHandler(producer);
-				pp.parse(doc.getElementById("seg1").getAttribute("d"));
-				seg1 = producer.getShape();
-				pp.parse(doc.getElementById("seg2").getAttribute("d"));
-				seg2 = producer.getShape();
-				pp.parse(doc.getElementById("outer").getAttribute("d"));
-				outer = producer.getShape();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		
-		public void setDimension(double width, double height) {
-			Rectangle2D oldBounds = bounds();
-			moveToOrigin();
-			transformed(AffineTransform.getScaleInstance(width / bounds().getWidth(), height / bounds().getHeight()));
-			transformed(AffineTransform.getTranslateInstance(oldBounds.getX(), oldBounds.getY()));
-		}
-		
-		public void transformed(AffineTransform trans) {
-			seg1 = trans.createTransformedShape(seg1);
-			seg2 = trans.createTransformedShape(seg2);
-			outer = trans.createTransformedShape(outer);
-		}
-		
-		Rectangle2D bounds() {
-			return seg1.getBounds2D().createUnion(seg2.getBounds2D()).createUnion(outer.getBounds2D());
-		}
-
-		//moves the top-left of the slider to the origin.
-		void moveToOrigin() {
-			Rectangle2D b = bounds();
-			transformed(AffineTransform.getTranslateInstance(-b.getX(), -b.getY()));
-		}
-	}
-
 	public void generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
 		// We create the SVG file by simply using SVGGraphics2D, saving to a
 		// file, and using the following command:
@@ -185,59 +125,9 @@ public class SVGPathwaysGenerator {
 
 				// step 1: find the bounding rectangle of the whole slider
 				//wantedBounds is the rectangle that you want to conform to
-				Rectangle2D wantedBounds = null;
-				for( ArduinoSensorButton b : s.triggerButtons) {
-					Rectangle2D temp = b.getShape().getBounds2D();
-					if(wantedBounds == null) wantedBounds = temp;
-					else wantedBounds = wantedBounds.createUnion(temp);
-				}
 				
-				try {
-					HellaSlider h = new HellaSlider();
-
-					h.moveToOrigin();
-					//the current bounds; could be anywhere. We bring it to the origin.
-					//If the slider should be vertical, we rotate 90 degrees, bring it back to the origin
-					//we then scale it such that the width and height are equal to the wanted bounds' dimensions,
-					//and finally translate to the wanted bounds' position
-					
-					
-					if(s.orientation == Direction.VERTICAL) { //vertical
-						h.transformed(AffineTransform.getRotateInstance(Math.PI/2));
-						h.moveToOrigin();
-					} else { //horizontal
-						h.transformed(AffineTransform.getRotateInstance(Math.PI));
-						h.moveToOrigin();
-					}
-					
-					h.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
-					h.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(), wantedBounds.getY()));
-					
-					//shapee.add(h.seg1); shapee.add(h.seg2); shapee.add(h.outer);
-					allButtons.add(h.seg1); allButtons.add(h.seg2); allButtons.add(h.outer);
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-//				try {
-//
-//					JSVGCanvas c = new JSVGCanvas();
-//					c.setDocumentState(c.ALWAYS_DYNAMIC);
-//					c.setDocument(doc);
-//					JFrame f = new JFrame();
-//					f.add(c);
-//					f.setVisible(true);
-//					f.paint(f.getGraphics());
-//					BridgeContext bc = c.getUpdateManager().getBridgeContext();
-//					Element slider = doc.getElementById("slider");
-//					GraphicsNode gn = bc.getGraphicsNode(slider);
-//					
-//					Shape shape = ((org.apache.batik.gvt.ShapeNode)gn).getShape();
-//					shapee = shape;
-//					f.setVisible(false);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-				// s.triggerButtons
+				HellaSliderPositioner h = s.getHSP();
+				allButtons.add(h.getSeg1()); allButtons.add(h.getSeg2()); allButtons.add(h.getOuter());
 			} else {
 				for(ArduinoSensorButton b : s.triggerButtons) {
 					allButtons.add(b.getShape());
