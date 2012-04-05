@@ -1,20 +1,12 @@
 #include <QT1106.h>
 
 // TEENSY
-int CHNG = 9;
-int DRDY = 10;
-/*int SCLK = 1;
-int SS = 0;
-int MOSI = 2;
-int MISO = 3;*/
-   
+/*int CHNG = 9;
+int DRDY = 10;*/
+
 // Arduino
-/*CHNG = 8;
+int CHNG = 8;
 int DRDY = 9;
-int SCLK = 13;
-int MOSI = 11;
-int MISO = 12;
-int SCLK = 13;*/
 
 //QT1106 instanceName(CHNG pin, DRDY pin, 1 for slider/0 for wheel)
 QT1106 QT(CHNG,DRDY,1);
