@@ -19,3 +19,4 @@ testdata/*
 .~lock.*
 *Inkscape.app*
 outline.svg
+*.DS_Store
