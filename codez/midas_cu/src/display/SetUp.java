@@ -304,7 +304,7 @@ public class SetUp extends JFrame {
       temp.deleteOnExit();
 
       BufferedWriter out = new BufferedWriter(new FileWriter(temp));
-      out.write(InstructionsGenerator.instructions());
+      out.write(InstructionsGenerator.instructions(false));
       out.close();
 
       return temp.toURI();
