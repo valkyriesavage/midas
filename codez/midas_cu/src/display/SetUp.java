@@ -22,7 +22,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -37,7 +39,10 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import pathway.SVGPathwaysGenerator;
+import serialtalk.ArduinoEvent;
+import serialtalk.ArduinoSetup;
 import serialtalk.SerialCommunication;
+import serialtalk.TouchDirection;
 import util.ExtensionFileFilter;
 import bridge.ArduinoToButtonBridge;
 import bridge.ArduinoToDisplayBridge;
@@ -218,6 +223,11 @@ public class SetUp extends JFrame {
           } catch (IOException e) {
             e.printStackTrace();
           }
+          
+          assignArduinoConnectionsFromSVG();
+          buttonCanvas.isInteractive = false;
+          
+          setSelectedBridge(currentBridge);
 
         } else {
           JOptionPane.showMessageDialog(null, "there are no buttons to print!",
@@ -254,6 +264,38 @@ public class SetUp extends JFrame {
 
   public void generatePathways() {
     pathwaysGenerator.generatePathways(displayedButtons, generatePathways.isSelected());
+  }
+  
+  public void assignArduinoConnectionsFromSVG() {
+    // we are cheating; we know that the SVG just assigns based on the order in which the buttons appear...
+    List<ArduinoSensorButton> buttonsOrdered = pathwaysGenerator.sortButtonsByUpperLeft(displayedButtons);
+    int i = 0;
+    Map<ArduinoToDisplayBridge, List<ArduinoEvent>> sensorsToAssign = new HashMap<ArduinoToDisplayBridge, List<ArduinoEvent>>();
+
+    // build a list of which sensors go to which bridges
+    for (ArduinoSensorButton button : buttonsOrdered) {
+      for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+        if (bridge.contains(button)) {
+          ArduinoEvent event = new ArduinoEvent(ArduinoSetup.sensors[i], TouchDirection.TOUCH);
+          
+          if (sensorsToAssign.containsKey(bridge)) {
+            sensorsToAssign.get(bridge).add(event);
+          }
+          else {
+            List<ArduinoEvent> assignToBridge = new ArrayList<ArduinoEvent>();
+            assignToBridge.add(event);
+            sensorsToAssign.put(bridge, assignToBridge);
+          }
+          
+          i++;
+        }
+      }
+    }
+    
+    // assign those sensors to those bridges (because we have to do this in chunks, sigh
+    for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+      bridge.setArduinoSequence(sensorsToAssign.get(bridge));
+    }
   }
 
   private URI generateInstructionsPage() {

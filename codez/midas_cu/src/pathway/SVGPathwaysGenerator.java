@@ -22,6 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.w3c.dom.DOMImplementation;
@@ -48,7 +50,7 @@ public class SVGPathwaysGenerator {
 	
 	private static List<Point> cellsOfInfluence(Point p, int extent) {
 		
-		List<Point> list = new LinkedList();
+		List<Point> list = new LinkedList<Point>();
 		for (int x = p.x - extent; x <= p.x + extent; x++) {
 			for (int y = p.y - extent; y <= p.y + extent; y++) {
 				list.add(new Point(x, y));
@@ -59,21 +61,21 @@ public class SVGPathwaysGenerator {
 		return list;
 	}
 	private static Iterable<Point> cellsOfInfluence(ArduinoSensorButton b) {
-		Set<Point> flattened = new HashSet();
+		Set<Point> flattened = new HashSet<Point>();
 		for(Point p : outlineFor(b)) {
 			flattened.addAll(cellsOfInfluence(p, BUTTON_INFLUENCE_WIDTH));
 		}
 		return flattened;
 	}
 	private static Iterable<Point> cellsOfInfluence(List<Point> path) {
-		Set<Point> flattened = new HashSet();
+		Set<Point> flattened = new HashSet<Point>();
 		for(Point p : path) {
 			flattened.addAll(cellsOfInfluence(p, PATH_INFLUENCE_WIDTH));
 		}
 		return flattened;
 	}
 
-	private List<List<Point>> allPaths = new ArrayList();
+	private List<List<Point>> allPaths = new ArrayList<List<Point>>();
 	
 	public void paint(Graphics2D g) {
 		g.setColor(Color.red);
@@ -86,28 +88,31 @@ public class SVGPathwaysGenerator {
 		}
 	}
 	
+	public List<ArduinoSensorButton> sortButtonsByUpperLeft (List<SensorButtonGroup> buttonsToSort) {
+	  List<ArduinoSensorButton> allButtons = new ArrayList<ArduinoSensorButton>();
+    for (SensorButtonGroup s : buttonsToSort)
+      allButtons.addAll(s.triggerButtons);
+
+    Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
+
+      @Override
+      public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
+        return (new Integer(o1.upperLeft.y)).compareTo(new Integer(
+            o2.upperLeft.y));
+      }
+
+    });
+    
+    return allButtons;
+	}
+	
 	public void generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
 		//We create the SVG file by simply using SVGGraphics2D, saving to a file, and using the following command:
-		//"inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
-		
-		
-		List<ArduinoSensorButton> allButtons = new ArrayList();
-		for (SensorButtonGroup s : buttonsToConnect)
-			allButtons.addAll(s.triggerButtons);
-
-		List<Point> allPorts = new ArrayList(allButtons.size());
-		for (int x = 0; x < allButtons.size(); x++)
-			allPorts.add(new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT));
-
-		Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
-
-			@Override
-			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
-				return (new Integer(o1.upperLeft.y)).compareTo(new Integer(
-						o2.upperLeft.y));
-			}
-
-		});
+		//"inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"		
+		List<ArduinoSensorButton> allButtons = sortButtonsByUpperLeft(buttonsToConnect);
+		List<Point> allPorts = new ArrayList<Point>(allButtons.size());
+    for (int x = 0; x < allButtons.size(); x++)
+      allPorts.add(new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT));
 
 		allPaths.clear();
 
@@ -123,7 +128,7 @@ public class SVGPathwaysGenerator {
 	}
 
 	private List<List<Point>> generateIndividual(List<ArduinoSensorButton> allButtons, List<Point> allPorts) {
-		List<List<Point>> paths = new ArrayList();
+		List<List<Point>> paths = new ArrayList<List<Point>>();
 
 		Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 		//We take each button and set its cells of influence to “restricted to B”, where B is that button.
@@ -137,11 +142,6 @@ public class SVGPathwaysGenerator {
 			i++;
 			if (PRINT_DEBUG) System.out.println("\tGenerating path " + i + " of " + allButtons.size());
 			Point port = portIterator.next();
-			
-//			List<Point> nearButton = new LinkedList();
-//			for (Point p : outlineFor(b)) {
-//				nearButton.addAll(g.removeOutOfBounds(adj(p)));
-//			}
 
 			List<Point> nearButton = outlineFor(button);
 			List<Point> path = g.findPath(nearButton, port, button);
@@ -151,6 +151,8 @@ public class SVGPathwaysGenerator {
 				g.close(cellsOfInfluence(path));
 			} else {
 				paths.add(null); //placeholder
+				JOptionPane.showMessageDialog(null, "buttons could not be routed! you will have to route your own buttons.",
+            "button routing failure", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		assert (!portIterator.hasNext());

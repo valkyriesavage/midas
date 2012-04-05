@@ -19,7 +19,7 @@ public class InstructionsGenerator {
     String ret = "<body><h2>Instructions to make shiny new sensors</h2>";
     ret += "<ol>";
     ret += "<li>Load the copper sheet into the cutter</li>";
-    ret += "<li>Open SignCut Pro and click 'Import', then cut out the file</li>";
+    ret += "<li>Download <a href='file:///Users/valkyrie/projects/midas_cu/codez/midas_cu/outline.svg'>this file</a>, then open SignCutPro, click \"Import\", then cut out the file</li>";
     ret += "<li>Remove the unnecessary background pieces from the sensors and tails, leaving the sensors undisturbed if possible</li>";
     ret += "<li>Using the transfer tape, put the newly-cut sensors onto your object</li>";
     ret += "<li>Attach one rainbow wire to each copper tail that leads to a button, as in <img src=''></li>.  Note that you should begin with the brown wire attaching to the top tail.";
