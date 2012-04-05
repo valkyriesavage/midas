@@ -84,9 +84,9 @@ public class SVGPathwaysGenerator {
 		return list;
 	}
 
-	private static Iterable<Point> cellsOfInfluence(ArduinoSensorButton b) {
+	private static Iterable<Point> cellsOfInfluence(Shape s) {
 		Set<Point> flattened = new HashSet();
-		for (Point p : outlineFor(b)) {
+		for (Point p : outlineFor(s)) {
 			flattened.addAll(cellsOfInfluence(p, BUTTON_INFLUENCE_WIDTH));
 		}
 		return flattened;
@@ -178,7 +178,7 @@ public class SVGPathwaysGenerator {
 		// file, and using the following command:
 		// "inkscape non-union.svg --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose"
 
-		List<ArduinoSensorButton> allButtons = new ArrayList();
+		List<Shape> allButtons = new ArrayList();
 		for (SensorButtonGroup s : buttonsToConnect) {
 			if (s.sensitivity == SetUp.HELLA_SLIDER) {
 				shapee.clear();
@@ -213,7 +213,8 @@ public class SVGPathwaysGenerator {
 					h.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
 					h.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(), wantedBounds.getY()));
 					
-					shapee.add(h.seg1); shapee.add(h.seg2); shapee.add(h.outer);
+					//shapee.add(h.seg1); shapee.add(h.seg2); shapee.add(h.outer);
+					allButtons.add(h.seg1); allButtons.add(h.seg2); allButtons.add(h.outer);
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -238,7 +239,9 @@ public class SVGPathwaysGenerator {
 //				}
 				// s.triggerButtons
 			} else {
-				allButtons.addAll(s.triggerButtons);
+				for(ArduinoSensorButton b : s.triggerButtons) {
+					allButtons.add(b.getShape());
+				}
 			}
 		}
 
@@ -247,12 +250,11 @@ public class SVGPathwaysGenerator {
 			allPorts.add(new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x
 					+ LINE_EXTENT));
 
-		Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
+		Collections.sort(allButtons, new Comparator<Shape>() {
 
 			@Override
-			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
-				return (new Integer(o1.upperLeft.y)).compareTo(new Integer(
-						o2.upperLeft.y));
+			public int compare(Shape o1, Shape o2) {
+				return (new Double(o1.getBounds2D().getY())).compareTo(o2.getBounds2D().getY());
 			}
 
 		});
@@ -273,20 +275,19 @@ public class SVGPathwaysGenerator {
 				allPaths, generatePathways);
 	}
 
-	private List<List<Point>> generateIndividual(
-			List<ArduinoSensorButton> allButtons, List<Point> allPorts) {
+	private List<List<Point>> generateIndividual(List<Shape> allButtons, List<Point> allPorts) {
 		List<List<Point>> paths = new ArrayList();
 
 		Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 		// We take each button and set its cells of influence to “restricted to
 		// B”, where B is that button.
-		for (ArduinoSensorButton b : allButtons) {
-			g.restrict(cellsOfInfluence(b), b);
+		for (Shape s : allButtons) {
+			g.restrict(cellsOfInfluence(s), s);
 		}
 
 		Iterator<Point> portIterator = allPorts.iterator();
 		int i = 0;
-		for (ArduinoSensorButton button : allButtons) { // generate pathways for
+		for (Shape button : allButtons) { // generate pathways for
 														// each button
 			i++;
 			if (PRINT_DEBUG)
@@ -362,11 +363,10 @@ public class SVGPathwaysGenerator {
 		return areaSegments;
 	}
 
-	public static List<Point> outlineFor(ArduinoSensorButton b) {
+	public static List<Point> outlineFor(Shape b) {
 		List<Point> outline = new LinkedList<Point>();
 
-		FlatteningPathIterator p = new FlatteningPathIterator(b.getShape()
-				.getPathIterator(null), 1);
+		FlatteningPathIterator p = new FlatteningPathIterator(b.getPathIterator(null), 1);
 		List<Line2D.Double> segments = toSegments(p);
 		for (Line2D.Double seg : segments) {
 			int x0 = (int) seg.x1, // possibly do rounding later
@@ -424,7 +424,7 @@ public class SVGPathwaysGenerator {
 		return outline;
 	}
 
-	private void writeSVG(File svg, List<ArduinoSensorButton> buttons,
+	private void writeSVG(File svg, List<Shape> buttons,
 			List<List<Point>> paths, boolean generatePathways) {
 		if (PRINT_DEBUG)
 			System.out.println("Writing SVG file to " + svg);
@@ -445,17 +445,16 @@ public class SVGPathwaysGenerator {
 
 		// draw all of the buttons
 		Iterator<List<Point>> pathsIterator = paths.iterator();
-		for (ArduinoSensorButton b : buttons) {
-			g.setStroke(new BasicStroke(1));
-			b.paint(g);
+		g.setStroke(new BasicStroke(1));
+		for (Shape b : buttons) {
+			g.setColor(new Color((float) Math.random(), (float) Math.random(), (float) Math.random()));
+//			b.paint(g);
+			g.draw(b);
 
 			if (generatePathways) {
-				g.setColor(new Color((float) Math.random(), (float) Math
-						.random(), (float) Math.random()));
-
 				List<Point> path = pathsIterator.next();
 				if (path != null) {
-					g.setStroke(new BasicStroke(.2f));
+//					g.setStroke(new BasicStroke(.2f));
 					for (Point p : path) {
 						point(g, p.x, p.y);
 					}
