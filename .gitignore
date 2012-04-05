@@ -6,7 +6,6 @@
 *.blg
 *.log
 *.out
-*.jpg
 *.pdf
 *.gz
 codez/midas_cu/bin/*

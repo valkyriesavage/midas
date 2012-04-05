@@ -1,15 +1,19 @@
+// TEENSY
+/*#define SS    0
+#define MOSI  2
+#define MISO  3
+#define SCLK  1*/
+
 #include <QT1106.h>
 
 // TEENSY
 int CHNG = 9;
 int DRDY = 10;
+int LED = 11;
 
-// Arduino
-/*int CHNG = 8;
-int DRDY = 9;*/
+int SLIDER = 1;
 
-//QT1106 instanceName(CHNG pin, DRDY pin, 1 for slider/0 for wheel)
-QT1106 QT(CHNG,DRDY,1);
+QT1106 QT(CHNG,DRDY,SLIDER);
 
 byte lastKeys = 0;
 byte lastSlide = 0;
@@ -19,12 +23,14 @@ boolean slideOff = true;
 void setup()
 {
   Serial.begin(9600);
-  Serial.write("here we go!\n");
   
   QT.Setup();		// go establish default settings
   QT.DI(0x01);          // set it to be more noise-tolerant
   QT.RES(0x08);         // set resolution to 8 bytes (0...255)
-  Serial.write("it's on!\n");
+  
+  //turn the light on so we know when it's ready
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, HIGH);
 }
 
 void loop()
