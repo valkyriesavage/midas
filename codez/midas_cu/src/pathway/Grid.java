@@ -1,36 +1,35 @@
 package pathway;
 
 import java.awt.Point;
+import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import display.ArduinoSensorButton;
-
 class Grid {
 	private interface State {
-		boolean canPass(ArduinoSensorButton b);
+		boolean canPass(Shape b);
 	}
 	private final State OPEN = new State() {
 		@Override
-		public boolean canPass(ArduinoSensorButton b) {
+		public boolean canPass(Shape b) {
 			return true;
 		}
 	};
 	private final State CLOSED = new State() {
 		@Override
-		public boolean canPass(ArduinoSensorButton b) {
+		public boolean canPass(Shape b) {
 			// TODO Auto-generated method stub
 			return false;
 		}
 	};
 
-	private State belongsTo(final ArduinoSensorButton button) {
+	private State belongsTo(final Shape button) {
 		return new State() {
 			@Override
-			public boolean canPass(ArduinoSensorButton b) {
+			public boolean canPass(Shape b) {
 				return b == button;
 			}
 		};
@@ -74,7 +73,7 @@ class Grid {
 	 * @param end
 	 * @return
 	 */
-	public List<Point> findPath(List<Point> starts, Point end, ArduinoSensorButton button) {
+	public List<Point> findPath(List<Point> starts, Point end, Shape button) throws PathwayGenerationException {
 		// step 1: wave expansion to create a mapping between locations and tags
 		Map<Point, Integer> edges = new HashMap();
 		for (Point p : starts)
@@ -113,7 +112,7 @@ class Grid {
 
 		if (!flood.containsKey(p)) {
 			if(SVGPathwaysGenerator.PRINT_DEBUG) System.out.println("\t\t:( Floodfill couldn't get to "+p);
-			return null;
+			throw new PathwayGenerationException();
 		}
 
 		backtrack.add(p);
@@ -130,7 +129,7 @@ class Grid {
 			}
 			if (!found) {
 				if(SVGPathwaysGenerator.PRINT_DEBUG) System.out.println("\t\t:(Backtracking got stuck at "+p);
-				return null;
+				throw new PathwayGenerationException();
 			}
 		}
 		return backtrack;
@@ -144,11 +143,11 @@ class Grid {
 		}
 	}
 
-	public void restrict(Iterable<Point> pts, final ArduinoSensorButton owner) {
+	public void restrict(Iterable<Point> pts, final Shape owner) {
 		State belongs = new State() {
 
 			@Override
-			public boolean canPass(ArduinoSensorButton b) {
+			public boolean canPass(Shape b) {
 				return b == owner;
 			}
 			

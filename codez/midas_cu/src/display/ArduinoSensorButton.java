@@ -32,7 +32,7 @@ public class ArduinoSensorButton extends JButton {
   private int width;
   private int height;
   
-  private Color relevantColor = CanvasPanel.COPPER;
+  public Color relevantColor = CanvasPanel.COPPER;
   
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
