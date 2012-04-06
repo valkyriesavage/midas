@@ -58,10 +58,6 @@ public class SVGPathwaysGenerator {
 	public static final int PATH_INFLUENCE_WIDTH = 2 * LINE_WIDTH; // should be
 																	// 2*LINE_WIDTH
 
-	private void point(Graphics2D g, int x1, int y1) {
-		g.drawRect(x1 - LINE_EXTENT, y1 - LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
-	}
-
 	static List<Point> cellsOfInfluence(Point p, int extent) {
 		List<Point> list = new LinkedList<Point>();
 		for (int x = p.x - extent; x <= p.x + extent; x++) {
@@ -102,6 +98,9 @@ public class SVGPathwaysGenerator {
 		return flattened;
 	}
 
+	private void point(Graphics2D g, int x1, int y1) {
+		g.drawRect(x1 - LINE_EXTENT, y1 - LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
+	}
 	public void paint(Graphics2D g) {
 		g.setColor(Color.red);
 		for (List<Point> path : allPaths) {
@@ -110,6 +109,79 @@ public class SVGPathwaysGenerator {
 					point(g, p.x, p.y);
 				}
 			}
+		}
+	}
+	
+	private static enum Corner {
+
+		TOPLEFT(1, 		new Point(LINE_EXTENT, 					LINE_EXTENT)),
+		TOPRIGHT(1, 	new Point(SetUp.CANVAS_X - LINE_EXTENT, LINE_EXTENT)),
+		BOTTOMLEFT(-1, 	new Point(LINE_EXTENT, 					SetUp.CANVAS_Y - LINE_EXTENT)),
+		BOTTOMRIGHT(-1, new Point(SetUp.CANVAS_X - LINE_EXTENT, SetUp.CANVAS_Y - LINE_EXTENT));
+		
+		private final int ySortDir;
+		private final Point start;
+		Corner(int yDir, Point start) {
+			this.ySortDir = yDir;
+			this.start = start;
+		}
+		
+		Point port(int x) {
+			Point p = new Point(start);
+			p.y += (1 + PATH_INFLUENCE_WIDTH) * x * ySortDir;
+			return p;
+		}
+		
+		void sort(List<Shape> shapes) {
+			Collections.sort(shapes, new Comparator<Shape>() {
+
+				@Override
+				public int compare(Shape o1, Shape o2) {
+					return (new Double(o1.getBounds2D().getY()*ySortDir)).compareTo(o2.getBounds2D().getY()*ySortDir);
+				}
+
+			});
+		}
+		
+		Corner[] others() {
+			Corner[] others = new Corner[3];
+			int i = 0;
+			for(Corner c : values()) if(c != this) others[i++] = c;
+			return others;
+		}
+	}
+
+	/**
+	 * Hella Slider "direction"; either do the ports 1-2-3 or 3-2-1
+	 * @author hellochar
+	 *
+	 */
+	private static enum HSDirection {
+		FORWARD, REVERSE
+	}
+	/**
+	 * Routing order; either the buttons go first or the hella goes first
+	 * @author hellochar
+	 *
+	 */
+	private static enum RouteOrder {
+		BUTTONFIRST, HELLAFIRST
+	}
+	/**
+	 * Locations of the hella slider ports (for the case that the hella slider is in the same corner as the normal buttons); 
+	 * the hella slider ports either go before the button ports or after.
+	 * @author hellochar
+	 *
+	 */
+	private static enum HSPortLocation {
+		BEFORE, AFTER
+	}
+	
+	private class SuccessfulException extends Exception {
+		List<List<Point>> paths;
+		SuccessfulException(List<List<Point>> paths) {
+			super();
+			this.paths = paths;
 		}
 	}
 	
@@ -126,7 +198,6 @@ public class SVGPathwaysGenerator {
 		List<Shape> sliderGenShapes = null; //possibly null!
 		for (SensorButtonGroup s : buttonsToConnect) {
 			if (s.sensitivity == SetUp.HELLA_SLIDER) {
-
 				sliderGenShapes = new LinkedList();
 				HellaSliderPositioner h = s.getHSP();
 				sliderGenShapes.add(h.getOuter());
@@ -138,23 +209,38 @@ public class SVGPathwaysGenerator {
 				}
 			}
 		}
-
-		/**
-		 * Sort buttons according to their Y positions.
-		 */
-		Collections.sort(buttonGenShapes, new Comparator<Shape>() {
-
-			@Override
-			public int compare(Shape o1, Shape o2) {
-				return (new Double(o1.getBounds2D().getY())).compareTo(o2.getBounds2D().getY());
-			}
-
-		});
 		
 		if (generatePathways) {
+			Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 			
 			try{
-				Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
+				for(Corner C : Corner.values()) {
+					if(sliderGenShapes == null) {
+						tryFullGeneration(buttonGenShapes, C);
+					} else {
+						for(HSDirection D : HSDirection.values()) {
+							for(RouteOrder O : RouteOrder.values()) {
+								
+								for(HSPortLocation L : HSPortLocation.values()) {
+									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, D, O, L);
+								}
+								
+								for(Corner Cc : C.others()) {
+									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, Cc, D, O);
+								}
+							}
+						}
+					}
+				}
+				throw new PathwayGenerationException();
+			}catch(SuccessfulException s) {
+				s.paths; //woo we have the paths now
+			}catch(PathwayGenerationException e) {
+				//oh noes we failed
+			}
+			
+			//==========OLD CODE==============
+			try{
 				// We take each button and set its cells of influence to “restricted to
 				// B”, where B is that button.
 				g.restrictAll(buttonGenShapes);
@@ -208,6 +294,43 @@ public class SVGPathwaysGenerator {
 		return true;
 	}
 
+	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
+	private void tryFullGeneration(List<Shape> buttonShapes, Corner C) throws SuccessfulException {
+		Grid g = new Grid();
+		C.sort(buttonShapes);
+
+		/*
+		restrict shape outlines - 										restrict all buttonShapes
+		create port-maps between buttons and their respective points - 	iterate through, make points
+		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
+		 */
+	}
+	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
+	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes, 
+			Corner C, HSDirection D, RouteOrder O, HSPortLocation L) throws SuccessfulException {
+		Grid g = new Grid();
+		C.sort(buttonShapes);
+
+		/*
+		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
+		create port-maps between buttons and their respective points - 	iterate through, make points depending on L and D
+		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
+		 */
+	}
+	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
+	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes,
+			Corner C, Corner Cc, HSDirection D, RouteOrder O) throws SuccessfulException {
+		Grid g = new Grid();
+		C.sort(buttonShapes);
+
+		/*
+		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
+		create port-maps between buttons and their respective points - 	iterate through, make points depending on D and Cc
+		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
+		 */
+	}
+	
+	
 	private List<List<Point>> generateIndividual(Grid g, List<Pair<Shape, Point>> pairs) throws PathwayGenerationException {
 		List<List<Point>> paths = new ArrayList<List<Point>>();
 
