@@ -1,0 +1,42 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<title>My Page</title> 
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+	<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		// TODO: replace me with right hostname
+		var socket = io.connect("http://localhost:8080");
+		socket.on('message', function (data) {
+			console.log(data);
+			$("#hello").text(data);
+		});
+		function send(dir) {
+			socket.emit("message", {direction: dir});
+		};
+
+		$(document).ready(function(){
+			});
+
+
+	</script>
+</head> 
+<body> 
+
+<div data-role="page">
+
+	<div data-role="header">
+		<h1>My Title</h1>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+		<p id="hello">...</p>		
+	</div><!-- /content -->
+
+</div><!-- /page -->
+
+</body>
+</html>
