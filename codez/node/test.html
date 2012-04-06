@@ -1,0 +1,62 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<title>My Page</title> 
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+	<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		// TODO: replace me with right hostname
+		var socket = io.connect("http://localhost:8080");
+		socket.on('message', function (data) {
+			console.log(data)
+			if(data['text']!=null){
+				$("#hello").text(data);
+			}
+			else if(data['check']!=null) {
+				$("input[type='checkbox']:first").attr("checked",true).checkboxradio("refresh");
+				console.log("checking the box");
+			}
+			else if(data['slider']!=null) {
+				$("#slider-0")[0]["value"] = data['slider'];
+				$("#slider-0").slider("refresh");
+			}
+		});
+		function send(dir) {
+			socket.emit("message", {direction: dir});
+		};
+
+		$(document).ready(function(){
+			});
+
+
+	</script>
+</head> 
+<body> 
+
+<div data-role="page">
+
+	<div data-role="header">
+		<h1>My Title</h1>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+		<p id="hello">...</p>
+		<label for="slider-0">Input slider:</label>
+		<input type="range" name="slider" id="slider-0" value="60" min="0" max="100" />
+		<label for="checkbox-0">Check 0</label>
+		<input type="checkbox" name="checkbox-0" id="checkbox-0" class="custom" />
+		<label for="checkbox-1">Check 1</label>
+		<input type="checkbox" name="checkbox-1" id="checkbox-1" class="custom" />
+		<label for="checkbox-2">Check 2</label>
+		<input type="checkbox" name="checkbox-2" id="checkbox-2" class="custom" />
+
+		
+	</div><!-- /content -->
+
+</div><!-- /page -->
+
+</body>
+</html>

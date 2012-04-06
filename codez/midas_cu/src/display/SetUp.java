@@ -259,11 +259,10 @@ public class SetUp extends JFrame {
     for (ArduinoToDisplayBridge deleteable : bridgesToDelete) {
       bridgeObjects.remove(deleteable);
     }
-//    generatePathways();
   }
 
   public void generatePathways() {
-    pathwaysGenerator.generatePathways(displayedButtons, !generatePathways.isSelected());
+    pathwaysGenerator.generatePathways(displayedButtons, generatePathways.isSelected());
   }
   
   public void assignArduinoConnectionsFromSVG() {
@@ -304,7 +303,7 @@ public class SetUp extends JFrame {
       temp.deleteOnExit();
 
       BufferedWriter out = new BufferedWriter(new FileWriter(temp));
-      out.write(InstructionsGenerator.instructions(false, generatePathways.isSelected()));
+      out.write(InstructionsGenerator.instructions(false, !generatePathways.isSelected()));
       out.close();
 
       return temp.toURI();
