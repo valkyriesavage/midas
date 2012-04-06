@@ -42,7 +42,9 @@ public class SocketTalkAction extends WebSocketClient implements UIAction {
 	
 	private String buildJSon() {
 	  String retStr = "{";
-	  
+	  retStr += "direction: " + dispatcher.lastEvent.touchDirection + ",";
+	  retStr += "sensor: (" + dispatcher.lastEvent.whichSensor.location.x + "," + dispatcher.lastEvent.whichSensor.location.y + "),";
+	  retStr += "name: " + dispatcher.lastEvent.whichSensor;
 	  retStr += "};";
 	  return retStr;
 	}
@@ -51,12 +53,14 @@ public class SocketTalkAction extends WebSocketClient implements UIAction {
 	  try {
 	    if(dispatcher.lastEvent != null) {
 	      send(buildJSon());
+	      System.out.println(buildJSon());
 	    } else {
 	      send("errorrrr");
 	    }
     } catch (NotYetConnectedException e) {
       e.printStackTrace();
       System.out.println("we aren't connected!");
+      System.out.println(buildJSon());
     } catch (InterruptedException e) {
       e.printStackTrace();
     }

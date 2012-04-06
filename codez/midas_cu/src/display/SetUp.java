@@ -66,7 +66,7 @@ public class SetUp extends JFrame {
   JPanel buttonDisplayGrid = new JPanel();
   List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
   CanvasPanel buttonCanvas = new CanvasPanel(this, displayedButtons);
-  List<ArduinoToDisplayBridge> bridgeObjects;
+  public List<ArduinoToDisplayBridge> bridgeObjects;
   JPanel buttonCreatorPanel = new JPanel();
   JPanel listsOfThingsHappening = new JPanel();
   JPanel propertiesPane = new JPanel();
@@ -263,7 +263,7 @@ public class SetUp extends JFrame {
   }
 
   public void generatePathways() {
-    pathwaysGenerator.generatePathways(displayedButtons, generatePathways.isSelected());
+    pathwaysGenerator.generatePathways(displayedButtons, !generatePathways.isSelected());
   }
   
   public void assignArduinoConnectionsFromSVG() {

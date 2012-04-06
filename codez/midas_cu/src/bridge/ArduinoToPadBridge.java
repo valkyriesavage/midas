@@ -3,6 +3,8 @@ package bridge;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
+import actions.SocketTalkAction;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoPad;
@@ -118,6 +122,17 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   }
 
   public void execute(ArduinoSensor sensor, TouchDirection direction) {
+    if (websocketing()) {
+      try {
+        SocketTalkAction interactiveSocket = new SocketTalkAction(new URI(websocketField()
+            .getText()));
+        interactiveSocket.doAction();
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+      }
+      return;
+    }
+    
     if (direction == TouchDirection.TOUCH) {
       interactivePiece.execute(((ArduinoPad) arduinoPiece).locationOnPad(sensor));
     }

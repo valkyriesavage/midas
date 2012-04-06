@@ -22,7 +22,7 @@ import display.ArduinoSensorButton;
 
 public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   private static final ArduinoSensor nullSensor = new ArduinoSensor(-1, -1);
-  
+
   private UIScript interactiveScript = new UIScript();
   private SocketTalkAction interactiveSocket;
 
@@ -38,11 +38,17 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   }
 
   public void executeScript() {
-    if(websocketing()) {
-      interactiveSocket.doAction();
-    } else {
-      interactiveScript.doAction();
+    if (websocketing()) {
+      try {
+        interactiveSocket = new SocketTalkAction(new URI(websocketField()
+            .getText()));
+        interactiveSocket.doAction();
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+      }
+      return;
     }
+    interactiveScript.doAction();
   }
 
   public void execute(ArduinoSensorButton button) {
@@ -73,10 +79,11 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
             interactiveScript.record();
             ((JButton) event.getSource()).setText("stop recording");
           } else {
-            interactiveScript.stopRecording();            
+            interactiveScript.stopRecording();
             ((JButton) event.getSource()).setText("");
             ((JButton) event.getSource()).setIcon(interactiveScript.icon());
-            ((JButton) event.getSource()).setToolTipText(interactiveScript.toString());
+            ((JButton) event.getSource()).setToolTipText(interactiveScript
+                .toString());
           }
         }
       });
@@ -93,13 +100,14 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
     });
     return go;
   }
-  
+
   private void initWebsocketField() {
     websocketField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void changedUpdate(DocumentEvent event) {
         try {
-          websocket = event.getDocument().getText(0, event.getDocument().getLength());
+          websocket = event.getDocument().getText(0,
+              event.getDocument().getLength());
         } catch (BadLocationException e1) {
           e1.printStackTrace();
         }
@@ -139,7 +147,8 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   }
 
   public void execute(ArduinoSensor sensor, TouchDirection direction) {
-    if (direction == TouchDirection.TOUCH) {
+    if (this.contains(sensor)
+        && (websocketing() || direction == TouchDirection.TOUCH)) {
       executeScript();
     }
   }
