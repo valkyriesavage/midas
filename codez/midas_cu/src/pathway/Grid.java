@@ -37,10 +37,13 @@ class Grid {
 	private final int width, height;
 	private final State[][] arr;
 	
+	private Map<Shape, Point> connectionMap;
+	
 	Grid(int w, int h) {
 		width = w;
 		height = h;
 		arr = new State[width][height];
+		connectionMap = new HashMap();
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				arr[x][y] = OPEN;
@@ -66,8 +69,7 @@ class Grid {
 	}
 	/**
 	 * Returns a path connecting End to any one of the starts without crossing
-	 * over any of the other paths/shapes; may return null if such a path
-	 * doesn't exist.
+	 * over any of the other paths/shapes; throws an exception if such a path doesn't exist.
 	 * 
 	 * @param starts
 	 * @param end
@@ -132,7 +134,12 @@ class Grid {
 				throw new PathwayGenerationException();
 			}
 		}
+		connectionMap.put(button, end);
 		return backtrack;
+	}
+	
+	public Map<Shape, Point> getConnections() {
+		return new HashMap<Shape, Point>(connectionMap);
 	}
 
 	
@@ -158,6 +165,12 @@ class Grid {
 					arr[p.x][p.y] = belongs;
 				else arr[p.x][p.y] = CLOSED;
 			}
+		}
+	}
+	
+	public void restrictAll(Iterable<Shape> shapes) {
+		for (Shape s : shapes) {
+			restrict(SVGPathwaysGenerator.cellsOfInfluence(s), s);
 		}
 	}
 
