@@ -25,13 +25,13 @@ public class InstructionsGenerator {
   
   private static String body(boolean hellaSlider, boolean noTails) {
     String ret = "<body><h2>Instructions to make shiny new sensors</h2>";
-    ret += "<table>";
+    ret += "<table border=1>";
     ret += row(number() + "Load the copper sheet into the cutter", "");
 
     if (noTails)
-      ret += row(number() + "Download <a href='"+MASK_FILE+"'>this file</a>", img(MASK_FILE));
+      ret += row(number() + "Download <a href='"+MASK_FILE+"'>this file</a>", svg(MASK_FILE));
     else
-      ret += row(number() + "Download <a href='"+OUTLINE_FILE+"'>this file</a>", img(OUTLINE_FILE));
+      ret += row(number() + "Download <a href='"+OUTLINE_FILE+"'>this file</a>", svg(OUTLINE_FILE));
 
     ret += row(number() + "Open SignCutPro",img(MIDAS_FIGS+"signcut-icon.png"));
     ret += row(number() + "Open your downloaded file", img(MIDAS_FIGS+"signcut-open.png"));
@@ -51,7 +51,7 @@ public class InstructionsGenerator {
       if(hellaSlider)
         ret += row(number() + "Attach the grey, white, and black wires to the copper tails leading to the slider","");
       ret += row(number() + "Load a vinyl sheet into the cutter", "");
-      ret += row(number() + "Download <a href='"+MASK_FILE+"'>this file</a>", img(MASK_FILE));
+      ret += row(number() + "Download <a href='"+MASK_FILE+"'>this file</a>", svg(MASK_FILE));
       ret += row(number() + "Open your downloaded file in SignCutPro", img(MIDAS_FIGS+"signcut-icon.png"));
       ret += row(number() + "Use the mirror tool at the bottom to flip the image",img(MIDAS_FIGS+"mirror-button.png"));
       ret += row(number() + "Cut out the file", img(MIDAS_FIGS+"cut-out.png"));
@@ -66,6 +66,10 @@ public class InstructionsGenerator {
     return ret;
   }
   
+  private static String svg(String svgLoc) {
+    return "<embed src=\""+svgLoc+"\" type=\"image/svg+xml\" height='525' width='275' />";
+  }
+  
   private static String img200(String imgLoc) {
     return "<img width=\"200\" src='" + imgLoc + "'>";
   }
@@ -75,7 +79,7 @@ public class InstructionsGenerator {
   }
   
   private static String row(String col1, String col2) {
-    return "<tr><td>"+col1+"</td><td>"+col2+"</tr>\n";
+    return "<tr><td width=50%>"+col1+"</td><td width=50%>"+col2+"</tr>\n";
   }
   
   private static String number() {
