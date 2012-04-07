@@ -113,7 +113,8 @@ public class SocketTalkAction implements UIAction, IOCallback {
     } else {
       socket.send("");
     }
-    socket.disconnect();
+    // we never need to disconnect because we're immediately forgetting about this object
+    //socket.disconnect();
   }
 
   public ImageIcon icon() {
