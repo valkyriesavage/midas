@@ -8,6 +8,9 @@ app.listen(8080);
 app.get('/test', function(req,res) {
 	res.sendfile(__dirname + "/test.html");
 });
+app.get('/helloworld', function(req,res) {
+	res.sendfile(__dirname + "/helloworld.html");
+});
 
 ////////// SOCKET.IO CALLBACKS /////////
 io.sockets.on('connection', function(client) {
