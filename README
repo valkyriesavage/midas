@@ -25,19 +25,23 @@ Other required things:
 want to include their code in my project:
   jshapes.jar -- http://java-sl.com/download/jshapes.jar
   jnativehook -- http://code.google.com/p/jnativehook/
-  java websocket -- https://github.com/TooTallNate/Java-WebSocket
+  socket.io-java-client -- https://github.com/Gottox/socket.io-java-client
+    * note that you need to also link the json-org.jar and weberknect-0.1.1.jar
+    * also note that this isn't a jar file itself, which is just rude, but
+      you can add it as a source folder for your project
   Inkscape --
-  	FOR WINDOWS:
-  	1) Download this file: http://sourceforge.net/projects/inkscape/files/inkscape/0.48.2/inkscape-0.48.2-1-win32.zip
-  	2) Unzip to codez/midas_cu/
-  		2.1) After unzipping, codez/midas_cu/ should have a folder "inkscape", inside which contains many files, notably "inkscape.exe".
+    FOR WINDOWS:
+    1) Download this file: http://sourceforge.net/projects/inkscape/files/inkscape/0.48.2/inkscape-0.48.2-1-win32.zip
+    2) Unzip to codez/midas_cu/
+      2.1) After unzipping, codez/midas_cu/ should have a folder "inkscape", inside which contains many files, notably "inkscape.exe".
   
-  	FOR MAC OS X:
-  	1) Download this file: http://sourceforge.net/projects/inkscape/files/inkscape/0.48.2/Inkscape-0.48.2-1-SNOWLEOPARD.dmg
-  	2) Mount the .DMG file; an icon should appear on your Desktop as "Inkscape"
-  	3) Double click "Inkscape". A window containing the Inkscape Application (with a fancy Inkscape icon) should appear.
-  	4) Drag and drop the Inkscape Application into codez/midas_cu/
-  		4.1) After dropping, codes/midas_cu/ should have the Inkscape Application
+    FOR MAC OS X:
+      1) Download this file: http://sourceforge.net/projects/inkscape/files/inkscape/0.48.2/Inkscape-0.48.2-1-SNOWLEOPARD.dmg
+      2) Mount the .DMG file; an icon should appear on your Desktop as "Inkscape"
+      3) Double click "Inkscape". A window containing the Inkscape Application (with a fancy Inkscape icon) should appear.
+      4) Drag and drop the Inkscape Application into codez/midas_cu/
+        4.1) After dropping, codes/midas_cu/ should have the Inkscape Application
 
   Also, if you want to load up the Arduino, you naturally need the Arduino IDE
 or similar, from e.g. http://arduino.cc/hu/Main/Software
+  For the Teensy, get Teensyduino - http://www.pjrc.com/teensy/teensyduino.html
