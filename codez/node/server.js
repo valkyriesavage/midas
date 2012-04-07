@@ -18,10 +18,14 @@ io.sockets.on('connection', function(client) {
 	client.emit('message', {check:true});
 	client.emit('message', {slider:33});
 	////// GENERIC MESSAGE BROADCAST //////////
+    client.on('', function(data){
+      console.log("received an empty message");
+      });
+      
 	client.on('message', function(data){
 		// send to all other clients
-
+        console.log('message received and broadcasted: ' + data);
 		client.broadcast.emit('message',data);
-		console.log('message received and broadcasted: ' + data);
+		
 	});
 });

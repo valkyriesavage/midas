@@ -2,16 +2,11 @@ package bridge;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
 
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
@@ -24,28 +19,12 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   private static final ArduinoSensor nullSensor = new ArduinoSensor(-1, -1);
 
   private UIScript interactiveScript = new UIScript();
-  private SocketTalkAction interactiveSocket;
 
-  public ArduinoToButtonBridge() {
-    initWebsocketField();
-  }
-
-  public String toString() {
-    if (interfacePiece.name != null) {
-      return interfacePiece.name;
-    }
-    return "unnamed";
-  }
+  public ArduinoToButtonBridge() { }
 
   public void executeScript() {
     if (websocketing()) {
-      try {
-        interactiveSocket = new SocketTalkAction(new URI(websocketField()
-            .getText()));
-        interactiveSocket.doAction();
-      } catch (URISyntaxException e) {
-        e.printStackTrace();
-      }
+      new SocketTalkAction(websocketField().getText()).doAction();
       return;
     }
     interactiveScript.doAction();
@@ -99,35 +78,6 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
       }
     });
     return go;
-  }
-
-  private void initWebsocketField() {
-    websocketField.getDocument().addDocumentListener(new DocumentListener() {
-      @Override
-      public void changedUpdate(DocumentEvent event) {
-        try {
-          websocket = event.getDocument().getText(0,
-              event.getDocument().getLength());
-        } catch (BadLocationException e1) {
-          e1.printStackTrace();
-        }
-        try {
-          interactiveSocket = new SocketTalkAction(new URI(websocket));
-        } catch (URISyntaxException e) {
-          // do nothing ; probably they aren't done typing
-        }
-      }
-
-      @Override
-      public void insertUpdate(DocumentEvent event) {
-        changedUpdate(event);
-      }
-
-      @Override
-      public void removeUpdate(DocumentEvent event) {
-        changedUpdate(event);
-      }
-    });
   }
 
   public JButton registerButton() {

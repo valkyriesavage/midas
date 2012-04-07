@@ -26,6 +26,14 @@ public class ArduinoPad implements ArduinoObject {
     return null;
   }
   
+  public double positionXInPad(ArduinoSensor sensor) {
+    return locationOnPad(sensor).x / (1.0*sensors.length - 1);
+  }
+ 
+  public double positionYInPad(ArduinoSensor sensor) {
+    return locationOnPad(sensor).y / (1.0*sensors[0].length - 1);
+  }
+  
   public int hashCode() {
     String allSensors = "";
     for (int i=0; i<sensors.length; i++) {

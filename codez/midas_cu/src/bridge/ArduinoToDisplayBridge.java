@@ -69,7 +69,7 @@ public abstract class ArduinoToDisplayBridge {
 
   public JButton setArduinoSequenceButton() {
     JButton sequenceButton;
-    if (arduinoPiece != null) {
+    if (arduinoPiece != null && arduinoPiece != ArduinoToSliderBridge.nullSlider && arduinoPiece != ArduinoToPadBridge.nullPad) {
       sequenceButton = new JButton("registered (change)");
     } else {
       sequenceButton = new JButton("register sensors");
@@ -135,5 +135,9 @@ public abstract class ArduinoToDisplayBridge {
 
   protected boolean screenScripting() {
     return interactionType.equals(UIAction.POSSIBLE_INTERACTIONS[0]);
+  }
+  
+  public String toString() {
+    return interfacePiece.name;
   }
 }

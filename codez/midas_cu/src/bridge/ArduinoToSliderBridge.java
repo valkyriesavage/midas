@@ -2,8 +2,6 @@ package bridge;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,13 +13,12 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import actions.SocketTalkAction;
-
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.ArduinoSlider;
 import serialtalk.TouchDirection;
+import actions.SocketTalkAction;
 import capture.UISlider;
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
@@ -29,7 +26,7 @@ import display.SetUp;
 
 public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
 
-  private static final ArduinoSlider nullSlider = new ArduinoSlider(
+  public static final ArduinoSlider nullSlider = new ArduinoSlider(
       new ArduinoSensor[0]);
 
   public UISlider interactivePiece;
@@ -51,10 +48,6 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
         setSensitivity(newSensitivity);
       }
     });
-  }
-
-  public String toString() {
-    return interfacePiece.name;
   }
 
   public void setSensitivity(Integer sensitivity) {
@@ -127,12 +120,7 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
 
   public void execute(ArduinoSensor sensor, TouchDirection direction) {
     if (websocketing()) {
-      try {
-        SocketTalkAction interactiveSocket = new SocketTalkAction(new URI(websocketField().getText()));
-        interactiveSocket.doAction();
-      } catch (URISyntaxException e) {
-        e.printStackTrace();
-      }
+      new SocketTalkAction(websocketField().getText()).doAction();
       return;
     }
     if (direction == TouchDirection.TOUCH) {
