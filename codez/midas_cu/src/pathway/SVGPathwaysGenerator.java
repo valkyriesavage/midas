@@ -31,6 +31,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import display.ArduinoSensorButton;
+import display.CanvasPanel;
 import display.HellaSliderPositioner;
 import display.SensorButtonGroup;
 import display.SetUp;
@@ -89,7 +90,7 @@ public class SVGPathwaysGenerator {
 	private List<List<Point>> allPaths = new ArrayList<List<Point>>();
 	
 	public void paint(Graphics2D g) {
-		g.setColor(Color.red);
+		g.setColor(CanvasPanel.LIGHT_COPPER);
 		for (List<Point> path : allPaths) {
 			if (path != null) {
 				for (Point p : path) {

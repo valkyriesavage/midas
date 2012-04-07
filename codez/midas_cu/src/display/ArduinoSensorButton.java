@@ -182,7 +182,7 @@ public class ArduinoSensorButton extends JButton {
     if(!selected) {
       relevantColor = CanvasPanel.COPPER;
     } else {
-      relevantColor = Color.GREEN;
+      relevantColor = CanvasPanel.DARK_COPPER;
     }
   }
   
