@@ -1,0 +1,137 @@
+<!DOCTYPE html> 
+<html> 
+  <head> 
+    <title>Edgewrite</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="helper.js"></script>
+    <script>
+      var timeoutBeforeRendering = 1000;
+      var currentSetOfActivations = new Array();
+      var timeout;
+
+      var socket = io.connect(HOST);
+      socket.on('message', function (dataStr) {
+        console.log(dataStr);
+        var data = jQuery.parseJSON(dataStr);
+        if(data['type'] == 'PAD') {
+          if(data['direction'] == 'TOUCH') {
+            touch(data['xposition'], data['yposition']);
+          } else {
+            release(data['xposition'], data['yposition']);
+          }
+          clearTimeout(timeout);
+          timeout = setTimeout("renderLetter()", timeoutBeforeRendering);
+        } else if (data['type'] == 'SLIDER') {
+        } else if (data['type'] == 'BUTTON') {
+        }
+      });
+
+      function send(dir) {
+        socket.emit("message", {direction: dir});
+      };
+
+      $(document).ready(function(){});
+
+      function Coordinate (x, y) {
+        this.x = x;
+        this.y = y;
+
+        this.equals = function(o) {
+          return o.x == this.x && o.y == this.y;
+        }
+      }
+
+      var hash=function(listOfCoords) {
+        var ret = 0;
+        for (var i=0; i<listOfCoords.length; i++) {
+          var coord = listOfCoords[i];
+          ret |= coord.x << 2*i;
+          ret |= coord.y << 2*i+1;
+        }
+        return ret;
+      };
+
+      var UL = new Coordinate(0,0);
+      var UR = new Coordinate(1,0);
+      var LL = new Coordinate(0,1);
+      var LR = new Coordinate(1,1);
+
+      var LETTERMAP = {};
+      LETTERMAP[hash([LL,UR,LR])] = "A";
+      LETTERMAP[hash([UL,LL,LR,LL])] = "B";
+      LETTERMAP[hash([UR,UL,LL,LR])] = "C";
+      LETTERMAP[hash([UR,LR,LL,LR])] = "D";
+      LETTERMAP[hash([UL,UR,UL,LL,LR])] = "E";
+      LETTERMAP[hash([UR,UL,LL])] = "F";
+      LETTERMAP[hash([UR,UL,UR,LR,LL])] = "G";
+      LETTERMAP[hash([UL,LL,UR,LR])] = "H";
+      LETTERMAP[hash([UL,LR])] = "I";
+      LETTERMAP[hash([UR,LR,LL])] = "J";
+      LETTERMAP[hash([UL,LL,UR,LL,LR])] = "K";
+      LETTERMAP[hash([UL,LL,LR])] = "L";
+      LETTERMAP[hash([LL,UL,LR,UR,LR])] = "M";
+      LETTERMAP[hash([LL,UL,LR,UR])] = "N";
+      LETTERMAP[hash([UR,UL,LL,LR,UR])] = "O";
+      LETTERMAP[hash([UL,UR,UL,LL])] = "P";
+      LETTERMAP[hash([UR,UL,UR,LR,UR])] = "Q";
+      LETTERMAP[hash([LL,UL,UR])] = "R";
+      LETTERMAP[hash([UR,UL,LR,LL])] = "S";
+      LETTERMAP[hash([UL,UR,LR])] = "T";
+      LETTERMAP[hash([UL,LL,LR,UR])] = "U";
+      LETTERMAP[hash([UL,LL,UR])] = "V";
+      LETTERMAP[hash([UL,LL,UR,LR,UR])] = "W";
+      LETTERMAP[hash([UL,LR,UR,LL])] = "X";
+      LETTERMAP[hash([UL,LR,UR,LR])] = "Y";
+      LETTERMAP[hash([UL,UR,LL,LR])] = "Z";
+
+      function renderLetter() {
+        var newLetter = LETTERMAP[hash(currentSetOfActivations)];
+        if (newLetter == null) {
+          newLetter = "?";
+        }
+        $('#renderedLetter').children()[0].textContent = newLetter;
+        currentSetOfActivations = new Array();
+        drawSquares();
+      }
+
+      function square(x, y, color) {
+        var c = document.getElementById("drawing");
+        var ctx = c.getContext("2d");
+        ctx.fillStyle=color;
+        ctx.fillRect(x*75, y*75, 50, 50);
+      }
+
+      function touch(x, y) {
+        square(x, y, "#FF0000");
+        currentSetOfActivations.push(new Coordinate(x,y));
+      }
+
+      function release(x, y) {
+        square(x, y, "#0000FF");
+      }
+
+      function drawSquares() {
+        release(0,0);
+        release(0,1);
+        release(1,0);
+        release(1,1);
+      }
+
+    </script>
+  </head> 
+  <body onload="drawSquares()"> 
+    <div data-role="page">
+      <div data-role="header">
+        <h1>EdgeWrite</h1>
+      </div><!-- /header -->
+      <div data-role="content">
+        <canvas id="drawing" width="150" height="150"></canvas>
+        <div id="renderedLetter"><h1>?</h1></div>
+      </div><!--/content--> 
+    </div><!-- /page -->
+  </body>
+</html>

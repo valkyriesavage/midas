@@ -7,9 +7,9 @@
     <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="helper.js"></script>
     <script>
-      // TODO: replace me with right hostname
-      var socket = io.connect("http://localhost:8080");
+      var socket = io.connect(HOST);
       socket.on('message', function (dataStr) {
         console.log(dataStr);
         var data = jQuery.parseJSON(dataStr);
