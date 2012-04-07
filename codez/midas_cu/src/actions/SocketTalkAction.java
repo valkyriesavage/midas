@@ -82,10 +82,14 @@ public class SocketTalkAction implements UIAction, IOCallback {
       json.put("name", dispatcher.getBridgeForSensor(event.whichSensor)
           .toString());
       if (type == EventType.SLIDER) {
-        json.put("position",
-            ((ArduinoSlider) ((ArduinoToSliderBridge) dispatcher
-                .getBridgeForSensor(event.whichSensor)).arduinoPiece)
-                .positionInSlider(event.whichSensor));
+        if (event.isHellaSlider) {
+          json.put("position", dispatcher.lastEvent.hellaSliderLocation / 256.0);
+        } else {
+          json.put("position",
+              ((ArduinoSlider) ((ArduinoToSliderBridge) dispatcher
+                  .getBridgeForSensor(event.whichSensor)).arduinoPiece)
+                  .positionInSlider(event.whichSensor));
+        }
       }
       if (type == EventType.PAD) {
         json.put("xposition", ((ArduinoPad) ((ArduinoToPadBridge) dispatcher

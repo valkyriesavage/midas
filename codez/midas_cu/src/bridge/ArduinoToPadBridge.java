@@ -106,7 +106,8 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
       public void actionPerformed(ActionEvent event) {
         for (int i = (int) Math.sqrt(sensitivity) - 1; i >= 0; i--) {
           for (int j = 0; j < Math.sqrt(sensitivity); j++) {
-            interactivePiece.execute(new Point(j, i));
+            execute(((ArduinoPad)arduinoPiece).sensorAt(j, i), TouchDirection.TOUCH);
+            execute(((ArduinoPad)arduinoPiece).sensorAt(j, i), TouchDirection.RELEASE);
           }
         }
       }
@@ -179,9 +180,8 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
     List<ArduinoSensor> sensors = new ArrayList<ArduinoSensor>();
     for (ArduinoEvent e : events) {
       if (!sensors.contains(e.whichSensor)) {
-        continue;
+        sensors.add(e.whichSensor);
       }
-      sensors.add(e.whichSensor);
     }
 
     // now organize them
@@ -189,6 +189,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
       System.out.println("wrong number of sensors registered");
       return;
     }
+    
     int sideOfPad = (int) Math.floor(Math.sqrt(sensitivity));
     ArduinoSensor[][] newPad = new ArduinoSensor[sideOfPad][sideOfPad];
 
@@ -197,6 +198,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
         newPad[i][j] = sensors.get(i * sideOfPad + j);
       }
     }
+    
     arduinoPiece = new ArduinoPad(newPad);
     ArduinoSetup.addPad((ArduinoPad) arduinoPiece);
   }

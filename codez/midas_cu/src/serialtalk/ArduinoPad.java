@@ -15,11 +15,15 @@ public class ArduinoPad implements ArduinoObject {
     return locationOnPad(sensor) != null;
   }
   
+  public ArduinoSensor sensorAt(int x, int y) {
+    return sensors[y][x];
+  }
+  
   public Point locationOnPad(ArduinoSensor sensor) {
     for (int i=0; i<sensors.length; i++) {
       for (int j=0; j<sensors[i].length; j++) {
         if (sensors[i][j].equals(sensor)) {
-          return new Point(i, j);
+          return new Point(j, i);
         }
       }
     }

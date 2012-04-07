@@ -1,15 +1,15 @@
 // TEENSY
-/*#define SS    0
-#define MOSI  2
-#define MISO  3
-#define SCLK  1*/
-
-#include <QT1106.h>
-
-// TEENSY
+/*#include <QT1106.h>
 int CHNG = 9;
 int DRDY = 10;
-int LED = 11;
+int LED = 11;*/
+
+// ARDUINO
+#include <QT1106.h>
+int CHNG = 8;
+int DRDY = 9;
+// no LED use.. it makes the pins go crayzeee
+int LED = 0;
 
 int SLIDER = 1;
 
@@ -27,10 +27,14 @@ void setup()
   QT.Setup();		// go establish default settings
   QT.DI(0x01);          // set it to be more noise-tolerant
   QT.RES(0x08);         // set resolution to 8 bytes (0...255)
+  //QT.Mode(0x05);        // set mode to sync mode (this should reduce noise...
+                        // the QT only speaks when spoken to)
+  
+  Serial.println("hello, world");
   
   //turn the light on so we know when it's ready
-  pinMode(LED, OUTPUT);
-  digitalWrite(LED, HIGH);
+  /*pinMode(LED, OUTPUT);
+  digitalWrite(LED, HIGH);*/
 }
 
 void loop()

@@ -111,7 +111,11 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
     show.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         for (int i = 0; i < sensitivity; i++) {
-          interactivePiece.execute(i);
+          ArduinoSensor sensor = ((ArduinoSlider)arduinoPiece).sensorAt(i);
+          execute(sensor, TouchDirection.TOUCH);
+          if(websocketing()) {
+            execute(sensor, TouchDirection.RELEASE);
+          }
         }
       }
     });
@@ -121,7 +125,6 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   public void execute(ArduinoSensor sensor, TouchDirection direction) {
     if (websocketing()) {
       new SocketTalkAction(websocketField().getText()).doAction();
-      return;
     }
     if (direction == TouchDirection.TOUCH) {
       interactivePiece.execute(((ArduinoSlider) arduinoPiece)
@@ -138,7 +141,11 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   }
 
   public void execute(int hellaSliderValue) {
-    interactivePiece.execute(hellaSliderValue);
+    if(websocketing()) {
+      new SocketTalkAction(websocketField().getText()).doAction();
+    } else {
+      interactivePiece.execute(hellaSliderValue);
+    }
   }
 
   private void initWebsocketField() {
