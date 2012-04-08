@@ -1,0 +1,87 @@
+<!DOCTYPE html> 
+<html> 
+  <head> 
+    <title>Edgewrite</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="helper.js"></script>
+    <script>
+      var timeoutBeforeRendering = 1000;
+      var currentSetOfActivations = new Array();
+      var timeout;
+
+      var i = 0;
+      var j = 0;
+      var CANVAS_X = 150;
+      var CANVAS_Y = 150;
+
+      var socket = io.connect(HOST);
+      socket.on('message', function (dataStr) {
+        console.log(dataStr);
+        var data = jQuery.parseJSON(dataStr);
+        if(data['type'] == 'PAD') {
+          if(data['direction'] == 'TOUCH') {
+            touch(data['xposition'], data['yposition']);
+          } else {
+            clearTimeout(timeout);
+            timeout = setTimeout("renderLetter()", timeoutBeforeRendering);
+          }
+        } else if (data['type'] == 'SLIDER') {
+        } else if (data['type'] == 'BUTTON') {
+        }
+      });
+
+      function send(dir) {
+        socket.emit("message", {direction: dir});
+      };
+
+      $(document).ready(function(){});
+
+      function Coordinate (x, y) {
+        this.x = x;
+        this.y = y;
+
+        this.equals = function(o) {
+          return o.x == this.x && o.y == this.y;
+        }
+      }
+
+      function renderLetter() {
+        newLetter = "B"; // do some OCR here... how?
+        if (newLetter == null) {
+          newLetter = "?";
+        }
+        $('#renderedLetter').children()[0].textContent += newLetter;
+        i++;
+        if (i > (CANVAS_X / 25)) {
+          i = 0;
+          j++;
+        }
+        currentSetOfActivations = new Array();
+      }
+
+      function touch(x, y) {
+        var c = document.getElementById("drawing");
+        var ctx = c.getContext("2d");
+        ctx.fillStyle="0xFFFFFF";
+        ctx.fillRect(i*25+x, j*25+y, 1, 1);
+        currentSetOfActivations.push(new Coordinate(x,y));
+      }
+
+    </script>
+  </head> 
+  <body onload=""> 
+    <div data-role="page">
+      <div data-role="header">
+        <h1>EdgeWrite</h1>
+      </div><!-- /header -->
+      <div data-role="content">
+        <canvas id="drawing" width="150" height="150"></canvas>
+        <div id="renderedLetter"><h1>?</h1></div>
+      </div><!--/content--> 
+    </div><!-- /page -->
+  </body>
+</html>
