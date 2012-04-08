@@ -9,7 +9,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="helper.js"></script>
     <script>
-      var timeoutBeforeRendering = 1000;
+      var timeoutBeforeRendering = 2000;
       var currentSetOfActivations = new Array();
       var timeout;
 
@@ -69,7 +69,7 @@
       LETTERMAP[hash([UR,UL,LL])] = "F";
       LETTERMAP[hash([UR,UL,UR,LR,LL])] = "G";
       LETTERMAP[hash([UL,LL,UR,LR])] = "H";
-      LETTERMAP[hash([UL,LR])] = "I";
+      LETTERMAP[hash([UL,LL])] = "I";
       LETTERMAP[hash([UR,LR,LL])] = "J";
       LETTERMAP[hash([UL,LL,UR,LL,LR])] = "K";
       LETTERMAP[hash([UL,LL,LR])] = "L";
@@ -93,8 +93,9 @@
         if (newLetter == null) {
           newLetter = "?";
         }
-        $('#renderedLetter').children()[0].textContent = newLetter;
+        $('#renderedLetter').children()[0].textContent += newLetter;
         currentSetOfActivations = new Array();
+        currentSetOfActivations.length = 0;
         drawSquares();
       }
 
@@ -105,16 +106,46 @@
         ctx.fillRect(x*75, y*75, 50, 50);
       }
 
+      function line(x1, y1, x2, y2, color) {
+        x1 = x1*75+37;
+        y1 = y1*75+37;
+        x2 = x2*75+37;
+        y2 = y2*75+37;
+        var c = document.getElementById("drawing");
+        var ctx = c.getContext("2d");
+        ctx.fillStyle=color;
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.stroke();
+      }
+
+      function lines() {
+        for (var i=0; i<currentSetOfActivations.length - 1; i++) {
+          console.log("line from " + i + " to " + (i+1));
+          line(currentSetOfActivations[i].x,
+               currentSetOfActivations[i].y,
+               currentSetOfActivations[i+1].x,
+               currentSetOfActivations[i+1].y,
+               "#000000");
+        }
+      }
+
       function touch(x, y) {
-        square(x, y, "#FF0000");
         currentSetOfActivations.push(new Coordinate(x,y));
+        square(x, y, "#FF0000");
+        lines();
       }
 
       function release(x, y) {
         square(x, y, "#0000FF");
+        lines();
       }
 
       function drawSquares() {
+        var c = document.getElementById("drawing");
+        var ctx = c.getContext("2d");
+        ctx.fillStyle="#FFFFFF";
+        ctx.fillRect(0,0,150,150);
         release(0,0);
         release(0,1);
         release(1,0);
