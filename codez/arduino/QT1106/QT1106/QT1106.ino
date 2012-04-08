@@ -42,12 +42,12 @@ void loop()
          if((QT.Keys >> i & 1) && !(lastKeys >> i & 1)){
            Serial.print("K:");
            Serial.print(i);
-           Serial.println(" D");
+           Serial.print(" Dx");
          }
          if(!(QT.Keys >> i & 1) && (lastKeys >> i & 1)){
            Serial.print("K:");
            Serial.print(i);
-           Serial.println(" U");
+           Serial.print(" Ux");
          }
       }
 
@@ -58,7 +58,7 @@ void loop()
     if (QT.slidePos != lastSlide) {
       Serial.print("S:");
       Serial.print(QT.slidePos);
-      Serial.println(" D");
+      Serial.print(" Dx");
       lastSlide = QT.slidePos;
       slideOff = false;
     }
@@ -66,7 +66,7 @@ void loop()
     if (slideOff == false) {
       Serial.print("S:");
       Serial.print(QT.slidePos);
-      Serial.println(" U");
+      Serial.print(" Ux");
       slideOff = true;
     }
   }

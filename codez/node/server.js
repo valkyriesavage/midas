@@ -20,6 +20,9 @@ app.get('/edgewrite', function(req,res) {
 app.get('/pockettouch', function(req,res) {
     res.sendfile(__dirname + "/pockettouch.html");
     });
+app.get('/musicposter', function(req,res) {
+    res.sendfile(__dirname + "/musicposter.html");
+    });
 
 ////////// SOCKET.IO CALLBACKS /////////
 io.sockets.on('connection', function(client) {

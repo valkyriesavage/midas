@@ -133,28 +133,6 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
       // this.interactivePiece.execute(whichPad)
     }
   }
-
-  public void setSequence(List<ArduinoEvent> events) {
-    // for a pad, we want to know all the bits. we need to tell this to the
-    // ArduinoSetup, too
-    List<ArduinoSensor> sensorsInPad = new ArrayList<ArduinoSensor>();
-    for (ArduinoEvent e : events) {
-      if (e.touchDirection == TouchDirection.RELEASE
-          || sensorsInPad.contains(e.whichSensor)) {
-        continue;
-      }
-      sensorsInPad.add(e.whichSensor);
-    }
-    int arrayDim = (int) Math.sqrt(sensorsInPad.size());
-    ArduinoSensor[][] sensors = new ArduinoSensor[arrayDim][arrayDim];
-    for (int i = 0; i < arrayDim; i++) {
-      for (int j = 0; j < arrayDim; j++) {
-        sensors[i][j] = sensorsInPad.get(i * arrayDim + j);
-      }
-    }
-    arduinoPiece = new ArduinoPad(sensors);
-    ArduinoSetup.addPad((ArduinoPad) arduinoPiece);
-  }
   
   private void initWebsocketField() {
     websocketField.getDocument().addDocumentListener(new DocumentListener() {
@@ -179,7 +157,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
     // for a pad, we want to take them in order l->r t->b
     List<ArduinoSensor> sensors = new ArrayList<ArduinoSensor>();
     for (ArduinoEvent e : events) {
-      if (!sensors.contains(e.whichSensor)) {
+      if (e.touchDirection == TouchDirection.TOUCH && !sensors.contains(e.whichSensor)) {
         sensors.add(e.whichSensor);
       }
     }
@@ -187,6 +165,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
     // now organize them
     if (sensitivity.intValue() != sensors.size()) {
       System.out.println("wrong number of sensors registered");
+      arduinoPiece = null;
       return;
     }
     

@@ -76,7 +76,7 @@ public abstract class ArduinoToDisplayBridge {
       sequenceButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent event) {
           JButton src = (JButton) event.getSource();
-          if (!src.getText().equals("done")) {
+          if (!src.getText().equals("done")) { // we want to start capturing
             if (interfacePiece.isSlider) {
               JOptionPane.showMessageDialog(null,
                   "slide your finger from top to bottom or left to right",
@@ -92,7 +92,7 @@ public abstract class ArduinoToDisplayBridge {
             }
             src.setText("done");
             dispatcher.beginCapturing();
-          } else { // src.getText().equals("done")
+          } else { // src.getText().equals("done") , i.e. we are done capturing
             List<ArduinoEvent> report = dispatcher.endCaptureAndReport();
             List<ArduinoEvent> sendAlong = new ArrayList<ArduinoEvent>();
             for (ArduinoEvent e : report) {
@@ -102,7 +102,11 @@ public abstract class ArduinoToDisplayBridge {
               }
             }
             setArduinoSequence(sendAlong);
-            src.setText("registered (change)");
+            if (arduinoPiece != null) {
+              src.setText("registered (change)");
+            } else {
+              src.setText("try again");
+            }
           }
         }
       });

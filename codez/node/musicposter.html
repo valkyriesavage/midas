@@ -1,0 +1,41 @@
+<!DOCTYPE html> 
+<html> 
+  <head> 
+    <title>!!!COMING SOON Justice COMING SOON!!!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="helper.js"></script>
+    <script>
+      var socket = io.connect(HOST);
+      socket.on('message', function (dataStr) {
+        console.log(dataStr);
+        var data = jQuery.parseJSON(dataStr);
+        if(data['type'] == 'PAD') {
+        } else if (data['type'] == 'SLIDER') {
+        } else if (data['type'] == 'BUTTON') {
+          if (data['name'] == 'civilization') {
+            // play civilization, obvs
+          }
+        }
+      });
+
+      function send(dir) {
+        socket.emit("message", {direction: dir});
+      };
+
+      $(document).ready(function(){});
+
+    </script>
+  </head> 
+  <body onload=""> 
+    <div data-role="page">
+      <div data-role="header">
+        <h1>Light in Response</h1>
+      </div><!-- /header -->
+      <canvas id="drawing" width="350" height="350"></canvas>
+    </div><!-- /page -->
+  </body>
+</html>
