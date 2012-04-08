@@ -17,6 +17,9 @@ app.get('/helloworld', function(req,res) {
 app.get('/edgewrite', function(req,res) {
     res.sendfile(__dirname + "/edgewrite.html");
     });
+app.get('/pockettouch', function(req,res) {
+    res.sendfile(__dirname + "/pockettouch.html");
+    });
 
 ////////// SOCKET.IO CALLBACKS /////////
 io.sockets.on('connection', function(client) {
