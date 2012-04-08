@@ -220,6 +220,7 @@ public class SerialCommunication implements SerialPortEventListener {
       dispatcher.clearRecentEvents();
       return;
     }
+    System.out.println("event!" + e);
     dispatcher.handleEvent(e);
   }
 

@@ -224,8 +224,10 @@ public class SetUp extends JFrame {
             e.printStackTrace();
           }
           
-          assignArduinoConnectionsFromSVG();
-          buttonCanvas.isInteractive = false;
+          if(generatePathways.isSelected()) {
+            assignArduinoConnectionsFromSVG();
+            buttonCanvas.isInteractive = false;
+          }
           
           setSelectedBridge(currentBridge);
 
