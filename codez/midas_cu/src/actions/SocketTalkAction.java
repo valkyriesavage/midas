@@ -114,6 +114,7 @@ public class SocketTalkAction implements UIAction, IOCallback {
       socket.send("");
     }
     // we never need to disconnect because we're immediately forgetting about this object
+    // and if we do, it doesn't have time to send.
     //socket.disconnect();
   }
 
