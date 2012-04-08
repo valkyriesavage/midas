@@ -20,3 +20,4 @@ testdata/*
 *Inkscape.app*
 outline.svg
 *.DS_Store
+paper/*.fdb_latexmk
