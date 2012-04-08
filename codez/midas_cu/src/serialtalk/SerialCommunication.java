@@ -187,6 +187,7 @@ public class SerialCommunication implements SerialPortEventListener {
         } else if (isGridded
             && (oneMessage = matchOneArduino2DMessage.matcher(singleMessage))
                 .lookingAt()) { // we need to look at two touch informationz
+          System.out.println("we saw an event, it is for 2D");
           TouchDirection direction;
           if (oneMessage.group(2).equals(ARDUINO_TOUCH)
               && oneMessage.group(2).equals(oneMessage.group(4))) {

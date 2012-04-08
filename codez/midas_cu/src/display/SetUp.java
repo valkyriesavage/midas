@@ -224,11 +224,6 @@ public class SetUp extends JFrame {
             e.printStackTrace();
           }
           
-          if(generatePathways.isSelected()) {
-            assignArduinoConnectionsFromSVG();
-            buttonCanvas.isInteractive = false;
-          }
-          
           setSelectedBridge(currentBridge);
 
         } else {
@@ -265,6 +260,11 @@ public class SetUp extends JFrame {
 
   public void generatePathways() {
     pathwaysGenerator.generatePathways(displayedButtons, generatePathways.isSelected());
+    
+    if(generatePathways.isSelected()) {
+      assignArduinoConnectionsFromSVG();
+      buttonCanvas.isInteractive = false;
+    }
   }
   
   public void assignArduinoConnectionsFromSVG() {
