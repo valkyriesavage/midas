@@ -94,28 +94,30 @@
           newLetter = "?";
         }
         $('#renderedLetter').children()[0].textContent += newLetter;
-        currentSetOfActivations = new Array();
-        currentSetOfActivations.length = 0;
+        currentSetOfActivations = [];
         drawSquares();
       }
 
       function square(x, y, color) {
-        var c = document.getElementById("drawing");
-        var ctx = c.getContext("2d");
+        var canvas = document.getElementById("drawing");
+        var ctx = canvas.getContext("2d");
         ctx.fillStyle=color;
         ctx.fillRect(x*75, y*75, 50, 50);
       }
 
       function line(x1, y1, x2, y2, color) {
-        x1 = x1*75+37;
-        y1 = y1*75+37;
-        x2 = x2*75+37;
-        y2 = y2*75+37;
-        var c = document.getElementById("drawing");
-        var ctx = c.getContext("2d");
+        console.log("callin a line between " + x1 + y1 + " and " + x2 + y2);
+        x1 = x1*75+25;
+        y1 = y1*75+25;
+        x2 = x2*75+25;
+        y2 = y2*75+25;
+        var canvas = document.getElementById("drawing");
+        var ctx = canvas.getContext("2d");
         ctx.fillStyle=color;
+        ctx.beginPath();
         ctx.moveTo(x1,y1);
         ctx.lineTo(x2,y2);
+        ctx.closePath();
         ctx.stroke();
       }
 
@@ -142,10 +144,9 @@
       }
 
       function drawSquares() {
-        var c = document.getElementById("drawing");
-        var ctx = c.getContext("2d");
-        ctx.fillStyle="#FFFFFF";
-        ctx.fillRect(0,0,150,150);
+        var canvas = document.getElementById("drawing");
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0,0,canvas.width,canvas.height)
         release(0,0);
         release(0,1);
         release(1,0);
