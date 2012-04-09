@@ -142,6 +142,8 @@ public class SVGPathwaysGenerator {
 		});
 
 		if (generatePathways) {
+		  writeSVG(new File("mask.svg").getAbsoluteFile(), allButtons,
+	        allPaths, !generatePathways);
 			try{
 			// if (btns.size() <= 12)
 			allPaths.addAll(generateIndividual(allButtons, allPorts));
