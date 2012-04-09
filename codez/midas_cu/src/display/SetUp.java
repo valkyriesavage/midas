@@ -39,14 +39,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 
 import pathway.SVGPathwaysGenerator;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSetup;
 import serialtalk.SerialCommunication;
 import serialtalk.TouchDirection;
-import util.ColorBar;
 import util.ExtensionFileFilter;
 import bridge.ArduinoToButtonBridge;
 import bridge.ArduinoToDisplayBridge;
@@ -86,7 +84,7 @@ public class SetUp extends JFrame {
   Border blackline = BorderFactory.createLineBorder(Color.black);
 
   public SetUp(boolean test) throws AWTException {
-    setSize(CANVAS_X + 350, CANVAS_Y + 180);
+    setSize(CANVAS_X + 350, CANVAS_Y + 100);
     setTitle("Midas Cu");
 
     serialCommunication = new SerialCommunication();
@@ -105,21 +103,21 @@ public class SetUp extends JFrame {
     setUpTheGrid();
     add(buttonDisplayGrid, BorderLayout.WEST);
 
+    setUpButtonCreator();
     prepPropertiesPane();
-    add(propertiesPane, BorderLayout.EAST);
+    JPanel holder = new JPanel(new BorderLayout());
+    holder.add(propertiesPane, BorderLayout.NORTH);
+    holder.add(buttonCreatorPanel, BorderLayout.SOUTH);
+    add(holder, BorderLayout.EAST);
 
     //add(serialCommunication.whatISee(), BorderLayout.SOUTH);
   }
 
   private void setUpTheGrid() {
     buttonDisplayGrid.setVisible(false);
-
     buttonDisplayGrid.setSize(CANVAS_X, 600);
     buttonDisplayGrid.setLayout(new BorderLayout());
     buttonDisplayGrid.add(buttonCanvas, BorderLayout.NORTH);
-
-    setUpButtonCreator();
-    buttonDisplayGrid.add(buttonCreatorPanel, BorderLayout.SOUTH);
     buttonDisplayGrid.setVisible(true);
   }
 
@@ -131,7 +129,13 @@ public class SetUp extends JFrame {
 
   private void setUpButtonCreator() {
     buttonCreatorPanel.removeAll();
-    buttonCreatorPanel.setLayout(new GridLayout(3, 2));
+    buttonCreatorPanel.setLayout(new GridLayout(0, 1));
+    
+    JPanel templatePanel = new JPanel(new GridLayout(0,1));
+    JPanel holder = new JPanel();
+    JButton templateButton = new JButton("load new template image");
+    holder.add(templateButton);
+    templatePanel.add(holder);
 
     JPanel addStockButtonPanel = new JPanel();
     JComboBox shapeChooser = new JComboBox(SensorShape.shapesList);
@@ -173,7 +177,7 @@ public class SetUp extends JFrame {
       }
     });
     addStockButtonPanel.add(addStock);
-    buttonCreatorPanel.add(addStockButtonPanel);
+    templatePanel.add(addStockButtonPanel);
 
     JPanel addCustomButtonPanel = new JPanel();
     JButton addCustom = new JButton("add custom button");
@@ -206,7 +210,7 @@ public class SetUp extends JFrame {
       }
     });
     addCustomButtonPanel.add(addCustom);
-    buttonCreatorPanel.add(addCustomButtonPanel);
+    templatePanel.add(addCustomButtonPanel);
 
     JPanel printingPanel = new JPanel();
     JButton printSensors = new JButton("print sensors");
@@ -240,9 +244,12 @@ public class SetUp extends JFrame {
     });
     printingPanel.add(printSensors);
     printingPanel.add(generatePathways);
-    printingPanel.setBorder(blackline);
+    printingPanel.setBorder(BorderFactory.createTitledBorder("print"));
+    
+    templatePanel.setBorder(BorderFactory.createTitledBorder("sensors"));
+
+    buttonCreatorPanel.add(templatePanel);
     buttonCreatorPanel.add(printingPanel);
-    buttonCreatorPanel.setBorder(blackline);
   }
 
   private void cleanUpDeletions() {
@@ -507,11 +514,11 @@ public class SetUp extends JFrame {
   private void prepPropertiesPane() {
     propertiesPane.setVisible(false);
     propertiesPane.removeAll();
-    propertiesPane.setSize(300, 600);
-    propertiesPane.setPreferredSize(new Dimension(300, 600));
-    propertiesPane.setLayout(new GridLayout(0, 2));
+    propertiesPane.setSize(300, 300);
+    propertiesPane.setPreferredSize(new Dimension(300, 300));
+    propertiesPane.setLayout(new GridLayout(0, 2,4,4));
     propertiesPane.setVisible(true);
-    propertiesPane.setBorder(blackline);
+    propertiesPane.setBorder(BorderFactory.createTitledBorder("properties"));
   }
 
   public static void main(String[] args) {
