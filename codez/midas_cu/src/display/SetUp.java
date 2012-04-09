@@ -383,9 +383,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(interactionType);
 
       propertiesPane.add(placeholder());
-      JButton setter = (JButton)sliderBridge.interactionSetter();
-      setter.addActionListener(repainter());
-      propertiesPane.add(setter);
+      propertiesPane.add(sliderBridge.interactionSetter());
       propertiesPane.add(placeholder());
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
@@ -430,9 +428,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(interactionType);
 
       propertiesPane.add(placeholder());
-      JButton setter = (JButton)padBridge.interactionSetter();
-      setter.addActionListener(repainter());
-      propertiesPane.add(setter);
+      propertiesPane.add(padBridge.interactionSetter());
       propertiesPane.add(placeholder());
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
@@ -475,9 +471,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(interactionType);
 
       propertiesPane.add(placeholder());
-      JButton setter = (JButton)buttonBridge.interactionSetter();
-      setter.addActionListener(repainter());
-      propertiesPane.add(setter);
+      propertiesPane.add(buttonBridge.interactionSetter());
       propertiesPane.add(placeholder());
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
