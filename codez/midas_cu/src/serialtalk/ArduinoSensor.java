@@ -46,4 +46,9 @@ public class ArduinoSensor implements ArduinoObject {
     this.location = newLocation;
     this.name = ""+ location;
   }
+  
+  public int[] sensor() {
+    int[] sensor = {location.x};
+    return sensor;
+  }
 }

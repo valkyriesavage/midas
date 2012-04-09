@@ -63,4 +63,15 @@ public class ArduinoPad implements ArduinoObject {
   public boolean contains(ArduinoSensor sensor) {
     return isPartOfPad(sensor);
   }
+  
+  public int[] sensor() {
+    sensitivity = sensors.length * sensors[0].length;
+    int[] retSensors = new int[sensitivity];
+    for (int i=0; i<sensors.length; i++) {
+      for (int j=0; j<sensors[i].length; j++) {
+        retSensors[i*sensors.length + j] = sensors[i][j].location.x; 
+      }
+    }
+    return retSensors;
+  }
 }

@@ -31,6 +31,8 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
       new ArduinoSensor[0][0]);
 
   public UIPad interactivePiece;
+  
+  private JButton show = new JButton();
 
   public Integer sensitivity;
   JComboBox padSensitivity = new JComboBox(SetUp.PAD_SENSITIVITIES);
@@ -72,7 +74,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
         capturePad = new JButton(interactivePiece.icon());
         capturePad.setToolTipText(interactivePiece.toString());
       } else {
-        capturePad = new JButton("capture pad");
+        capturePad = new JButton("record pad");
       }
       capturePad.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent event) {
@@ -83,17 +85,30 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
                     "click in two opposite corners of the pad area you'd like to control",
                     "pad capture instructions", JOptionPane.INFORMATION_MESSAGE);
             interactivePiece.record();
-            ((JButton) event.getSource()).setText("stop recording");
+            ((JButton) event.getSource()).setText("done");
           } else {
             interactivePiece.stopRecording();
-            ((JButton) event.getSource()).setText("");
-            ((JButton) event.getSource()).setIcon(interactivePiece.icon());
-            ((JButton) event.getSource()).setToolTipText(interactivePiece.toString());
+            ((JButton) event.getSource()).setText("record pad");
+            setUpDisplay();
           }
         }
       });
       return capturePad;
     }
+  }
+  
+  private void setUpDisplay() {
+    if (interactivePiece == null) {
+      show.setText("none");
+    }
+    show.setIcon(interactivePiece.icon());
+    show.setToolTipText(interactivePiece.toString());
+    show.setEnabled(false);
+  }
+  
+  public JComponent interactionDisplay() {
+    setUpDisplay();
+    return show;
   }
 
   public JComboBox padSensitivityBox() {
@@ -101,7 +116,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   }
 
   public JButton goButton() {
-    JButton show = new JButton("test positions");
+    JButton show = new JButton("replay positions");
     show.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         for (int i = (int) Math.sqrt(sensitivity) - 1; i >= 0; i--) {
