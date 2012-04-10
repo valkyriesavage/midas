@@ -130,6 +130,7 @@ public abstract class ArduinoToDisplayBridge {
           } else {
             src.setText("tie to stickers");
             myColorBar.setColor(arduinoTies());
+            repainter.repaint();
           }
         }
       }
