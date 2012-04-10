@@ -155,17 +155,24 @@ public class SerialCommunication implements SerialPortEventListener {
    */
   public synchronized void serialEvent(SerialPortEvent oEvent) {
     if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-      byte touched[] = new byte[3];
+      byte touched[] = new byte[6];
       try {
-        input.read(touched, 0, 3);
+        input.read(touched, 0, 6);
+
         // Displayed results are codepage dependent
       } catch (Exception e) {
         System.err.println(e.toString());
         return;
       }
 
-      currentSerialInfo = currentSerialInfo + new String(touched);
+      currentSerialInfo = (currentSerialInfo + new String(touched));
+      while(currentSerialInfo.startsWith("9")) {
+        currentSerialInfo = currentSerialInfo.substring(1);
+        currentSerialInfo = currentSerialInfo.trim();
+      }
       Matcher oneMessage;
+      
+      System.out.println(currentSerialInfo);
 
       while (((oneMessage = matchOneLine.matcher(currentSerialInfo))
           .lookingAt())) {
