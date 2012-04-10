@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import display.SetUp;
+
 class Grid {
 	private interface State {
 		boolean canPass(Shape b);
@@ -26,21 +28,33 @@ class Grid {
 		}
 	};
 
-	private State belongsTo(final Shape button) {
+	/**
+	 * belongsTo does reference identity.
+	 * @param shape
+	 * @return
+	 */
+	private State belongsTo(final Shape shape) {
 		return new State() {
 			@Override
 			public boolean canPass(Shape b) {
-				return b == button;
+				return b == shape;
 			}
 		};
 	}
 	private final int width, height;
 	private final State[][] arr;
 	
+	private Map<Shape, Point> connectionMap;
+	
+	Grid() {
+		this(SetUp.CANVAS_X, SetUp.CANVAS_Y);
+	}
+	
 	Grid(int w, int h) {
 		width = w;
 		height = h;
 		arr = new State[width][height];
+		connectionMap = new HashMap();
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				arr[x][y] = OPEN;
@@ -66,14 +80,13 @@ class Grid {
 	}
 	/**
 	 * Returns a path connecting End to any one of the starts without crossing
-	 * over any of the other paths/shapes; may return null if such a path
-	 * doesn't exist.
+	 * over any of the other paths/shapes; throws an exception if such a path doesn't exist.
 	 * 
 	 * @param starts
 	 * @param end
 	 * @return
 	 */
-	public List<Point> findPath(List<Point> starts, Point end, Shape button) throws PathwayGenerationException {
+	public List<Point> findPath(List<Point> starts, Point end, Shape shape) throws PathwayGenerationException {
 		// step 1: wave expansion to create a mapping between locations and tags
 		Map<Point, Integer> edges = new HashMap();
 		for (Point p : starts)
@@ -90,7 +103,7 @@ class Grid {
 				// loc.adj.filter(x => arr(x) && !flood.contains(x)).map(_ ->
 				// i+1)
 				for (Point adj : adj(loc)) {
-					if (bounded(adj) && arr[adj.x][adj.y].canPass(button) && !flood.containsKey(adj)) {
+					if (bounded(adj) && arr[adj.x][adj.y].canPass(shape) && !flood.containsKey(adj)) {
 						newEdges.put(adj, i + 1);
 					}
 				}
@@ -132,7 +145,12 @@ class Grid {
 				throw new PathwayGenerationException();
 			}
 		}
+		connectionMap.put(shape, end);
 		return backtrack;
+	}
+	
+	public Map<Shape, Point> getConnections() {
+		return new HashMap<Shape, Point>(connectionMap);
 	}
 
 	
@@ -147,8 +165,8 @@ class Grid {
 		State belongs = new State() {
 
 			@Override
-			public boolean canPass(Shape b) {
-				return b == owner;
+			public boolean canPass(Shape s) {
+				return s == owner;
 			}
 			
 		};
@@ -158,6 +176,12 @@ class Grid {
 					arr[p.x][p.y] = belongs;
 				else arr[p.x][p.y] = CLOSED;
 			}
+		}
+	}
+	
+	public void restrictAll(Iterable<Shape> shapes) {
+		for (Shape s : shapes) {
+			restrict(SVGPathwaysGenerator.cellsOfInfluence(s), s);
 		}
 	}
 

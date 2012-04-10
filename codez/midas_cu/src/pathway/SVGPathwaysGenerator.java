@@ -17,10 +17,12 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -39,6 +41,7 @@ import display.SetUp;
 public class SVGPathwaysGenerator {
 
 	SetUp mySetup;
+	private List<List<Point>> allPaths = new ArrayList<List<Point>>();
 
 	public SVGPathwaysGenerator(SetUp s) {
 		mySetup = s;
@@ -56,11 +59,7 @@ public class SVGPathwaysGenerator {
 	public static final int PATH_INFLUENCE_WIDTH = 2 * LINE_WIDTH; // should be
 																	// 2*LINE_WIDTH
 
-	private void point(Graphics2D g, int x1, int y1) {
-		g.drawRect(x1 - LINE_EXTENT, y1 - LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
-	}
-
-	private static List<Point> cellsOfInfluence(Point p, int extent) {
+	static List<Point> cellsOfInfluence(Point p, int extent) {
 		List<Point> list = new LinkedList<Point>();
 		for (int x = p.x - extent; x <= p.x + extent; x++) {
 			for (int y = p.y - extent; y <= p.y + extent; y++) {
@@ -71,7 +70,14 @@ public class SVGPathwaysGenerator {
 
 		return list;
 	}
-	private static Iterable<Point> cellsOfInfluence(Shape s) {
+
+	/**
+	 * Returns all points that are influenced by the given Shape. A point is influenced by a shape if it's coordinates are both within
+	 * <code>BUTTON_INFLUENCE_WIDTH<code> of the Shape's outline.
+	 * @param s
+	 * @return
+	 */
+	static Iterable<Point> cellsOfInfluence(Shape s) {
 		Set<Point> flattened = new HashSet<Point>();
 		for (Point p : outlineFor(s)) {
 			flattened.addAll(cellsOfInfluence(p, BUTTON_INFLUENCE_WIDTH));
@@ -79,7 +85,13 @@ public class SVGPathwaysGenerator {
 		return flattened;
 	}
 
-	private static Iterable<Point> cellsOfInfluence(List<Point> path) {
+	/**
+	 * Returns all points that are influenced by the given path. A point is influenced by a path if the point's coordinates are both within
+	 * <code>PATH_INFLUENCE_WIDTH</code> distance from any point on the Path.
+	 * @param path
+	 * @return
+	 */
+	static Iterable<Point> cellsOfInfluence(List<Point> path) {
 		Set<Point> flattened = new HashSet<Point>();
 		for (Point p : path) {
 			flattened.addAll(cellsOfInfluence(p, PATH_INFLUENCE_WIDTH));
@@ -87,8 +99,9 @@ public class SVGPathwaysGenerator {
 		return flattened;
 	}
 
-	private List<List<Point>> allPaths = new ArrayList<List<Point>>();
-	
+	private void point(Graphics2D g, int x1, int y1) {
+		g.drawRect(x1 - LINE_EXTENT, y1 - LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
+	}
 	public void paint(Graphics2D g) {
 		g.setColor(CanvasPanel.LIGHT_COPPER);
 		for (List<Point> path : allPaths) {
@@ -97,6 +110,79 @@ public class SVGPathwaysGenerator {
 					point(g, p.x, p.y);
 				}
 			}
+		}
+	}
+	
+	private static enum Corner {
+
+		TOPLEFT(1, 		new Point(LINE_EXTENT, 					LINE_EXTENT)),
+		TOPRIGHT(1, 	new Point(SetUp.CANVAS_X - LINE_EXTENT, LINE_EXTENT)),
+		BOTTOMLEFT(-1, 	new Point(LINE_EXTENT, 					SetUp.CANVAS_Y - LINE_EXTENT)),
+		BOTTOMRIGHT(-1, new Point(SetUp.CANVAS_X - LINE_EXTENT, SetUp.CANVAS_Y - LINE_EXTENT));
+		
+		private final int ySortDir;
+		private final Point start;
+		Corner(int yDir, Point start) {
+			this.ySortDir = yDir;
+			this.start = start;
+		}
+		
+		Point port(int x) {
+			Point p = new Point(start);
+			p.y += (1 + PATH_INFLUENCE_WIDTH) * x * ySortDir;
+			return p;
+		}
+		
+		void sort(List<Shape> shapes) {
+			Collections.sort(shapes, new Comparator<Shape>() {
+
+				@Override
+				public int compare(Shape o1, Shape o2) {
+					return (new Double(o1.getBounds2D().getY()*ySortDir)).compareTo(o2.getBounds2D().getY()*ySortDir);
+				}
+
+			});
+		}
+		
+		Corner[] others() {
+			Corner[] others = new Corner[3];
+			int i = 0;
+			for(Corner c : values()) if(c != this) others[i++] = c;
+			return others;
+		}
+	}
+
+	/**
+	 * Hella Slider "direction"; either do the ports 1-2-3 or 3-2-1
+	 * @author hellochar
+	 *
+	 */
+	private static enum HSDirection {
+		FORWARD, REVERSE
+	}
+	/**
+	 * Routing order; either the buttons go first or the hella goes first
+	 * @author hellochar
+	 *
+	 */
+	private static enum RouteOrder {
+		BUTTONFIRST, HELLAFIRST
+	}
+	/**
+	 * Locations of the hella slider ports (for the case that the hella slider is in the same corner as the normal buttons); 
+	 * the hella slider ports either go before the button ports or after.
+	 * @author hellochar
+	 *
+	 */
+	private static enum HSPortLocation {
+		BEFORE, AFTER
+	}
+	
+	private class SuccessfulException extends Exception {
+		List<List<Point>> paths;
+		SuccessfulException(List<List<Point>> paths) {
+			super();
+			this.paths = paths;
 		}
 	}
 	
@@ -109,48 +195,98 @@ public class SVGPathwaysGenerator {
 	public boolean generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
 		allPaths.clear();
 		
-		List<Shape> allButtons = new ArrayList<Shape>();
+		List<Shape> buttonGenShapes = new ArrayList<Shape>();
+		List<Shape> sliderGenShapes = null; //possibly null!
 		for (SensorButtonGroup s : buttonsToConnect) {
 			if (s.sensitivity == SetUp.HELLA_SLIDER) {
-
-				// step 1: find the bounding rectangle of the whole slider
-				//wantedBounds is the rectangle that you want to conform to
-				
+				sliderGenShapes = new LinkedList();
 				HellaSliderPositioner h = s.getHSP();
-				allButtons.add(h.getOuter());
-				allButtons.add(h.getSeg1());
-				allButtons.add(h.getSeg2());
+				sliderGenShapes.add(h.getOuter());
+				sliderGenShapes.add(h.getSeg1());
+				sliderGenShapes.add(h.getSeg2());
 			} else {
 				for(ArduinoSensorButton b : s.triggerButtons) {
-					allButtons.add(b.getShape());
+					buttonGenShapes.add(b.getShape());
 				}
 			}
 		}
 
-		List<Point> allPorts = new ArrayList<Point>(allButtons.size());
-		for (int x = 0; x < allButtons.size(); x++)
-			allPorts.add(new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x
-					+ LINE_EXTENT));
-
-		Collections.sort(allButtons, new Comparator<Shape>() {
-
-			@Override
-			public int compare(Shape o1, Shape o2) {
-				return (new Double(o1.getBounds2D().getY())).compareTo(o2.getBounds2D().getY());
-			}
-
-		});
-
+		List<Shape> allShapes = new LinkedList();
+		allShapes.addAll(buttonGenShapes);
+		if(sliderGenShapes != null)
+			allShapes.addAll(sliderGenShapes);
+		
+		
 		if (generatePathways) {
-		  writeSVG(new File("mask.svg").getAbsoluteFile(), allButtons,
+			Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
+			
+			/*
+			try{
+				for(Corner C : Corner.values()) {
+					if(sliderGenShapes == null) {
+						tryFullGeneration(buttonGenShapes, C);
+					} else {
+						for(HSDirection D : HSDirection.values()) {
+							for(RouteOrder O : RouteOrder.values()) {
+								
+								for(HSPortLocation L : HSPortLocation.values()) {
+									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, D, O, L);
+								}
+								
+								for(Corner Cc : C.others()) {
+									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, Cc, D, O);
+								}
+							}
+						}
+					}
+				}
+				throw new PathwayGenerationException();
+			}catch(SuccessfulException s) {
+				s.paths; //woo we have the paths now
+			}catch(PathwayGenerationException e) {
+				//oh noes we failed
+			}
+			*/
+		
+		  writeSVG(new File("mask.svg").getAbsoluteFile(), allShapes,
 	        allPaths, !generatePathways);
 			try{
+				// We take each button and set its cells of influence to “restricted to
+				// B”, where B is that button.
+				g.restrictAll(buttonGenShapes);
+				
+				if(sliderGenShapes != null) {
+					g.restrictAll(sliderGenShapes);
+				}
+
+				//create the mapping between buttons and their ports.
+				List<Pair<Shape, Point>> buttonGenPairs = new LinkedList<Pair<Shape, Point>>();
+				List<Pair<Shape, Point>> sliderGenPairs = null;
+				{
+					int x = 0;
+					for(Shape b : buttonGenShapes) {
+						buttonGenPairs.add(new Pair<Shape, Point>(b, new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT)));
+						x++;
+					}
+					if(sliderGenShapes != null) {
+						sliderGenPairs = new LinkedList<Pair<Shape, Point>>();
+						for(Shape b : sliderGenShapes) {
+							sliderGenPairs.add(new Pair<Shape, Point>(b, new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT)));
+							x++;
+						}
+					}
+				}
 			// if (btns.size() <= 12)
-			allPaths.addAll(generateIndividual(allButtons, allPorts));
+				if(PRINT_DEBUG) System.out.println("Generating paths for buttons...");
+				allPaths.addAll(generateIndividual(g, buttonGenPairs));
+				if(sliderGenPairs != null) {
+					if(PRINT_DEBUG) System.out.println("Generating paths for hella slider...");
+					allPaths.addAll(generateIndividual(g, sliderGenPairs));
+				}
 			// else
 			// allPaths.addAll(generateGrid(btns, ports));
 			}catch(PathwayGenerationException e) {
-				JOptionPane.showMessageDialog(null, "buttons could not be routed! you will have to route your own buttons.",
+				JOptionPane.showMessageDialog(null, "Buttons could not be routed! You will have to route your own buttons.",
 						"button routing failure", JOptionPane.ERROR_MESSAGE);
 				return false;
 			}
@@ -159,41 +295,85 @@ public class SVGPathwaysGenerator {
 		if (PRINT_DEBUG)
 			System.out.println("Paths generated!");
 
-		writeSVG(new File("outline.svg").getAbsoluteFile(), allButtons,
-				allPaths, generatePathways);
+		writeSVG(new File("outline.svg").getAbsoluteFile(), allShapes, allPaths, generatePathways);
 		
 		return true;
 	}
 
-	private List<List<Point>> generateIndividual(List<Shape> allButtons, List<Point> allPorts) throws PathwayGenerationException {
+	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
+	private void tryFullGeneration(List<Shape> buttonShapes, Corner C) throws SuccessfulException {
+		Grid g = new Grid();
+		C.sort(buttonShapes);
+
+		/*
+		restrict shape outlines - 										restrict all buttonShapes
+		create port-maps between buttons and their respective points - 	iterate through, make points
+		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
+		 */
+	}
+	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
+	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes, 
+			Corner C, HSDirection D, RouteOrder O, HSPortLocation L) throws SuccessfulException {
+		Grid g = new Grid();
+		C.sort(buttonShapes);
+
+		/*
+		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
+		create port-maps between buttons and their respective points - 	iterate through, make points depending on L and D
+		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
+		 */
+	}
+	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
+	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes,
+			Corner C, Corner Cc, HSDirection D, RouteOrder O) throws SuccessfulException {
+		Grid g = new Grid();
+		C.sort(buttonShapes);
+
+		/*
+		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
+		create port-maps between buttons and their respective points - 	iterate through, make points depending on D and Cc
+		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
+		 */
+	}
+	
+	
+	private List<List<Point>> generateIndividual(Grid g, List<Pair<Shape, Point>> pairs) throws PathwayGenerationException {
 		List<List<Point>> paths = new ArrayList<List<Point>>();
 
-		Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
-		// We take each button and set its cells of influence to “restricted to
-		// B”, where B is that button.
-		for (Shape s : allButtons) {
-			g.restrict(cellsOfInfluence(s), s);
-		}
-
-		Iterator<Point> portIterator = allPorts.iterator();
 		int i = 0;
-		for (Shape button : allButtons) { // generate pathways for
+		for (Pair<Shape, Point> p : pairs) { // generate pathways for
 														// each button
 			i++;
 			if (PRINT_DEBUG)
 				System.out.println("\tGenerating path " + i + " of "
-						+ allButtons.size());
-			Point port = portIterator.next();
+						+ pairs.size());
+			Shape button = p._1;
+			Point port = p._2;
 
 			List<Point> nearButton = outlineFor(button);
-			List<Point> path = g.findPath(nearButton, port, button);
+			List<Point> path;
+			try{
+				path = g.findPath(nearButton, port, button);
+			} catch(PathwayGenerationException e) { //todo: temporary fix to see when things go wrong
+				path = null;
+			}
 
 			paths.add(path);
-			g.close(cellsOfInfluence(path));
+			if(path != null)
+				g.close(cellsOfInfluence(path));
 		}
-		assert (!portIterator.hasNext());
 
 		return paths;
+	}
+	
+	private class Pair<S, T> {
+		public S _1;
+		public T _2;
+		public Pair(S s, T t) {
+			super();
+			this._1 = s;
+			this._2 = t;
+		}
 	}
 	
 
@@ -272,6 +452,11 @@ public class SVGPathwaysGenerator {
 		return areaSegments;
 	}
 
+	/**
+	 * Returns a list of points representing the immediate outline for the given Shape.
+	 * @param b
+	 * @return
+	 */
 	public static List<Point> outlineFor(Shape b) {
 		List<Point> outline = new LinkedList<Point>();
 
