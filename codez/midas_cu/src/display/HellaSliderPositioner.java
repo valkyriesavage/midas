@@ -4,6 +4,8 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.batik.bridge.DocumentLoader;
 import org.apache.batik.bridge.UserAgentAdapter;
@@ -11,33 +13,15 @@ import org.apache.batik.parser.AWTPathProducer;
 import org.apache.batik.parser.PathParser;
 import org.w3c.dom.Document;
 
+import util.SVGPathLoader;
+
 public class HellaSliderPositioner {
 	private Shape seg1, seg2, outer;
 	
 	private static HellaSliderPositioner base;
 	static {
-
-		try {
-			UserAgentAdapter ua = new UserAgentAdapter();
-			DocumentLoader loader = new DocumentLoader(ua);
-			String svgURI;
-			svgURI = new File("slider.svg").toURL().toString();
-//			System.out.println(svgURI);
-			Document doc = loader.loadDocument(svgURI);
-
-			PathParser pp = new PathParser();
-			AWTPathProducer producer = new AWTPathProducer();
-			pp.setPathHandler(producer);
-			pp.parse(doc.getElementById("seg1").getAttribute("d"));
-			Shape seg1 = producer.getShape();
-			pp.parse(doc.getElementById("seg2").getAttribute("d"));
-			Shape seg2 = producer.getShape();
-			pp.parse(doc.getElementById("outer").getAttribute("d"));
-			Shape outer = producer.getShape();
-			base = new HellaSliderPositioner(seg1, seg2, outer);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		List<Shape> shapes = SVGPathLoader.loadPaths("slider.svg", "seg1", "seg2", "outer");
+		base = new HellaSliderPositioner(shapes.get(0), shapes.get(1), shapes.get(2));
 	}
 
 	private HellaSliderPositioner(Shape seg1, Shape seg2, Shape outer) {
@@ -86,6 +70,10 @@ public class HellaSliderPositioner {
 
 	public Shape getOuter() {
 		return outer;
+	}
+	
+	public List<Shape> getShapes() {
+		return Arrays.asList(new Shape[] {seg1, seg2, outer});
 	}
 
 }

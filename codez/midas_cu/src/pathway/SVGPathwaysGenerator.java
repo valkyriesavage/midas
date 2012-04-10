@@ -34,7 +34,6 @@ import org.w3c.dom.Document;
 
 import display.ArduinoSensorButton;
 import display.CanvasPanel;
-import display.HellaSliderPositioner;
 import display.SensorButtonGroup;
 import display.SetUp;
 
@@ -42,7 +41,7 @@ public class SVGPathwaysGenerator {
 
 	SetUp mySetup;
 	private List<List<Point>> allPaths = new ArrayList<List<Point>>();
-	private Grid lastGrid;
+	private Map<ArduinoSensorButton, Integer> buttonMap = new HashMap();
 
 	public SVGPathwaysGenerator(SetUp s) {
 		mySetup = s;
@@ -53,13 +52,17 @@ public class SVGPathwaysGenerator {
 	public static final int LINE_EXTENT = 1;
 
 	public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
-	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH; // should be
+	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH + 1; // should be
 																	// LINE_WIDTH
 																	// +
 																	// LINE_EXTENT
 	public static final int PATH_INFLUENCE_WIDTH = 2 * LINE_WIDTH; // should be
 																	// 2*LINE_WIDTH
 
+	public Map<ArduinoSensorButton, Integer> getButtonMap() {
+		return buttonMap;
+	}
+	
 	static List<Point> cellsOfInfluence(Point p, int extent) {
 		List<Point> list = new LinkedList<Point>();
 		for (int x = p.x - extent; x <= p.x + extent; x++) {
@@ -180,66 +183,65 @@ public class SVGPathwaysGenerator {
 	}
 	
 	private class SuccessfulException extends Exception {
+		//	a) a list of lists of points, representing the paths
+		//	b) a mapping between ArduinoSensorButtons to indices, representing which button is mapped to which port.
+		
 		List<List<Point>> paths;
-		Grid grid;
-		SuccessfulException(List<List<Point>> paths, Grid g) {
+		Map<ArduinoSensorButton, Integer> map;
+		SuccessfulException(List<List<Point>> paths, Map<ArduinoSensorButton, Integer> map) {
 			super();
 			this.paths = paths;
-			grid = g;
+			this.map = map;
 		}
 	}
 	
 	/**
 	 * Returns true if the pathways were successfully generated; false otherwise.
-	 * @param buttonsToConnect
+	 * @param groups
 	 * @param generatePathways
 	 * @return
 	 */
-	public boolean generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
+	public boolean generatePathways(List<SensorButtonGroup> groups, boolean generatePathways) {
 		allPaths.clear();
-		lastGrid = null;
+		buttonMap.clear();
 		
-		List<Shape> buttonGenShapes = new ArrayList<Shape>();
-		List<Shape> sliderGenShapes = null; //possibly null!
-		for (SensorButtonGroup s : buttonsToConnect) {
+		List<ArduinoSensorButton> buttons = new ArrayList<ArduinoSensorButton>();
+		SensorButtonGroup slider = null; //possibly null!
+		
+		List<Shape> allShapes = new LinkedList();
+		
+		for (SensorButtonGroup s : groups) {
 			if (s.sensitivity == SetUp.HELLA_SLIDER) {
-				sliderGenShapes = new LinkedList();
-				HellaSliderPositioner h = s.getHSP();
-				sliderGenShapes.add(h.getOuter());
-				sliderGenShapes.add(h.getSeg1());
-				sliderGenShapes.add(h.getSeg2());
+				slider = s;
+				allShapes.addAll(s.getHSP().getShapes());
 			} else {
+				buttons.addAll(s.triggerButtons);
 				for(ArduinoSensorButton b : s.triggerButtons) {
-					buttonGenShapes.add(b.getShape());
+					allShapes.add(b.getShape());
 				}
 			}
 		}
 
-		List<Shape> allShapes = new LinkedList();
-		allShapes.addAll(buttonGenShapes);
-		if(sliderGenShapes != null)
-			allShapes.addAll(sliderGenShapes);
-		
+		writeSVG(new File("mask.svg").getAbsoluteFile(), allShapes, null, false); //always output mask.svg
 		
 		if (generatePathways) {
-			writeSVG(new File("mask.svg").getAbsoluteFile(), allShapes, allPaths, false);
 //			Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 			
 			try{
 				int configNum = 1;
 				for(Corner C : Corner.values()) {
-					if(sliderGenShapes == null) {
+					if(slider == null) {
 						if(PRINT_DEBUG) System.out.println("Attempting config "+(configNum++));
-						tryFullGeneration(buttonGenShapes, C);
+						tryFullGeneration(buttons, C);
 					} else {
 						for(HSDirection D : HSDirection.values()) {
 							for(RouteOrder O : RouteOrder.values()) {
 								for(HSPortLocation L : HSPortLocation.values()) {
 									if(PRINT_DEBUG) System.out.println("Attempting config "+(configNum++));
-									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, D, O, L);
+									tryFullGeneration(buttons, slider, C, D, O, L);
 								}
 //								
-//								for(Corner Cc : C.others()) {
+//								for(Corner Cc : C.others()) { //don't try other corner routing for now
 //									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, Cc, D, O);
 //								}
 							}
@@ -249,28 +251,40 @@ public class SVGPathwaysGenerator {
 				throw new PathwayGenerationException();
 			}catch(SuccessfulException s) {
 				if (PRINT_DEBUG) System.out.println("Paths generated!");
-				System.out.println(s.paths.size());
-				System.out.println(s.grid.getConnections().size());
+				
+				//a generation should have the following information available:
+				//	a) a list of lists of points, representing the paths
+				//	b) a mapping between ArduinoSensorButtons to indices, representing which button is mapped to which port.
 				
 				allPaths.addAll(s.paths); //woo we have the paths now
-				allShapes.addAll(s.grid.getConnections().keySet());
+				buttonMap = s.map;
+
+				writeSVG(new File("outline.svg").getAbsoluteFile(), allShapes, s.paths, generatePathways);
+				return true;
 				
-				lastGrid = s.grid;
 			}catch(PathwayGenerationException e) {
 				//oh noes we failed
 				JOptionPane.showMessageDialog(null, "Buttons could not be routed! You will have to route your own buttons.",
 						"button routing failure", JOptionPane.ERROR_MESSAGE);
 				return false;
 			}
+		} else { //not generating pathways; you're done
+			return true;
 		}
-
-		writeSVG(new File("outline.svg").getAbsoluteFile(), allShapes, allPaths, generatePathways);
-		return true;
 	}
 
 	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
-	private void tryFullGeneration(List<Shape> buttonShapes, Corner C) throws SuccessfulException {
+	private void tryFullGeneration(List<ArduinoSensorButton> buttons, Corner C) throws SuccessfulException {
 		Grid g = new Grid();
+		
+		Map<Shape, ArduinoSensorButton> shapeToButton = new HashMap();
+		List<Shape> buttonShapes = new ArrayList();
+		for(ArduinoSensorButton b : buttons) {
+			Shape s = b.getShape();
+			buttonShapes.add(s);
+			shapeToButton.put(s, b);
+		}
+		
 		C.sort(buttonShapes);
 
 //		restrict shape outlines - 										restrict all buttonShapes
@@ -285,17 +299,37 @@ public class SVGPathwaysGenerator {
 		
 		try{
 //			generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
-			List<List<Point>> paths = generateIndividual(g, buttonGenPairs);
-			throw new SuccessfulException(paths, g);
+			
+			Pair<List<List<Point>>, Map<Shape, Integer>> buttonInfo = generateIndividual(g, buttonGenPairs);
+			List<List<Point>> paths = new ArrayList();
+		    paths.addAll(buttonInfo._1);
+		    
+		    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap();
+		    for(Map.Entry<Shape, Integer> entry : buttonInfo._2.entrySet()) {
+		    	buttonMap.put(shapeToButton.get(entry.getKey()), entry.getValue());
+		    }
+		    
+			throw new SuccessfulException(paths, buttonMap);
+			
 		}catch(PathwayGenerationException e) {
 			return;
 		}
 	}
 	
 	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
-	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes, 
+	private void tryFullGeneration(List<ArduinoSensorButton> buttons, SensorButtonGroup slider, 
 			Corner C, HSDirection D, RouteOrder O, HSPortLocation L) throws SuccessfulException {
 		Grid g = new Grid();
+		
+		Map<Shape, ArduinoSensorButton> shapeToButton = new HashMap();
+		List<Shape> buttonShapes = new ArrayList();
+		for(ArduinoSensorButton b : buttons) {
+			Shape s = b.getShape();
+			buttonShapes.add(s);
+			shapeToButton.put(s, b);
+		}
+		List<Shape> sliderShapes = slider.getHSP().getShapes();
+		
 		C.sort(buttonShapes);
 
 //		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
@@ -336,15 +370,23 @@ public class SVGPathwaysGenerator {
 			sliderGenPairs.get(2)._2 = p1; //swap orders
 		}
 //		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
-		List<List<Point>> paths = new ArrayList();
+		
 		switch(O) {
 			case BUTTONFIRST:
 
 				try{
 //					generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
-					paths.addAll(generateIndividual(g, buttonGenPairs));
-					paths.addAll(generateIndividual(g, sliderGenPairs));
-					throw new SuccessfulException(paths, g);
+					Pair<List<List<Point>>, Map<Shape, Integer>> buttonInfo = generateIndividual(g, buttonGenPairs);
+					Pair<List<List<Point>>, Map<Shape, Integer>> sliderInfo = generateIndividual(g, sliderGenPairs);
+					List<List<Point>> paths = new ArrayList();
+				    paths.addAll(buttonInfo._1); paths.addAll(sliderInfo._1);
+				    
+				    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap();
+				    for(Map.Entry<Shape, Integer> entry : buttonInfo._2.entrySet()) {
+				    	buttonMap.put(shapeToButton.get(entry.getKey()), entry.getValue());
+				    }
+				    
+					throw new SuccessfulException(paths, buttonMap);
 				}catch(PathwayGenerationException e) {
 					return;
 				}
@@ -353,9 +395,22 @@ public class SVGPathwaysGenerator {
 
 				try{
 //					generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
-					paths.addAll(generateIndividual(g, sliderGenPairs));
-					paths.addAll(generateIndividual(g, buttonGenPairs));
-					throw new SuccessfulException(paths, g);
+					
+					Pair<List<List<Point>>, Map<Shape, Integer>> sliderInfo = generateIndividual(g, sliderGenPairs); //WOO DO SLIDER FIRST
+					
+					
+					
+					Pair<List<List<Point>>, Map<Shape, Integer>> buttonInfo = generateIndividual(g, buttonGenPairs);
+					
+					List<List<Point>> paths = new ArrayList();
+				    paths.addAll(buttonInfo._1); paths.addAll(sliderInfo._1);
+				    
+				    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap();
+				    for(Map.Entry<Shape, Integer> entry : buttonInfo._2.entrySet()) {
+				    	buttonMap.put(shapeToButton.get(entry.getKey()), entry.getValue());
+				    }
+				    
+					throw new SuccessfulException(paths, buttonMap);
 				}catch(PathwayGenerationException e) {
 					return;
 				}
@@ -363,24 +418,33 @@ public class SVGPathwaysGenerator {
 		
 		throw new RuntimeException("not implemented yet");
 	}
-	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
-	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes,
-			Corner C, Corner Cc, HSDirection D, RouteOrder O) throws SuccessfulException {
-		Grid g = new Grid();
-		C.sort(buttonShapes);
-		
-		throw new RuntimeException("not implemented yet");
-
-		/*
-		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
-		create port-maps between buttons and their respective points - 	iterate through, make points depending on D and Cc
-		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
-		 */
-	}
+	
+//	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
+//	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes,
+//			Corner C, Corner Cc, HSDirection D, RouteOrder O) throws SuccessfulException {
+//		Grid g = new Grid();
+//		C.sort(buttonShapes);
+//		
+//		throw new RuntimeException("not implemented yet");
+//
+//		/*
+//		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
+//		create port-maps between buttons and their respective points - 	iterate through, make points depending on D and Cc
+//		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
+//		 */
+//	}
 	
 	
-	private List<List<Point>> generateIndividual(Grid g, List<Pair<Shape, Point>> pairs) throws PathwayGenerationException {
+	/**
+	 * Returns a pair whose _1 is the list of paths, and whose _2 is the mapping between input shapes and integers.
+	 * @param g
+	 * @param pairs
+	 * @return
+	 * @throws PathwayGenerationException
+	 */
+	private Pair<List<List<Point>>, Map<Shape, Integer>> generateIndividual(Grid g, List<Pair<Shape, Point>> pairs) throws PathwayGenerationException {
 		List<List<Point>> paths = new ArrayList<List<Point>>();
+		Map<Shape, Integer> map = new HashMap();
 
 		int i = 0;
 		for (Pair<Shape, Point> p : pairs) { // generate pathways for
@@ -401,11 +465,13 @@ public class SVGPathwaysGenerator {
 //			}
 
 			paths.add(path);
+			
+			map.put(button, i);
 //			if(path != null)
 				g.close(cellsOfInfluence(path));
 		}
 
-		return paths;
+		return new Pair<List<List<Point>>, Map<Shape, Integer>>(paths, map);
 	}
 	
 	private class Pair<S, T> {
@@ -583,7 +649,7 @@ public class SVGPathwaysGenerator {
 
 		// draw all of the buttons
 		if(generatePathways) {
-			for(List<Point> path : allPaths) {
+			for(List<Point> path : paths) {
 				for (Point p : path) {
 					point(g, p.x, p.y);
 				}

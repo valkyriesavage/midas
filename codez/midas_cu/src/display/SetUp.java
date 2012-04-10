@@ -284,12 +284,13 @@ public class SetUp extends JFrame {
   
   public void assignArduinoConnectionsFromSVG() {
     // we are cheating; we know that the SVG just assigns based on the order in which the buttons appear...
-    List<ArduinoSensorButton> buttonsOrdered = pathwaysGenerator.sortButtonsByUpperLeft(displayedButtons);
-    int i = 0;
+    Map<ArduinoSensorButton, Integer> buttonMap = pathwaysGenerator.getButtonMap();
     Map<ArduinoToDisplayBridge, List<ArduinoEvent>> sensorsToAssign = new HashMap<ArduinoToDisplayBridge, List<ArduinoEvent>>();
 
     // build a list of which sensors go to which bridges
-    for (ArduinoSensorButton button : buttonsOrdered) {
+    for (Map.Entry<ArduinoSensorButton, Integer> entry : buttonMap.entrySet()) {
+    	ArduinoSensorButton button = entry.getKey();
+    	int i = entry.getValue();
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
         if (bridge.contains(button)) {
           ArduinoEvent event = new ArduinoEvent(ArduinoSetup.sensors[i], TouchDirection.TOUCH);
@@ -303,7 +304,6 @@ public class SetUp extends JFrame {
             sensorsToAssign.put(bridge, assignToBridge);
           }
           
-          i++;
         }
       }
     }

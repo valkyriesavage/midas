@@ -44,7 +44,7 @@ class Grid {
 	private final int width, height;
 	private final State[][] arr;
 	
-	private Map<Shape, Point> connectionMap;
+//	private Map<Shape, Point> connectionMap;
 	
 	Grid() {
 		this(SetUp.CANVAS_X, SetUp.CANVAS_Y);
@@ -54,7 +54,7 @@ class Grid {
 		width = w;
 		height = h;
 		arr = new State[width][height];
-		connectionMap = new HashMap();
+//		connectionMap = new HashMap();
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				arr[x][y] = OPEN;
@@ -145,13 +145,13 @@ class Grid {
 				throw new PathwayGenerationException();
 			}
 		}
-		connectionMap.put(shape, end);
+//		connectionMap.put(shape, end);
 		return backtrack;
 	}
 	
-	public Map<Shape, Point> getConnections() {
-		return new HashMap<Shape, Point>(connectionMap);
-	}
+//	public Map<Shape, Point> getConnections() {
+//		return new HashMap<Shape, Point>(connectionMap);
+//	}
 
 	
 	public void close(Iterable<Point> pts) {

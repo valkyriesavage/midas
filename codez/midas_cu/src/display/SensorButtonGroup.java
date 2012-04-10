@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
@@ -197,7 +198,13 @@ public class SensorButtonGroup extends JPanel {
 
   public void paint(Graphics2D g) {
     if (!deleteMe) {
-    	if(sensitivity == SetUp.HELLA_SLIDER) {
+    	if(isPad) {
+    		PadPositioner p = getPP();
+    		g.setColor(triggerButtons.get(0).relevantColor);
+    		for(Shape s : p.getShapes()) {
+    			g.fill(s);
+    		}
+    	} else if(sensitivity == SetUp.HELLA_SLIDER) {
     		HellaSliderPositioner hsp = getHSP();
     		g.setColor(triggerButtons.get(0).relevantColor);
     		g.fill(hsp.getSeg1());
@@ -328,6 +335,27 @@ public class SensorButtonGroup extends JPanel {
 		h.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(), wantedBounds.getY()));
 		
 		return h;
+  }
+  
+  public PadPositioner getPP() {
+	  PadPositioner p = new PadPositioner();
+	  
+	  p.moveToOrigin();
+	  //bring to origin;
+	  //set the bounds to be the bounds of the trigger buttons
+
+	  Rectangle2D wantedBounds = null;
+		for( ArduinoSensorButton b : triggerButtons) {
+			Rectangle2D temp = b.getShape().getBounds2D();
+			if(wantedBounds == null) wantedBounds = temp;
+			else wantedBounds = wantedBounds.createUnion(temp);
+		}
+		
+
+		p.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
+		p.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(), wantedBounds.getY()));
+		
+		return p;
   }
 
   @Override
