@@ -18,6 +18,7 @@ import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.ArduinoSlider;
 import serialtalk.TouchDirection;
+import actions.SocketTalkAction;
 import capture.UISlider;
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
@@ -25,7 +26,7 @@ import display.SetUp;
 
 public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
 
-  private static final ArduinoSlider nullSlider = new ArduinoSlider(
+  public static final ArduinoSlider nullSlider = new ArduinoSlider(
       new ArduinoSensor[0]);
 
   public UISlider interactivePiece;
@@ -33,6 +34,8 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   public Integer sensitivity;
   private JComboBox sliderSensitivity = new JComboBox(
       SetUp.SLIDER_SENSITIVITIES);
+
+  private JButton show;
 
   public ArduinoToSliderBridge(int sensitivity) {
     initWebsocketField();
@@ -47,10 +50,6 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
         setSensitivity(newSensitivity);
       }
     });
-  }
-
-  public String toString() {
-    return interfacePiece.name;
   }
 
   public void setSensitivity(Integer sensitivity) {
@@ -70,6 +69,18 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
     this.interfacePiece.setSensitivity(this.sensitivity);
   }
 
+  public JComponent interactionDisplay() {
+    if (interactivePiece.icon() != null) {
+      show = new JButton(interactivePiece.icon());
+      show.setToolTipText(interactivePiece.toString());
+    } else {
+      show = new JButton("none");
+    }
+    show.setEnabled(false);
+
+    return show;
+  }
+
   public JComponent interactionSetter() {
     if (websocketing()) {
       return websocketField;
@@ -79,7 +90,7 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
         captureSlider = new JButton(interactivePiece.icon());
         captureSlider.setToolTipText(interactivePiece.toString());
       } else {
-        captureSlider = new JButton("capture slider");
+        captureSlider = new JButton("record slider");
       }
       captureSlider.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent event) {
@@ -91,13 +102,12 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
                     "slider capture instructions",
                     JOptionPane.INFORMATION_MESSAGE);
             interactivePiece.record();
-            ((JButton) event.getSource()).setText("stop recording");
+            ((JButton) event.getSource()).setText("done");
           } else {
             interactivePiece.stopRecording();
-            ((JButton) event.getSource()).setText("");
-            ((JButton) event.getSource()).setIcon(interactivePiece.icon());
-            ((JButton) event.getSource()).setToolTipText(interactivePiece
-                .toString());
+            ((JButton) event.getSource()).setText("record slider");
+            show.setIcon(interactivePiece.icon());
+            show.setToolTipText(interactivePiece.toString());
           }
         }
       });
@@ -110,11 +120,15 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   }
 
   public JButton goButton() {
-    JButton show = new JButton("test positions");
+    JButton show = new JButton("replay positions");
     show.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         for (int i = 0; i < sensitivity; i++) {
-          interactivePiece.execute(i);
+          ArduinoSensor sensor = ((ArduinoSlider) arduinoPiece).sensorAt(i);
+          execute(sensor, TouchDirection.TOUCH);
+          if (websocketing()) {
+            execute(sensor, TouchDirection.RELEASE);
+          }
         }
       }
     });
@@ -122,6 +136,9 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   }
 
   public void execute(ArduinoSensor sensor, TouchDirection direction) {
+    if (websocketing()) {
+      new SocketTalkAction(websocketField().getText()).doAction();
+    }
     if (direction == TouchDirection.TOUCH) {
       interactivePiece.execute(((ArduinoSlider) arduinoPiece)
           .whichInSlider(sensor));
@@ -137,7 +154,11 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   }
 
   public void execute(int hellaSliderValue) {
-    interactivePiece.execute(hellaSliderValue);
+    if (websocketing()) {
+      new SocketTalkAction(websocketField().getText()).doAction();
+    } else {
+      interactivePiece.execute(hellaSliderValue);
+    }
   }
 
   private void initWebsocketField() {

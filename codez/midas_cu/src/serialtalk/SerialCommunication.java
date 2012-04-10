@@ -29,11 +29,9 @@ public class SerialCommunication implements SerialPortEventListener {
 
   private static final String PORT_NAMES[] = { "/dev/tty.usbmodemfa131", // Mac,
                                                                          // Arduino
-                                                                         // Uno,
-                                                                         // works
-                                                                         // for
-                                                                         // Ragnarok
-      "/dev/tty.usbmodemfa121", // Mac, Arduino Uno, works for Ragnarok
+                                                                         // Uno
+      "/dev/tty.usbmodemfa121", // Mac, Arduino Uno
+      "/dev/tty.usbmodem12341", // Mac, Teensy
       "/dev/ttyACM0", // Linux, Arduino Uno
       "COM3", // Windows
   };
@@ -52,11 +50,16 @@ public class SerialCommunication implements SerialPortEventListener {
   boolean paused = false;
   private String currentSerialInfo = new String();
 
-  private Pattern matchOneLine = Pattern.compile(".*\n");
-  private Pattern matchOneArduinoMessage = Pattern.compile("K:(\\d{2})(U|D)\n");
+  private Pattern matchOneLine = Pattern.compile(".*x");
+  private Pattern matchOneArduinoMessage = Pattern
+      .compile("K:(\\d{1,2}) (U|D)");
   private Pattern matchOneArduino2DMessage = Pattern
-      .compile("(K:(\\d{2})(U|D)){2}\n");
-  private Pattern matchOneArduinoSliderMessage = Pattern.compile("S:(\\d{1,3})(U|D)\n");
+      .compile("(K:(\\d{1,2}) (U|D)){2}");
+  private Pattern matchOneArduinoSliderMessage = Pattern
+      .compile("S:(\\d{1,3}) (U|D)");
+  
+  private static final String ARDUINO_TOUCH = "D";
+  private static final String ARDUINO_RELEASE = "U";
 
   public boolean isGridded = false;
 
@@ -152,40 +155,48 @@ public class SerialCommunication implements SerialPortEventListener {
    */
   public synchronized void serialEvent(SerialPortEvent oEvent) {
     if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-      byte touched[] = new byte[3];
+      byte touched[] = new byte[6];
       try {
-        input.read(touched, 0, 3);
+        input.read(touched, 0, 6);
+
         // Displayed results are codepage dependent
       } catch (Exception e) {
         System.err.println(e.toString());
         return;
       }
 
-      currentSerialInfo = currentSerialInfo + new String(touched).trim();
-
+      currentSerialInfo = (currentSerialInfo + new String(touched));
+      while(currentSerialInfo.startsWith("9")) {
+        currentSerialInfo = currentSerialInfo.substring(1);
+        currentSerialInfo = currentSerialInfo.trim();
+      }
       Matcher oneMessage;
+      
+      System.out.println(currentSerialInfo);
 
       while (((oneMessage = matchOneLine.matcher(currentSerialInfo))
           .lookingAt())) {
-        String singleMessage = currentSerialInfo.substring(0,
-            oneMessage.start() - 1);
+
+        String singleMessage = currentSerialInfo.substring(0, oneMessage.end() - "x".length()); // strip the x
         currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
 
         if ((oneMessage = matchOneArduinoSliderMessage.matcher(singleMessage))
             .lookingAt()) { // we have a slider thing to look at
           TouchDirection direction;
-          if (oneMessage.group(2).equals("U")) {
+          if (oneMessage.group(2).equals(ARDUINO_TOUCH)) {
             direction = TouchDirection.TOUCH;
           } else {
             direction = TouchDirection.RELEASE;
           }
-          ArduinoEvent currentEvent = new ArduinoEvent(Integer.parseInt(oneMessage.group(1)), direction);
+          ArduinoEvent currentEvent = new ArduinoEvent(
+              Integer.parseInt(oneMessage.group(1)), direction);
           handleCompleteEvent(currentEvent);
         } else if (isGridded
             && (oneMessage = matchOneArduino2DMessage.matcher(singleMessage))
                 .lookingAt()) { // we need to look at two touch informationz
+          System.out.println("we saw an event, it is for 2D");
           TouchDirection direction;
-          if (oneMessage.group(2).equals("U")
+          if (oneMessage.group(2).equals(ARDUINO_TOUCH)
               && oneMessage.group(2).equals(oneMessage.group(4))) {
             direction = TouchDirection.TOUCH;
           } else {
@@ -198,7 +209,7 @@ public class SerialCommunication implements SerialPortEventListener {
         } else if ((oneMessage = matchOneArduinoMessage.matcher(singleMessage))
             .lookingAt()) { // we are looking at one touch information at a time
           TouchDirection direction;
-          if (oneMessage.group(2).equals("U")) {
+          if (oneMessage.group(2).equals(ARDUINO_TOUCH)) {
             direction = TouchDirection.TOUCH;
           } else {
             direction = TouchDirection.RELEASE;
@@ -217,6 +228,7 @@ public class SerialCommunication implements SerialPortEventListener {
       dispatcher.clearRecentEvents();
       return;
     }
+    System.out.println("event!" + e);
     dispatcher.handleEvent(e);
   }
 

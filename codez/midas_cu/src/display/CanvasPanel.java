@@ -25,7 +25,9 @@ import bridge.ArduinoToDisplayBridge;
 public class CanvasPanel extends JPanel implements MouseListener, MouseMotionListener {
   private static final long serialVersionUID = 7046692110388368464L;
   
-  public static final Color COPPER = new Color(184,115,51);
+  public static final Color COPPER = new Color(204, 76, 22);
+  public static final Color LIGHT_COPPER = new Color(236, 112, 20);
+  public static final Color DARK_COPPER = new Color(140, 45, 4);
   
   List<SensorButtonGroup> displayedButtons;
   List<File> displayedCustomButtons;

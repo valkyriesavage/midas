@@ -19,6 +19,7 @@ import serialtalk.ArduinoPad;
 import serialtalk.ArduinoSensor;
 import serialtalk.ArduinoSetup;
 import serialtalk.TouchDirection;
+import actions.SocketTalkAction;
 import capture.UIPad;
 import display.ArduinoSensorButton;
 import display.SensorButtonGroup;
@@ -26,10 +27,12 @@ import display.SetUp;
 
 public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
 
-  private static final ArduinoPad nullPad = new ArduinoPad(
+  public static final ArduinoPad nullPad = new ArduinoPad(
       new ArduinoSensor[0][0]);
 
   public UIPad interactivePiece;
+  
+  private JButton show = new JButton();
 
   public Integer sensitivity;
   JComboBox padSensitivity = new JComboBox(SetUp.PAD_SENSITIVITIES);
@@ -47,10 +50,6 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
         setSensitivity(newSensitivity);
       }
     });
-  }
-
-  public String toString() {
-    return interfacePiece.name;
   }
 
   public void setSensitivity(Integer sensitivity) {
@@ -75,7 +74,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
         capturePad = new JButton(interactivePiece.icon());
         capturePad.setToolTipText(interactivePiece.toString());
       } else {
-        capturePad = new JButton("capture pad");
+        capturePad = new JButton("record pad");
       }
       capturePad.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent event) {
@@ -86,17 +85,30 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
                     "click in two opposite corners of the pad area you'd like to control",
                     "pad capture instructions", JOptionPane.INFORMATION_MESSAGE);
             interactivePiece.record();
-            ((JButton) event.getSource()).setText("stop recording");
+            ((JButton) event.getSource()).setText("done");
           } else {
             interactivePiece.stopRecording();
-            ((JButton) event.getSource()).setText("");
-            ((JButton) event.getSource()).setIcon(interactivePiece.icon());
-            ((JButton) event.getSource()).setToolTipText(interactivePiece.toString());
+            ((JButton) event.getSource()).setText("record pad");
+            setUpDisplay();
           }
         }
       });
       return capturePad;
     }
+  }
+  
+  private void setUpDisplay() {
+    if (interactivePiece == null) {
+      show.setText("none");
+    }
+    show.setIcon(interactivePiece.icon());
+    show.setToolTipText(interactivePiece.toString());
+    show.setEnabled(false);
+  }
+  
+  public JComponent interactionDisplay() {
+    setUpDisplay();
+    return show;
   }
 
   public JComboBox padSensitivityBox() {
@@ -104,12 +116,13 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   }
 
   public JButton goButton() {
-    JButton show = new JButton("test positions");
+    JButton show = new JButton("replay positions");
     show.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         for (int i = (int) Math.sqrt(sensitivity) - 1; i >= 0; i--) {
           for (int j = 0; j < Math.sqrt(sensitivity); j++) {
-            interactivePiece.execute(new Point(j, i));
+            execute(((ArduinoPad)arduinoPiece).sensorAt(j, i), TouchDirection.TOUCH);
+            execute(((ArduinoPad)arduinoPiece).sensorAt(j, i), TouchDirection.RELEASE);
           }
         }
       }
@@ -118,6 +131,11 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
   }
 
   public void execute(ArduinoSensor sensor, TouchDirection direction) {
+    if (websocketing()) {
+      new SocketTalkAction(websocketField().getText()).doAction();
+      return;
+    }
+    
     if (direction == TouchDirection.TOUCH) {
       interactivePiece.execute(((ArduinoPad) arduinoPiece).locationOnPad(sensor));
     }
@@ -129,28 +147,6 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
       // click
       // this.interactivePiece.execute(whichPad)
     }
-  }
-
-  public void setSequence(List<ArduinoEvent> events) {
-    // for a pad, we want to know all the bits. we need to tell this to the
-    // ArduinoSetup, too
-    List<ArduinoSensor> sensorsInPad = new ArrayList<ArduinoSensor>();
-    for (ArduinoEvent e : events) {
-      if (e.touchDirection == TouchDirection.RELEASE
-          || sensorsInPad.contains(e.whichSensor)) {
-        continue;
-      }
-      sensorsInPad.add(e.whichSensor);
-    }
-    int arrayDim = (int) Math.sqrt(sensorsInPad.size());
-    ArduinoSensor[][] sensors = new ArduinoSensor[arrayDim][arrayDim];
-    for (int i = 0; i < arrayDim; i++) {
-      for (int j = 0; j < arrayDim; j++) {
-        sensors[i][j] = sensorsInPad.get(i * arrayDim + j);
-      }
-    }
-    arduinoPiece = new ArduinoPad(sensors);
-    ArduinoSetup.addPad((ArduinoPad) arduinoPiece);
   }
   
   private void initWebsocketField() {
@@ -176,17 +172,18 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
     // for a pad, we want to take them in order l->r t->b
     List<ArduinoSensor> sensors = new ArrayList<ArduinoSensor>();
     for (ArduinoEvent e : events) {
-      if (!sensors.contains(e.whichSensor)) {
-        continue;
+      if (e.touchDirection == TouchDirection.TOUCH && !sensors.contains(e.whichSensor)) {
+        sensors.add(e.whichSensor);
       }
-      sensors.add(e.whichSensor);
     }
 
     // now organize them
     if (sensitivity.intValue() != sensors.size()) {
       System.out.println("wrong number of sensors registered");
+      arduinoPiece = null;
       return;
     }
+    
     int sideOfPad = (int) Math.floor(Math.sqrt(sensitivity));
     ArduinoSensor[][] newPad = new ArduinoSensor[sideOfPad][sideOfPad];
 
@@ -195,6 +192,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
         newPad[i][j] = sensors.get(i * sideOfPad + j);
       }
     }
+    
     arduinoPiece = new ArduinoPad(newPad);
     ArduinoSetup.addPad((ArduinoPad) arduinoPiece);
   }

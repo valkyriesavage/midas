@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
 
 import util.Direction;
 
@@ -81,17 +82,24 @@ public class SensorButtonGroup extends JPanel {
     nameField.setText(name);
     nameField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
-      public void changedUpdate(DocumentEvent event) {
-        JTextField target = (JTextField) event.getDocument();
-        name = target.getText();
-      }
+      public void changedUpdate(DocumentEvent event) { }
 
       @Override
       public void insertUpdate(DocumentEvent event) {
+        try {
+          name = event.getDocument().getText(0, event.getDocument().getLength());
+        } catch (BadLocationException e) {
+          e.printStackTrace();
+        }
       }
 
       @Override
       public void removeUpdate(DocumentEvent event) {
+        try {
+          name = event.getDocument().getText(0, event.getDocument().getLength());
+        } catch (BadLocationException e) {
+          e.printStackTrace();
+        }
       }
     });
   }

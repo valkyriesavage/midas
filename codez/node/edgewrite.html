@@ -1,0 +1,170 @@
+<!DOCTYPE html> 
+<html> 
+  <head> 
+    <title>Edgewrite</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="helper.js"></script>
+    <script>
+      var timeoutBeforeRendering = 500;
+      var currentSetOfActivations = new Array();
+      var timeout;
+
+      var socket = io.connect(HOST);
+      socket.on('message', function (dataStr) {
+        console.log(dataStr);
+        var data = jQuery.parseJSON(dataStr);
+        if(data['type'] == 'PAD') {
+          if(data['direction'] == 'TOUCH') {
+            touch(data['xposition'], data['yposition']);
+          } else {
+            release(data['xposition'], data['yposition']);
+          }
+          clearTimeout(timeout);
+          timeout = setTimeout("renderLetter()", timeoutBeforeRendering);
+        } else if (data['type'] == 'SLIDER') {
+        } else if (data['type'] == 'BUTTON') {
+        }
+      });
+
+      function send(dir) {
+        socket.emit("message", {direction: dir});
+      };
+
+      $(document).ready(function(){});
+
+      function Coordinate (x, y) {
+        this.x = x;
+        this.y = y;
+
+        this.equals = function(o) {
+          return o.x == this.x && o.y == this.y;
+        }
+      }
+
+      var hash=function(listOfCoords) {
+        var ret = 0;
+        for (var i=0; i<listOfCoords.length; i++) {
+          var coord = listOfCoords[i];
+          ret |= coord.x << 2*i;
+          ret |= coord.y << 2*i+1;
+        }
+        return ret;
+      };
+
+      var UR = new Coordinate(0,0);
+      var UL = new Coordinate(1,0);
+      var LR = new Coordinate(0,1);
+      var LL = new Coordinate(1,1);
+
+      var LETTERMAP = {};
+      LETTERMAP[hash([LR,UL,LL])] = "A";
+      LETTERMAP[hash([UR,LR,LL,LR])] = "B";
+      LETTERMAP[hash([UL,UR,LR,LL])] = "C";
+      LETTERMAP[hash([UL,LL,LR,LL])] = "D";
+      LETTERMAP[hash([UR,UL,UR,LR,LL])] = "E";
+      LETTERMAP[hash([UL,UR,LR])] = "F";
+      LETTERMAP[hash([UL,UR,UL,LL,LR])] = "G";
+      LETTERMAP[hash([UR,LR,UL,LL])] = "H";
+      LETTERMAP[hash([UR,LR])] = "I";
+      LETTERMAP[hash([UL,LL,LR])] = "J";
+      LETTERMAP[hash([UR,LR,UL,LR,LL])] = "K";
+      LETTERMAP[hash([UR,LR,LL])] = "L";
+      LETTERMAP[hash([LR,UR,LL,UL,LL])] = "M";
+      LETTERMAP[hash([LR,UR,LL,UL])] = "N";
+      LETTERMAP[hash([UL,UR,LR,LL,UL])] = "O";
+      LETTERMAP[hash([UR,UL,UR,LR])] = "P";
+      LETTERMAP[hash([UL,UR,UL,LL,UL])] = "Q";
+      LETTERMAP[hash([LR,UR,UL])] = "R";
+      LETTERMAP[hash([UL,UR,LL,LR])] = "S";
+      LETTERMAP[hash([UR,UL,LL])] = "T";
+      LETTERMAP[hash([UR,LR,LL,UL])] = "U";
+      LETTERMAP[hash([UR,LR,UL])] = "V";
+      LETTERMAP[hash([UR,LR,UL,LL,UL])] = "W";
+      LETTERMAP[hash([UR,LL,UL,LR])] = "X";
+      LETTERMAP[hash([UR,LL,UL,LL])] = "Y";
+      LETTERMAP[hash([UR,UL,LR,LL])] = "Z";
+
+      function renderLetter() {
+        var newLetter = LETTERMAP[hash(currentSetOfActivations)];
+        if (newLetter == null) {
+          newLetter = "?";
+        }
+        $('#renderedLetter').children()[0].textContent += newLetter;
+        currentSetOfActivations = [];
+        drawSquares();
+      }
+
+      function square(x, y, color) {
+        var canvas = document.getElementById("drawing");
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle=color;
+        ctx.fillRect(x*75, y*75, 50, 50);
+      }
+
+      function line(x1, y1, x2, y2, color) {
+        console.log("callin a line between " + x1 + y1 + " and " + x2 + y2);
+        x1 = x1*75+25;
+        y1 = y1*75+25;
+        x2 = x2*75+25;
+        y2 = y2*75+25;
+        var canvas = document.getElementById("drawing");
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle=color;
+        ctx.beginPath();
+        ctx.lineWidth=10;
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      function lines() {
+        for (var i=0; i<currentSetOfActivations.length - 1; i++) {
+          console.log("line from " + i + " to " + (i+1));
+          line(currentSetOfActivations[i].x,
+               currentSetOfActivations[i].y,
+               currentSetOfActivations[i+1].x,
+               currentSetOfActivations[i+1].y,
+               "#000000");
+        }
+      }
+
+      function touch(x, y) {
+        currentSetOfActivations.push(new Coordinate(x,y));
+        square(x, y, "#FF0000");
+        lines();
+      }
+
+      function release(x, y) {
+        square(x, y, "#0000FF");
+        lines();
+      }
+
+      function drawSquares() {
+        var canvas = document.getElementById("drawing");
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        release(0,0);
+        release(0,1);
+        release(1,0);
+        release(1,1);
+      }
+
+    </script>
+  </head> 
+  <body onload="drawSquares()"> 
+    <div data-role="page">
+      <div data-role="header">
+        <h1>EdgeWrite</h1>
+      </div><!-- /header -->
+      <div data-role="content">
+        <canvas id="drawing" width="150" height="150"></canvas>
+        <div id="renderedLetter" style="font-size:65px">?</div>
+      </div><!--/content--> 
+    </div><!-- /page -->
+  </body>
+</html>

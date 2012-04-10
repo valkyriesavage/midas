@@ -6,7 +6,6 @@
 *.blg
 *.log
 *.out
-*.jpg
 *.pdf
 *.gz
 codez/midas_cu/bin/*
@@ -20,3 +19,6 @@ testdata/*
 .~lock.*
 *Inkscape.app*
 outline.svg
+mask.svg
+*.DS_Store
+paper/*.fdb_latexmk

@@ -1,0 +1,65 @@
+<!DOCTYPE html> 
+<html> 
+  <head> 
+    <title>Light in response</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="helper.js"></script>
+    <script>
+      var socket = io.connect(HOST);
+      socket.on('message', function (dataStr) {
+        console.log(dataStr);
+        var data = jQuery.parseJSON(dataStr);
+        if(data['type'] == 'PAD') {
+          if(data['direction'] == 'TOUCH') {
+            touch(data['xposition'], data['yposition']);
+          } else {
+            release(data['xposition'], data['yposition']);
+          }
+        } else if (data['type'] == 'SLIDER') {
+        } else if (data['type'] == 'BUTTON') {
+        }
+      });
+
+      function send(dir) {
+        socket.emit("message", {direction: dir});
+      };
+
+      $(document).ready(function(){});
+
+      function square(x, y, color) {
+        var c = document.getElementById("drawing");
+        var ctx = c.getContext("2d");
+        ctx.fillStyle=color;
+        ctx.fillRect(x*75, y*75, 50, 50);
+      }
+
+      function touch(x, y) {
+        square(x, y, "#FF0000");
+      }
+
+      function release(x, y) {
+        square(x, y, "#0000FF");
+      }
+
+      function drawSquares() {
+        release(0,0);
+        release(0,1);
+        release(1,0);
+        release(1,1);
+      }
+
+    </script>
+  </head> 
+  <body onload="drawSquares()"> 
+    <div data-role="page">
+      <div data-role="header">
+        <h1>Light in Response</h1>
+      </div><!-- /header -->
+      <canvas id="drawing" width="350" height="350"></canvas>
+    </div><!-- /page -->
+  </body>
+</html>

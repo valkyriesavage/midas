@@ -1,0 +1,54 @@
+<!DOCTYPE html> 
+<html> 
+  <head> 
+    <title>All the music</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="helper.js"></script>
+    <script>
+      var socket = io.connect(HOST);
+      socket.on('message', function (dataStr) {
+        console.log(dataStr);
+        var data = jQuery.parseJSON(dataStr);
+        if(data['type'] == 'PAD') {
+        } else if (data['type'] == 'SLIDER') {
+        } else if (data['type'] == 'BUTTON') {
+          var sound_file_url = "";
+          // all urls link from the (legal) free record label http://www.bdwrekordings.com/
+          if (data['name'] == 'shock') {
+            sound_file_url = "http://ia600407.us.archive.org/33/items/BDW4MP3015/Shock.mp3";
+          }
+          if (data['name'] == 'overdose') {
+            sound_file_url = "http://ia700402.us.archive.org/23/items/BDW4MP3013/overdose.mp3";
+          }
+          if (data['name'] == 'hardcore') {
+            sound_file_url = "http://ia700202.us.archive.org/14/items/BDW4MP3001/HardcoreBeatz.mp3";
+          }
+          if (data['name'] == 'chance') {
+            sound_file_url = "http://ia700502.us.archive.org/20/items/BDW4MP3002/UGotThe2Chance.mp3";
+          }
+          $('#player').attr('src', sound_file_url);
+          document.getElementById('player').play();
+        }
+      });
+
+      function send(dir) {
+        socket.emit("message", {direction: dir});
+      };
+
+      $(document).ready(function(){});
+
+    </script>
+  </head> 
+  <body onload=""> 
+    <div data-role="page">
+      <div data-role="header">
+        <h1>Music clips</h1>
+      </div><!-- /header -->
+      <audio id="player" src="" />
+    </div><!-- /page -->
+  </body>
+</html>

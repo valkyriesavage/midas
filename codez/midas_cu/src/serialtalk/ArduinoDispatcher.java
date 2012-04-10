@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.swing.JTextField;
 
+import util.EventType;
+
 import bridge.ArduinoToDisplayBridge;
 import bridge.ArduinoToSliderBridge;
 import display.ArduinoSensorButton;
@@ -33,6 +35,10 @@ public class ArduinoDispatcher {
   public void beginCapturing() {
     isCapturing = true;
     capturedEvents = new ArrayList<ArduinoEvent>();
+  }
+  
+  public boolean isCapturing() {
+    return isCapturing;
   }
   
   public List<ArduinoEvent> endCaptureAndReport() {
@@ -105,5 +111,25 @@ public class ArduinoDispatcher {
   public List<ArduinoEvent> lastNEvents(int n) {
     if(recentEvents.size() <= n) { return recentEvents; }
     return recentEvents.subList(recentEvents.size() - n - 1, recentEvents.size() - 1);
+  }
+  
+  public EventType getType(ArduinoSensor sensor) {
+    for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+      if (bridge.contains(sensor)) {
+        if (bridge.interfacePiece.isPad) { return EventType.PAD; }
+        if (bridge.interfacePiece.isSlider) { return EventType.SLIDER; }
+        return EventType.BUTTON;
+      }
+    }
+    return null;
+  }
+  
+  public ArduinoToDisplayBridge getBridgeForSensor(ArduinoSensor sensor) {
+    for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+      if (bridge.contains(sensor)) {
+        return bridge;
+      }
+    }
+    return null;
   }
 }

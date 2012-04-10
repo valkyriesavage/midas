@@ -15,15 +15,27 @@ public class ArduinoPad implements ArduinoObject {
     return locationOnPad(sensor) != null;
   }
   
+  public ArduinoSensor sensorAt(int x, int y) {
+    return sensors[y][x];
+  }
+  
   public Point locationOnPad(ArduinoSensor sensor) {
     for (int i=0; i<sensors.length; i++) {
       for (int j=0; j<sensors[i].length; j++) {
         if (sensors[i][j].equals(sensor)) {
-          return new Point(i, j);
+          return new Point(j, i);
         }
       }
     }
     return null;
+  }
+  
+  public double positionXInPad(ArduinoSensor sensor) {
+    return locationOnPad(sensor).x / (1.0*sensors.length - 1);
+  }
+ 
+  public double positionYInPad(ArduinoSensor sensor) {
+    return locationOnPad(sensor).y / (1.0*sensors[0].length - 1);
   }
   
   public int hashCode() {
@@ -50,5 +62,16 @@ public class ArduinoPad implements ArduinoObject {
 
   public boolean contains(ArduinoSensor sensor) {
     return isPartOfPad(sensor);
+  }
+  
+  public int[] sensor() {
+    sensitivity = sensors.length * sensors[0].length;
+    int[] retSensors = new int[sensitivity];
+    for (int i=0; i<sensors.length; i++) {
+      for (int j=0; j<sensors[i].length; j++) {
+        retSensors[i*sensors.length + j] = sensors[i][j].location.x; 
+      }
+    }
+    return retSensors;
   }
 }

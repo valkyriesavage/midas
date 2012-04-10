@@ -33,6 +33,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import display.ArduinoSensorButton;
+import display.CanvasPanel;
 import display.HellaSliderPositioner;
 import display.SensorButtonGroup;
 import display.SetUp;
@@ -102,7 +103,7 @@ public class SVGPathwaysGenerator {
 		g.drawRect(x1 - LINE_EXTENT, y1 - LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
 	}
 	public void paint(Graphics2D g) {
-		g.setColor(Color.red);
+		g.setColor(CanvasPanel.LIGHT_COPPER);
 		for (List<Point> path : allPaths) {
 			if (path != null) {
 				for (Point p : path) {
@@ -209,10 +210,17 @@ public class SVGPathwaysGenerator {
 				}
 			}
 		}
+
+		List<Shape> allShapes = new LinkedList();
+		allShapes.addAll(buttonGenShapes);
+		if(sliderGenShapes != null)
+			allShapes.addAll(sliderGenShapes);
+		
 		
 		if (generatePathways) {
 			Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 			
+			/*
 			try{
 				for(Corner C : Corner.values()) {
 					if(sliderGenShapes == null) {
@@ -238,8 +246,10 @@ public class SVGPathwaysGenerator {
 			}catch(PathwayGenerationException e) {
 				//oh noes we failed
 			}
-			
-			//==========OLD CODE==============
+			*/
+		
+		  writeSVG(new File("mask.svg").getAbsoluteFile(), allShapes,
+	        allPaths, !generatePathways);
 			try{
 				// We take each button and set its cells of influence to “restricted to
 				// B”, where B is that button.
@@ -285,10 +295,6 @@ public class SVGPathwaysGenerator {
 		if (PRINT_DEBUG)
 			System.out.println("Paths generated!");
 
-		List<Shape> allShapes = new LinkedList();
-		allShapes.addAll(buttonGenShapes);
-		if(sliderGenShapes != null)
-			allShapes.addAll(sliderGenShapes);
 		writeSVG(new File("outline.svg").getAbsoluteFile(), allShapes, allPaths, generatePathways);
 		
 		return true;
@@ -564,8 +570,7 @@ public class SVGPathwaysGenerator {
 				System.out.println("SVG successfully written!"
 						+ (generatePathways ? " Simplifying..." : ""));
 
-			if (generatePathways)
-				simplifySVG(svg.getName());
+			simplifySVG(svg.getName());
 			if (PRINT_DEBUG)
 				System.out.println("Finished!");
 			mySetup.repaint();

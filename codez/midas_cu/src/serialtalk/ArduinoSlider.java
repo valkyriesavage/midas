@@ -34,6 +34,14 @@ public class ArduinoSlider implements ArduinoObject {
     return sensors.indexOf(sensor);
   }
   
+  public ArduinoSensor sensorAt(int position) {
+    return sensors.get(position);
+  }
+  
+  public double positionInSlider(ArduinoSensor sensor) {
+    return whichInSlider(sensor)/(1.0*sensors.size() - 1);
+  }
+  
   public int howFar(List<ArduinoSensor> sensorsTouched) {
     return Math.abs(sensors.indexOf(sensorsTouched.get(0)) - sensors.indexOf(sensorsTouched.get(sensorsTouched.size())));
   }
@@ -66,5 +74,14 @@ public class ArduinoSlider implements ArduinoObject {
 
   public boolean contains(ArduinoSensor sensor) {
     return isPartOfSlider(sensor);
+  }
+  
+  public int[] sensor() {
+    int numSensors = sensors.size();
+    int[] retSensors = new int[numSensors];
+    for (int i=0; i<numSensors; i++) {
+      retSensors[i] = sensors.get(i).location.x;
+    }
+    return retSensors;
   }
 }
