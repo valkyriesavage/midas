@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import serialtalk.ArduinoEvent;
@@ -19,6 +20,8 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
   private static final ArduinoSensor nullSensor = new ArduinoSensor(-1, -1);
 
   private UIScript interactiveScript = new UIScript();
+  
+  private JButton show = new JButton();
 
   public ArduinoToButtonBridge() { }
 
@@ -41,12 +44,7 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
       return websocketField;
     } else {
       JButton change;
-      if (interactiveScript.actions.size() > 0) {
-        change = new JButton(interactiveScript.icon());
-        change.setToolTipText(interactiveScript.toString());
-      } else {
-        change = new JButton("record interaction");
-      }
+      change = new JButton("record interaction");
       change.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent event) {
           if (!interactiveScript.isRecording) {
@@ -59,24 +57,41 @@ public class ArduinoToButtonBridge extends ArduinoToDisplayBridge {
             ((JButton) event.getSource()).setText("stop recording");
           } else {
             interactiveScript.stopRecording();
-            ((JButton) event.getSource()).setText("");
-            ((JButton) event.getSource()).setIcon(interactiveScript.icon());
-            ((JButton) event.getSource()).setToolTipText(interactiveScript
-                .toString());
+            ((JButton) event.getSource()).setText("record interaction");
+            setUpDisplay();
           }
         }
       });
       return change;
     }
   }
+  
+  private void setUpDisplay() {
+    if (interactiveScript.actions.size() > 0) {
+      show = new JButton(interactiveScript.icon());
+      show.setToolTipText(interactiveScript.toString());
+    } else {
+      show = new JButton("none");
+    }
+    show.setEnabled(false);
+  }
+  
+  public JComponent interactionDisplay() {
+    if (websocketing()) { return new JLabel(); }
+    
+    setUpDisplay();
+    
+    return show;
+  }
 
   public JButton goButton() {
-    JButton go = new JButton("test interaction");
+    JButton go = new JButton("replay interaction");
     go.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         executeScript();
       }
     });
+    if (websocketing()) { go.setEnabled(false); }
     return go;
   }
 

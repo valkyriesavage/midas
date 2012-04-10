@@ -75,4 +75,13 @@ public class ArduinoSlider implements ArduinoObject {
   public boolean contains(ArduinoSensor sensor) {
     return isPartOfSlider(sensor);
   }
+  
+  public int[] sensor() {
+    int numSensors = sensors.size();
+    int[] retSensors = new int[numSensors];
+    for (int i=0; i<numSensors; i++) {
+      retSensors[i] = sensors.get(i).location.x;
+    }
+    return retSensors;
+  }
 }

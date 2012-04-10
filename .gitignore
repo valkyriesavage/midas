@@ -19,5 +19,6 @@ testdata/*
 .~lock.*
 *Inkscape.app*
 outline.svg
+mask.svg
 *.DS_Store
 paper/*.fdb_latexmk

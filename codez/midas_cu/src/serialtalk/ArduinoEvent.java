@@ -67,4 +67,9 @@ public class ArduinoEvent implements ArduinoObject {
   public boolean contains(ArduinoSensor sensor) {
     return !isHellaSlider && sensor.equals(whichSensor);
   }
+  
+  public int[] sensor() {
+    int[] ret = {whichSensor.location.x};
+    return ret;
+  }
 }

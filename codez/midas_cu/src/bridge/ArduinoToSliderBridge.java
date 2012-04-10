@@ -35,6 +35,8 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   private JComboBox sliderSensitivity = new JComboBox(
       SetUp.SLIDER_SENSITIVITIES);
 
+  private JButton show;
+
   public ArduinoToSliderBridge(int sensitivity) {
     initWebsocketField();
     this.sensitivity = sensitivity;
@@ -67,6 +69,18 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
     this.interfacePiece.setSensitivity(this.sensitivity);
   }
 
+  public JComponent interactionDisplay() {
+    if (interactivePiece.icon() != null) {
+      show = new JButton(interactivePiece.icon());
+      show.setToolTipText(interactivePiece.toString());
+    } else {
+      show = new JButton("none");
+    }
+    show.setEnabled(false);
+
+    return show;
+  }
+
   public JComponent interactionSetter() {
     if (websocketing()) {
       return websocketField;
@@ -76,7 +90,7 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
         captureSlider = new JButton(interactivePiece.icon());
         captureSlider.setToolTipText(interactivePiece.toString());
       } else {
-        captureSlider = new JButton("capture slider");
+        captureSlider = new JButton("record slider");
       }
       captureSlider.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent event) {
@@ -88,13 +102,12 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
                     "slider capture instructions",
                     JOptionPane.INFORMATION_MESSAGE);
             interactivePiece.record();
-            ((JButton) event.getSource()).setText("stop recording");
+            ((JButton) event.getSource()).setText("done");
           } else {
             interactivePiece.stopRecording();
-            ((JButton) event.getSource()).setText("");
-            ((JButton) event.getSource()).setIcon(interactivePiece.icon());
-            ((JButton) event.getSource()).setToolTipText(interactivePiece
-                .toString());
+            ((JButton) event.getSource()).setText("record slider");
+            show.setIcon(interactivePiece.icon());
+            show.setToolTipText(interactivePiece.toString());
           }
         }
       });
@@ -107,13 +120,13 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   }
 
   public JButton goButton() {
-    JButton show = new JButton("test positions");
+    JButton show = new JButton("replay positions");
     show.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         for (int i = 0; i < sensitivity; i++) {
-          ArduinoSensor sensor = ((ArduinoSlider)arduinoPiece).sensorAt(i);
+          ArduinoSensor sensor = ((ArduinoSlider) arduinoPiece).sensorAt(i);
           execute(sensor, TouchDirection.TOUCH);
-          if(websocketing()) {
+          if (websocketing()) {
             execute(sensor, TouchDirection.RELEASE);
           }
         }
@@ -141,7 +154,7 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   }
 
   public void execute(int hellaSliderValue) {
-    if(websocketing()) {
+    if (websocketing()) {
       new SocketTalkAction(websocketField().getText()).doAction();
     } else {
       interactivePiece.execute(hellaSliderValue);

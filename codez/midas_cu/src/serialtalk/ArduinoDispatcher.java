@@ -37,6 +37,10 @@ public class ArduinoDispatcher {
     capturedEvents = new ArrayList<ArduinoEvent>();
   }
   
+  public boolean isCapturing() {
+    return isCapturing;
+  }
+  
   public List<ArduinoEvent> endCaptureAndReport() {
     isCapturing = false;
     return capturedEvents;
