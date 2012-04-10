@@ -9,7 +9,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="helper.js"></script>
     <script>
-      var timeoutBeforeRendering = 2000;
+      var timeoutBeforeRendering = 500;
       var currentSetOfActivations = new Array();
       var timeout;
 
@@ -115,6 +115,7 @@
         var ctx = canvas.getContext("2d");
         ctx.fillStyle=color;
         ctx.beginPath();
+        ctx.lineWidth=10;
         ctx.moveTo(x1,y1);
         ctx.lineTo(x2,y2);
         ctx.closePath();
@@ -162,7 +163,7 @@
       </div><!-- /header -->
       <div data-role="content">
         <canvas id="drawing" width="150" height="150"></canvas>
-        <div id="renderedLetter"><h1>?</h1></div>
+        <div id="renderedLetter" style="font-size:65px">?</div>
       </div><!--/content--> 
     </div><!-- /page -->
   </body>

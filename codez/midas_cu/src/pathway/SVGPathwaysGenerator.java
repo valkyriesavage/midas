@@ -46,7 +46,7 @@ public class SVGPathwaysGenerator {
 
 	public static boolean PRINT_DEBUG = true;
 
-	public static final int LINE_EXTENT = 1;
+	public static final int LINE_EXTENT = 3;
 
 	public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
 	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH; // should be
@@ -385,8 +385,7 @@ public class SVGPathwaysGenerator {
 				System.out.println("SVG successfully written!"
 						+ (generatePathways ? " Simplifying..." : ""));
 
-			if (generatePathways)
-				simplifySVG(svg.getName());
+			simplifySVG(svg.getName());
 			if (PRINT_DEBUG)
 				System.out.println("Finished!");
 			mySetup.repaint();

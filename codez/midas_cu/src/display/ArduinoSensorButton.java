@@ -180,9 +180,9 @@ public class ArduinoSensorButton extends JButton {
   @Override
   public void setSelected(boolean selected) {
     if(!selected) {
-      relevantColor = CanvasPanel.COPPER;
-    } else {
       relevantColor = CanvasPanel.DARK_COPPER;
+    } else {
+      relevantColor = CanvasPanel.COPPER;
     }
   }
   
