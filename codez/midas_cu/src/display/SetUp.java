@@ -395,6 +395,8 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
       propertiesPane.add(sliderBridge.interactionDisplay());
+      propertiesPane.add(placeholder());
+      propertiesPane.add(sliderBridge.goButton());
 
       propertiesPane.add(new JLabel("sensitivity"));
       JComboBox sensitivityBox = sliderBridge.sliderSensitivityBox();

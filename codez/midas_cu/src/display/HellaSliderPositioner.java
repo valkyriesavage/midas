@@ -16,13 +16,11 @@ public class HellaSliderPositioner {
 	
 	private static HellaSliderPositioner base;
 	static {
-
 		try {
 			UserAgentAdapter ua = new UserAgentAdapter();
 			DocumentLoader loader = new DocumentLoader(ua);
 			String svgURI;
 			svgURI = new File("slider.svg").toURL().toString();
-//			System.out.println(svgURI);
 			Document doc = loader.loadDocument(svgURI);
 
 			PathParser pp = new PathParser();
