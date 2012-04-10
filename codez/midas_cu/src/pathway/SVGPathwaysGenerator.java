@@ -42,6 +42,7 @@ public class SVGPathwaysGenerator {
 
 	SetUp mySetup;
 	private List<List<Point>> allPaths = new ArrayList<List<Point>>();
+	private Grid lastGrid;
 
 	public SVGPathwaysGenerator(SetUp s) {
 		mySetup = s;
@@ -49,7 +50,7 @@ public class SVGPathwaysGenerator {
 
 	public static boolean PRINT_DEBUG = true;
 
-	public static final int LINE_EXTENT = 3;
+	public static final int LINE_EXTENT = 1;
 
 	public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
 	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH; // should be
@@ -196,6 +197,7 @@ public class SVGPathwaysGenerator {
 	 */
 	public boolean generatePathways(List<SensorButtonGroup> buttonsToConnect, boolean generatePathways) {
 		allPaths.clear();
+		lastGrid = null;
 		
 		List<Shape> buttonGenShapes = new ArrayList<Shape>();
 		List<Shape> sliderGenShapes = null; //possibly null!
@@ -252,6 +254,8 @@ public class SVGPathwaysGenerator {
 				
 				allPaths.addAll(s.paths); //woo we have the paths now
 				allShapes.addAll(s.grid.getConnections().keySet());
+				
+				lastGrid = s.grid;
 			}catch(PathwayGenerationException e) {
 				//oh noes we failed
 				JOptionPane.showMessageDialog(null, "Buttons could not be routed! You will have to route your own buttons.",
@@ -262,57 +266,6 @@ public class SVGPathwaysGenerator {
 
 		writeSVG(new File("outline.svg").getAbsoluteFile(), allShapes, allPaths, generatePathways);
 		return true;
-			
-			//==========OLD CODE==============
-//			try{
-//				// We take each button and set its cells of influence to “restricted to
-//				// B”, where B is that button.
-//				g.restrictAll(buttonGenShapes);
-//				
-//				if(sliderGenShapes != null) {
-//					g.restrictAll(sliderGenShapes);
-//				}
-//
-//				//create the mapping between buttons and their ports.
-//				List<Pair<Shape, Point>> buttonGenPairs = new LinkedList<Pair<Shape, Point>>();
-//				List<Pair<Shape, Point>> sliderGenPairs = null;
-//				{
-//					int x = 0;
-//					for(Shape b : buttonGenShapes) {
-//						buttonGenPairs.add(new Pair<Shape, Point>(b, new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT)));
-//						x++;
-//					}
-//					if(sliderGenShapes != null) {
-//						sliderGenPairs = new LinkedList<Pair<Shape, Point>>();
-//						for(Shape b : sliderGenShapes) {
-//							sliderGenPairs.add(new Pair<Shape, Point>(b, new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT)));
-//							x++;
-//						}
-//					}
-//				}
-//			// if (btns.size() <= 12)
-//				if(PRINT_DEBUG) System.out.println("Generating paths for buttons...");
-//				allPaths.addAll(generateIndividual(g, buttonGenPairs));
-//				if(sliderGenPairs != null) {
-//					if(PRINT_DEBUG) System.out.println("Generating paths for hella slider...");
-//					allPaths.addAll(generateIndividual(g, sliderGenPairs));
-//				}
-//			// else
-//			// allPaths.addAll(generateGrid(btns, ports));
-//			}catch(PathwayGenerationException e) {
-//			}
-//		}
-
-//			if (PRINT_DEBUG)
-//				System.out.println("Paths generated!");
-
-//		List<Shape> allShapes = new LinkedList();
-//		allShapes.addAll(buttonGenShapes);
-//		if(sliderGenShapes != null)
-//			allShapes.addAll(sliderGenShapes);
-//		writeSVG(new File("outline.svg").getAbsoluteFile(), allShapes, allPaths, generatePathways);
-//		
-//		return true;
 	}
 
 	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
