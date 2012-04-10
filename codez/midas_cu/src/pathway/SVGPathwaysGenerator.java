@@ -180,9 +180,11 @@ public class SVGPathwaysGenerator {
 	
 	private class SuccessfulException extends Exception {
 		List<List<Point>> paths;
-		SuccessfulException(List<List<Point>> paths) {
+		Grid grid;
+		SuccessfulException(List<List<Point>> paths, Grid g) {
 			super();
 			this.paths = paths;
+			grid = g;
 		}
 	}
 	
@@ -218,86 +220,99 @@ public class SVGPathwaysGenerator {
 		
 		
 		if (generatePathways) {
-			Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
+			writeSVG(new File("mask.svg").getAbsoluteFile(), allShapes, allPaths, false);
+//			Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 			
-			/*
 			try{
+				int configNum = 1;
 				for(Corner C : Corner.values()) {
 					if(sliderGenShapes == null) {
+						if(PRINT_DEBUG) System.out.println("Attempting config "+(configNum++));
 						tryFullGeneration(buttonGenShapes, C);
 					} else {
 						for(HSDirection D : HSDirection.values()) {
 							for(RouteOrder O : RouteOrder.values()) {
-								
 								for(HSPortLocation L : HSPortLocation.values()) {
+									if(PRINT_DEBUG) System.out.println("Attempting config "+(configNum++));
 									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, D, O, L);
 								}
-								
-								for(Corner Cc : C.others()) {
-									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, Cc, D, O);
-								}
+//								
+//								for(Corner Cc : C.others()) {
+//									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, Cc, D, O);
+//								}
 							}
 						}
 					}
 				}
 				throw new PathwayGenerationException();
 			}catch(SuccessfulException s) {
-				s.paths; //woo we have the paths now
+				if (PRINT_DEBUG) System.out.println("Paths generated!");
+				System.out.println(s.paths.size());
+				System.out.println(s.grid.getConnections().size());
+				
+				allPaths.addAll(s.paths); //woo we have the paths now
+				allShapes.addAll(s.grid.getConnections().keySet());
 			}catch(PathwayGenerationException e) {
 				//oh noes we failed
-			}
-			*/
-		
-		  writeSVG(new File("mask.svg").getAbsoluteFile(), allShapes,
-	        allPaths, !generatePathways);
-			try{
-				// We take each button and set its cells of influence to “restricted to
-				// B”, where B is that button.
-				g.restrictAll(buttonGenShapes);
-				
-				if(sliderGenShapes != null) {
-					g.restrictAll(sliderGenShapes);
-				}
-
-				//create the mapping between buttons and their ports.
-				List<Pair<Shape, Point>> buttonGenPairs = new LinkedList<Pair<Shape, Point>>();
-				List<Pair<Shape, Point>> sliderGenPairs = null;
-				{
-					int x = 0;
-					for(Shape b : buttonGenShapes) {
-						buttonGenPairs.add(new Pair<Shape, Point>(b, new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT)));
-						x++;
-					}
-					if(sliderGenShapes != null) {
-						sliderGenPairs = new LinkedList<Pair<Shape, Point>>();
-						for(Shape b : sliderGenShapes) {
-							sliderGenPairs.add(new Pair<Shape, Point>(b, new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT)));
-							x++;
-						}
-					}
-				}
-			// if (btns.size() <= 12)
-				if(PRINT_DEBUG) System.out.println("Generating paths for buttons...");
-				allPaths.addAll(generateIndividual(g, buttonGenPairs));
-				if(sliderGenPairs != null) {
-					if(PRINT_DEBUG) System.out.println("Generating paths for hella slider...");
-					allPaths.addAll(generateIndividual(g, sliderGenPairs));
-				}
-			// else
-			// allPaths.addAll(generateGrid(btns, ports));
-			}catch(PathwayGenerationException e) {
 				JOptionPane.showMessageDialog(null, "Buttons could not be routed! You will have to route your own buttons.",
 						"button routing failure", JOptionPane.ERROR_MESSAGE);
 				return false;
 			}
 		}
 
-		if (PRINT_DEBUG)
-			System.out.println("Paths generated!");
-
 		writeSVG(new File("outline.svg").getAbsoluteFile(), allShapes, allPaths, generatePathways);
-		
 		return true;
+			
+			//==========OLD CODE==============
+//			try{
+//				// We take each button and set its cells of influence to “restricted to
+//				// B”, where B is that button.
+//				g.restrictAll(buttonGenShapes);
+//				
+//				if(sliderGenShapes != null) {
+//					g.restrictAll(sliderGenShapes);
+//				}
+//
+//				//create the mapping between buttons and their ports.
+//				List<Pair<Shape, Point>> buttonGenPairs = new LinkedList<Pair<Shape, Point>>();
+//				List<Pair<Shape, Point>> sliderGenPairs = null;
+//				{
+//					int x = 0;
+//					for(Shape b : buttonGenShapes) {
+//						buttonGenPairs.add(new Pair<Shape, Point>(b, new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT)));
+//						x++;
+//					}
+//					if(sliderGenShapes != null) {
+//						sliderGenPairs = new LinkedList<Pair<Shape, Point>>();
+//						for(Shape b : sliderGenShapes) {
+//							sliderGenPairs.add(new Pair<Shape, Point>(b, new Point(LINE_EXTENT, (1 + PATH_INFLUENCE_WIDTH) * x + LINE_EXTENT)));
+//							x++;
+//						}
+//					}
+//				}
+//			// if (btns.size() <= 12)
+//				if(PRINT_DEBUG) System.out.println("Generating paths for buttons...");
+//				allPaths.addAll(generateIndividual(g, buttonGenPairs));
+//				if(sliderGenPairs != null) {
+//					if(PRINT_DEBUG) System.out.println("Generating paths for hella slider...");
+//					allPaths.addAll(generateIndividual(g, sliderGenPairs));
+//				}
+//			// else
+//			// allPaths.addAll(generateGrid(btns, ports));
+//			}catch(PathwayGenerationException e) {
+//			}
+//		}
+
+//			if (PRINT_DEBUG)
+//				System.out.println("Paths generated!");
+
+//		List<Shape> allShapes = new LinkedList();
+//		allShapes.addAll(buttonGenShapes);
+//		if(sliderGenShapes != null)
+//			allShapes.addAll(sliderGenShapes);
+//		writeSVG(new File("outline.svg").getAbsoluteFile(), allShapes, allPaths, generatePathways);
+//		
+//		return true;
 	}
 
 	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
@@ -305,29 +320,103 @@ public class SVGPathwaysGenerator {
 		Grid g = new Grid();
 		C.sort(buttonShapes);
 
-		/*
-		restrict shape outlines - 										restrict all buttonShapes
-		create port-maps between buttons and their respective points - 	iterate through, make points
-		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
-		 */
+//		restrict shape outlines - 										restrict all buttonShapes
+		g.restrictAll(buttonShapes);
+		
+
+//		create port-maps between buttons and their respective points - 	iterate through, make points
+		List<Pair<Shape, Point>> buttonGenPairs = new LinkedList<Pair<Shape, Point>>();
+		for(int x = 0; x < buttonShapes.size(); x++) {
+			buttonGenPairs.add(new Pair<Shape, Point>(buttonShapes.get(x), C.port(x)));
+		}
+		
+		try{
+//			generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
+			List<List<Point>> paths = generateIndividual(g, buttonGenPairs);
+			throw new SuccessfulException(paths, g);
+		}catch(PathwayGenerationException e) {
+			return;
+		}
 	}
+	
 	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
 	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes, 
 			Corner C, HSDirection D, RouteOrder O, HSPortLocation L) throws SuccessfulException {
 		Grid g = new Grid();
 		C.sort(buttonShapes);
 
-		/*
-		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
-		create port-maps between buttons and their respective points - 	iterate through, make points depending on L and D
-		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
-		 */
+//		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
+		g.restrictAll(buttonShapes);
+		g.restrictAll(sliderShapes);
+		
+//		create port-maps between buttons and their respective points - 	iterate through, make points depending on L and D
+		List<Pair<Shape, Point>> buttonGenPairs = new LinkedList<Pair<Shape, Point>>();
+		List<Pair<Shape, Point>> sliderGenPairs = new LinkedList<Pair<Shape, Point>>();
+		int x = 0;
+		switch(L) {
+			case AFTER:
+				for(Shape s : buttonShapes) {
+					buttonGenPairs.add(new Pair<Shape, Point>(s, C.port(x)));
+					x++;
+				}
+				for(Shape s : sliderShapes) {
+					sliderGenPairs.add(new Pair<Shape, Point>(s, C.port(x)));
+					x++;
+				}
+				break;
+				
+			case BEFORE:
+				for(Shape s : sliderShapes) {
+					sliderGenPairs.add(new Pair<Shape, Point>(s, C.port(x)));
+					x++;
+				}
+				for(Shape s : buttonShapes) {
+					buttonGenPairs.add(new Pair<Shape, Point>(s, C.port(x)));
+					x++;
+				}
+				break;
+		}
+		if(D == HSDirection.REVERSE) {
+			Point p1 = sliderGenPairs.get(0)._2,
+				  p3 = sliderGenPairs.get(2)._2;
+			sliderGenPairs.get(0)._2 = p3;
+			sliderGenPairs.get(2)._2 = p1; //swap orders
+		}
+//		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
+		List<List<Point>> paths = new ArrayList();
+		switch(O) {
+			case BUTTONFIRST:
+
+				try{
+//					generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
+					paths.addAll(generateIndividual(g, buttonGenPairs));
+					paths.addAll(generateIndividual(g, sliderGenPairs));
+					throw new SuccessfulException(paths, g);
+				}catch(PathwayGenerationException e) {
+					return;
+				}
+				
+			case HELLAFIRST:
+
+				try{
+//					generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
+					paths.addAll(generateIndividual(g, sliderGenPairs));
+					paths.addAll(generateIndividual(g, buttonGenPairs));
+					throw new SuccessfulException(paths, g);
+				}catch(PathwayGenerationException e) {
+					return;
+				}
+		}
+		
+		throw new RuntimeException("not implemented yet");
 	}
 	//On failure, tryFullGeneration simply returns and does nothing. On success, will throw SuccessfulException carrying the data.
 	private void tryFullGeneration(List<Shape> buttonShapes, List<Shape> sliderShapes,
 			Corner C, Corner Cc, HSDirection D, RouteOrder O) throws SuccessfulException {
 		Grid g = new Grid();
 		C.sort(buttonShapes);
+		
+		throw new RuntimeException("not implemented yet");
 
 		/*
 		restrict shape outlines - 										restrict all buttonShapes, all sliderShapes
@@ -352,14 +441,14 @@ public class SVGPathwaysGenerator {
 
 			List<Point> nearButton = outlineFor(button);
 			List<Point> path;
-			try{
+//			try{
 				path = g.findPath(nearButton, port, button);
-			} catch(PathwayGenerationException e) { //todo: temporary fix to see when things go wrong
-				path = null;
-			}
+//			} catch(PathwayGenerationException e) { //todo: temporary fix to see when things go wrong
+//				path = null;
+//			}
 
 			paths.add(path);
-			if(path != null)
+//			if(path != null)
 				g.close(cellsOfInfluence(path));
 		}
 
@@ -518,7 +607,7 @@ public class SVGPathwaysGenerator {
 		return outline;
 	}
 
-	private void writeSVG(File svg, List<Shape> buttons,
+	private void writeSVG(File svg, Iterable<Shape> buttons,
 			List<List<Point>> paths, boolean generatePathways) {
 		if (PRINT_DEBUG)
 			System.out.println("Writing SVG file to " + svg);
@@ -536,24 +625,22 @@ public class SVGPathwaysGenerator {
 
 		// Create an instance of the SVG Generator.
 		SVGGraphics2D g = new SVGGraphics2D(document);
+		g.setStroke(new BasicStroke(.5f));
+		g.setColor(Color.red);
 
 		// draw all of the buttons
-		Iterator<List<Point>> pathsIterator = paths.iterator();
-		g.setStroke(new BasicStroke(.5f));
-		for (Shape b : buttons) {
-			g.setColor(new Color((float) Math.random(), (float) Math.random(), (float) Math.random()));
-//			b.paint(g);
-			g.draw(b);
-
-			if (generatePathways) {
-				List<Point> path = pathsIterator.next();
-				if (path != null) {
-//					g.setStroke(new BasicStroke(.2f));
-					for (Point p : path) {
-						point(g, p.x, p.y);
-					}
+		if(generatePathways) {
+			for(List<Point> path : allPaths) {
+				for (Point p : path) {
+					point(g, p.x, p.y);
 				}
 			}
+		}
+		for (Shape b : buttons) {
+//			b.paint(g);
+			g.setColor(new Color((float) Math.random(), (float) Math.random(), (float) Math.random()));
+			g.draw(b);
+
 		}
 
 		// Finally, stream out SVG to the standard output using
@@ -567,12 +654,10 @@ public class SVGPathwaysGenerator {
 			out.close();
 
 			if (PRINT_DEBUG)
-				System.out.println("SVG successfully written!"
-						+ (generatePathways ? " Simplifying..." : ""));
+				System.out.println("SVG successfully written! Simplifying...");
 
 			simplifySVG(svg.getName());
-			if (PRINT_DEBUG)
-				System.out.println("Finished!");
+			
 			mySetup.repaint();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
