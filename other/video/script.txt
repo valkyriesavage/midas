@@ -1,0 +1,9 @@
+We introduce Midas, a software and hardware toolkit to support the design, fabrication, and programming of flexible capacitive touch sensors for interactive objects.
+
+With Midas, designers first define the desired shape, layout, and type of touch sensitive areas in a sensor editor interface.  Midas automatically generates layout files with appropriate sensor pads and routed connections.
+
+These files can be cut out in copper on a vinyl cutter and adhered to the desired prototype object.
+
+Midas supports both record-and-replay actions for existing applications and event output to control novel applications via websockets.
+
+
