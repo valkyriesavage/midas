@@ -24,7 +24,7 @@ public class SensorButtonGroup extends JPanel {
   private static final long serialVersionUID = -3154036436928212098L;
   private static final int BASE = 30;
   private static final int MIN_SIZE = 30;
-  public static final int SIZE_CHANGE = 5;
+  public static final int SIZE_CHANGE = 1;
   public static final int BUFFER = 2;
   private static final int WIDTH_OF_NAME_FIELD = 10;
 
@@ -74,6 +74,10 @@ public class SensorButtonGroup extends JPanel {
 
     isCustom = true;
   }
+  
+  public Point center() {
+    return base;
+  }
 
   private void generalSetup() {
     initializeButtons();
@@ -82,12 +86,14 @@ public class SensorButtonGroup extends JPanel {
     nameField.setText(name);
     nameField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
-      public void changedUpdate(DocumentEvent event) { }
+      public void changedUpdate(DocumentEvent event) {
+      }
 
       @Override
       public void insertUpdate(DocumentEvent event) {
         try {
-          name = event.getDocument().getText(0, event.getDocument().getLength());
+          name = event.getDocument()
+              .getText(0, event.getDocument().getLength());
         } catch (BadLocationException e) {
           e.printStackTrace();
         }
@@ -96,7 +102,8 @@ public class SensorButtonGroup extends JPanel {
       @Override
       public void removeUpdate(DocumentEvent event) {
         try {
-          name = event.getDocument().getText(0, event.getDocument().getLength());
+          name = event.getDocument()
+              .getText(0, event.getDocument().getLength());
         } catch (BadLocationException e) {
           e.printStackTrace();
         }
@@ -166,26 +173,12 @@ public class SensorButtonGroup extends JPanel {
     });
     smaller.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        size -= SIZE_CHANGE;
-        if (size < MIN_SIZE) {
-          size = MIN_SIZE;
-        } else {
-          for (ArduinoSensorButton button : triggerButtons) {
-            button.smaller();
-          }
-        }
-        moveTo(base);
-        repaint();
+        smaller();
       }
     });
     larger.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        size += SIZE_CHANGE;
-        for (ArduinoSensorButton button : triggerButtons) {
-          button.larger();
-        }
-        moveTo(base);
-        repaint();
+        larger();
       }
     });
     delete.addActionListener(new ActionListener() {
@@ -197,17 +190,17 @@ public class SensorButtonGroup extends JPanel {
 
   public void paint(Graphics2D g) {
     if (!deleteMe) {
-    	if(sensitivity == SetUp.HELLA_SLIDER) {
-    		HellaSliderPositioner hsp = getHSP();
-    		g.setColor(triggerButtons.get(0).relevantColor);
-    		g.fill(hsp.getSeg1());
-    		g.fill(hsp.getSeg2());
-    		g.fill(hsp.getOuter());
-    	} else {
-	      for (ArduinoSensorButton button : triggerButtons) {
-	        button.paint(g);
-	      }
-    	}
+      if (sensitivity == SetUp.HELLA_SLIDER) {
+        HellaSliderPositioner hsp = getHSP();
+        g.setColor(triggerButtons.get(0).relevantColor);
+        g.fill(hsp.getSeg1());
+        g.fill(hsp.getSeg2());
+        g.fill(hsp.getOuter());
+      } else {
+        for (ArduinoSensorButton button : triggerButtons) {
+          button.paint(g);
+        }
+      }
     }
   }
 
@@ -243,13 +236,11 @@ public class SensorButtonGroup extends JPanel {
       // note that for hella sliders we render a full bar with no spaces in it.
       if (orientation == Direction.HORIZONTAL) {
         for (int i = 0; i < SetUp.SLIDER_SENSITIVITIES[0]; i++) {
-          triggerButtons.get(i).moveTo(
-              new Point(i * (size) + base.x, base.y));
+          triggerButtons.get(i).moveTo(new Point(i * (size) + base.x, base.y));
         }
       } else {
         for (int i = 0; i < SetUp.SLIDER_SENSITIVITIES[0]; i++) {
-          triggerButtons.get(i).moveTo(
-              new Point(base.x, i * (size) + base.y));
+          triggerButtons.get(i).moveTo(new Point(base.x, i * (size) + base.y));
         }
       }
     } else { // we have a slider or single button
@@ -297,37 +288,62 @@ public class SensorButtonGroup extends JPanel {
     }
     return false;
   }
-  
+
   public HellaSliderPositioner getHSP() {
-		HellaSliderPositioner h = new HellaSliderPositioner();
+    HellaSliderPositioner h = new HellaSliderPositioner();
 
-		h.moveToOrigin();
-		//the current bounds; could be anywhere. We bring it to the origin.
-		//If the slider should be vertical, we rotate 90 degrees, bring it back to the origin
-		//we then scale it such that the width and height are equal to the wanted bounds' dimensions,
-		//and finally translate to the wanted bounds' position
-		
-		
-		if(orientation == Direction.VERTICAL) { //vertical
-			h.transformed(AffineTransform.getRotateInstance(Math.PI/2));
-			h.moveToOrigin();
-		} else { //horizontal
-			h.transformed(AffineTransform.getRotateInstance(Math.PI));
-			h.moveToOrigin();
-		}
-		
+    h.moveToOrigin();
+    // the current bounds; could be anywhere. We bring it to the origin.
+    // If the slider should be vertical, we rotate 90 degrees, bring it back to
+    // the origin
+    // we then scale it such that the width and height are equal to the wanted
+    // bounds' dimensions,
+    // and finally translate to the wanted bounds' position
 
-		Rectangle2D wantedBounds = null;
-		for( ArduinoSensorButton b : triggerButtons) {
-			Rectangle2D temp = b.getShape().getBounds2D();
-			if(wantedBounds == null) wantedBounds = temp;
-			else wantedBounds = wantedBounds.createUnion(temp);
-		}
-		
-		h.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
-		h.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(), wantedBounds.getY()));
-		
-		return h;
+    if (orientation == Direction.VERTICAL) { // vertical
+      h.transformed(AffineTransform.getRotateInstance(Math.PI / 2));
+      h.moveToOrigin();
+    } else { // horizontal
+      h.transformed(AffineTransform.getRotateInstance(Math.PI));
+      h.moveToOrigin();
+    }
+
+    Rectangle2D wantedBounds = null;
+    for (ArduinoSensorButton b : triggerButtons) {
+      Rectangle2D temp = b.getShape().getBounds2D();
+      if (wantedBounds == null)
+        wantedBounds = temp;
+      else
+        wantedBounds = wantedBounds.createUnion(temp);
+    }
+
+    h.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
+    h.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(),
+        wantedBounds.getY()));
+
+    return h;
+  }
+
+  public void smaller() {
+    size -= SIZE_CHANGE;
+    if (size < MIN_SIZE) {
+      size = MIN_SIZE;
+    } else {
+      for (ArduinoSensorButton button : triggerButtons) {
+        button.smaller();
+      }
+    }
+    moveTo(base);
+    repaint();
+  }
+  
+  public void larger() {
+    size += SIZE_CHANGE;
+    for (ArduinoSensorButton button : triggerButtons) {
+      button.larger();
+    }
+    moveTo(base);
+    repaint();
   }
 
   @Override
