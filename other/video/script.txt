@@ -13,7 +13,7 @@ Designers cut this file from adhesive copper foil on a vinyl cutter and apply it
 A vinyl mask layer can prevent stray touch events.
 [show someone applying the mask layer]
 
-Designers are led through this assembly process by step-by-step instructions that Midas generates.
+Designers are led through this assembly process step-by-step by instructions that Midas generates.
 [Show the web page; scroll it to the bottom, also click on one of the files and show that it opens up.]
 
 Next, designers connect a touch controller board with conductive tape or solder.
@@ -32,7 +32,7 @@ Afterwards, Midas will replay that series of actions when it detects a touch fro
 We used record-and-replay to create an interactive music poster. [show 10 seconds of this]
 
 For more robust control, Midas can send events over a WebSocket to a user-specified server. That server will then receive events from Midas describing which sensor was touched, its name, whether it is part of a pad or slider, and, if so, its position in the pad or slider. {sentence too long}
-[???VISUALS???]
+[scrolling terminal window with server's debug output of touch events from all kinds of things might be a good visual here?]
 
 We used the websocket framework to prototype a version of Edgewrite on the backside of a smart phone; [show the edgewrite clip.]
 
