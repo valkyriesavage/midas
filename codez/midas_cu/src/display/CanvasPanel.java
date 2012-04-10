@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -19,10 +21,9 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 import serialtalk.ArduinoSetup;
-
 import bridge.ArduinoToDisplayBridge;
 
-public class CanvasPanel extends JPanel implements MouseListener, MouseMotionListener {
+public class CanvasPanel extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
   private static final long serialVersionUID = 7046692110388368464L;
   
   public static final Color COPPER = new Color(204, 76, 22);
@@ -35,6 +36,9 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
   
   private SensorButtonGroup draggingGroup;
   
+  private int keyCodePressed = 0;
+  private Point prevPoint;
+  
   public boolean isInteractive = true;
 
   public CanvasPanel(SetUp setUp, List<SensorButtonGroup> buttonsToDisplay) {
@@ -46,6 +50,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     setVisible(true);
     this.addMouseListener(this);
     this.addMouseMotionListener(this);
+    this.setFocusable(true);
+    this.addKeyListener(this);
   }
   
   @Override
@@ -135,6 +141,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
         setUp.setSelectedBridge(bridge);
       }
     }
+    
+    prevPoint = event.getPoint();
   }
 
   @Override
@@ -143,7 +151,9 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
   }
   
   @Override
-  public void mouseEntered(MouseEvent event) { }
+  public void mouseEntered(MouseEvent event) {
+    requestFocus();
+  }
 
   @Override
   public void mouseExited(MouseEvent event) { }
@@ -153,18 +163,44 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     if (!isInteractive) { return; }
 
     if(draggingGroup != null) {
-      draggingGroup.moveTo(event.getPoint());
+      if (keyCodePressed == KeyEvent.VK_SHIFT) {
+        if (isFurtherFromCenterOf(prevPoint, event.getPoint(), draggingGroup)) {
+          draggingGroup.larger();
+        } else {
+          draggingGroup.smaller();
+        }
+      } else {
+        draggingGroup.moveTo(event.getPoint());
+      }
       repaint();
-//      setUp.generatePathways(); //regenerate because something just moved
     }
     for(ArduinoToDisplayBridge bridge : setUp.bridgeObjects) {
       if (bridge.interfacePiece == draggingGroup) {
         setUp.setSelectedBridge(bridge);
       }
     }
+    
+    prevPoint = event.getPoint();
   }
 
   @Override
   public void mouseMoved(MouseEvent event) { }
+
+  @Override
+  public void keyPressed(KeyEvent event) {
+    keyCodePressed = event.getKeyCode();
+  }
+
+  @Override
+  public void keyReleased(KeyEvent event) {
+    keyCodePressed = 0;
+  }
+  
+  @Override
+  public void keyTyped(KeyEvent event) { }
+  
+  public boolean isFurtherFromCenterOf(Point prevPoint, Point curPoint, SensorButtonGroup draggingGroup) {
+    return (prevPoint.distance(draggingGroup.center()) < curPoint.distance(draggingGroup.center()));
+  }
 
 }

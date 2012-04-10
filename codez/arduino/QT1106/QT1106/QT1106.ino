@@ -26,7 +26,7 @@ void setup()
   
   QT.Setup();		// go establish default settings
   QT.DI(0x01);          // set it to be more noise-tolerant
-  QT.RES(0x08);         // set resolution to 8 bytes (0...255)
+  QT.RES(0x07);         // set resolution to 8 bytes (0...255)
   QT.AKS(1);            // turn on adjacent key suppression (only one key at a time)
   
   //turn the light on so we know when it's ready

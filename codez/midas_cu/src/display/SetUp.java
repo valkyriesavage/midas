@@ -395,23 +395,18 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
       propertiesPane.add(sliderBridge.interactionDisplay());
+      propertiesPane.add(placeholder());
+      propertiesPane.add(sliderBridge.goButton());
 
       propertiesPane.add(new JLabel("sensitivity"));
       JComboBox sensitivityBox = sliderBridge.sliderSensitivityBox();
       sensitivityBox.addActionListener(repainter());
       propertiesPane.add(sensitivityBox);
 
-      JButton larger = sliderBridge.interfacePiece.larger;
-      larger.addActionListener(repainter());
-      propertiesPane.add(larger);
-      JButton smaller = sliderBridge.interfacePiece.smaller;
-      smaller.addActionListener(repainter());
-      propertiesPane.add(smaller);
-
+      propertiesPane.add(new JLabel("orientation"));
       JButton orientationFlip = sliderBridge.interfacePiece.orientationFlip;
       orientationFlip.addActionListener(repainter());
       propertiesPane.add(orientationFlip);
-      propertiesPane.add(placeholder());
 
       propertiesPane.add(new JLabel("registration"));
       JButton seqButton = sliderBridge.setArduinoSequenceButton();
@@ -449,13 +444,6 @@ public class SetUp extends JFrame {
       sensitivityBox.addActionListener(repainter());
       propertiesPane.add(sensitivityBox);
 
-      JButton larger = padBridge.interfacePiece.larger;
-      larger.addActionListener(repainter());
-      propertiesPane.add(larger);
-      JButton smaller = padBridge.interfacePiece.smaller;
-      smaller.addActionListener(repainter());
-      propertiesPane.add(smaller);
-
       propertiesPane.add(new JLabel("registration"));
       JButton seqButton = padBridge.setArduinoSequenceButton();
       seqButton.addActionListener(repainter());
@@ -486,13 +474,6 @@ public class SetUp extends JFrame {
       
       propertiesPane.add(placeholder());
       propertiesPane.add(buttonBridge.goButton());
-      
-      JButton larger = buttonBridge.interfacePiece.larger;
-      larger.addActionListener(repainter());
-      propertiesPane.add(larger);
-      JButton smaller = buttonBridge.interfacePiece.smaller;
-      smaller.addActionListener(repainter());
-      propertiesPane.add(smaller);
 
       propertiesPane.add(new JLabel("registration"));
       JButton seqButton = buttonBridge.setArduinoSequenceButton();

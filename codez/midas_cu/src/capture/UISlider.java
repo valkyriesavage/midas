@@ -36,9 +36,9 @@ public class UISlider {
   public void execute(int whichPad) {    
     Point clickPoint;
     if (this.isHorizontal()) {
-      clickPoint = new Point((highEndOfSlider.x-lowEndOfSlider.x)/(sensitivity-1)*whichPad + lowEndOfSlider.x, highEndOfSlider.y);
+      clickPoint = new Point(((int)((whichPad/(1.0*sensitivity-1))*(highEndOfSlider.x-lowEndOfSlider.x)) + lowEndOfSlider.x), highEndOfSlider.y);
     } else {
-      clickPoint = new Point(highEndOfSlider.x, (highEndOfSlider.y-lowEndOfSlider.y)/(sensitivity-1)*whichPad + lowEndOfSlider.y);
+      clickPoint = new Point(highEndOfSlider.x, (((int) (whichPad/(1.0*sensitivity-1))*(highEndOfSlider.y-lowEndOfSlider.y)) + lowEndOfSlider.y));
     }
     try {
       MousePressAction action = new MousePressAction(clickPoint, InputEvent.BUTTON1_MASK);

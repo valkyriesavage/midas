@@ -171,8 +171,6 @@ public class SerialCommunication implements SerialPortEventListener {
         currentSerialInfo = currentSerialInfo.trim();
       }
       Matcher oneMessage;
-      
-      System.out.println(currentSerialInfo);
 
       while (((oneMessage = matchOneLine.matcher(currentSerialInfo))
           .lookingAt())) {
