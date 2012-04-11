@@ -84,7 +84,7 @@ public class ArduinoDispatcher {
     lastEvent = e;
 
     recentEvents.add(e);
-    setWhatISee();
+    //setWhatISee();
     
     if (e.isHellaSlider) {
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
