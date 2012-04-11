@@ -1,6 +1,11 @@
 #include "mpr121.h"
 #include <Wire.h>
 
+// To make this work:
+// Arduino power -> MPR121 power
+// Arduino Gnd -> MPR121 gnd
+// Arduio 
+
 int irqpin = 2;  // Digital 2
 boolean touchStates[12]; //to keep track of the previous touch states
 
@@ -22,12 +27,11 @@ void loop(){
 
 void readTouchInputs(){
   if(!checkInterrupt()){
-
     //read the touch state from the MPR121
     Wire.requestFrom(0x5A,2);
 
-    byte LSB = Wire.receive();
-    byte MSB = Wire.receive();
+    byte LSB = Wire.read();
+    byte MSB = Wire.read();
 
     uint16_t touched = ((MSB << 8) | LSB); //16bits that make up the touch states
 
@@ -36,7 +40,7 @@ void readTouchInputs(){
         if(touchStates[i] == 0){
           //pin i was just touched
           char buffer[4];
-          sprintf(buffer, "%02dD", i);
+          sprintf(buffer, "K: %02dDx", i);
           Serial.print(buffer);
         }else if(touchStates[i] == 1){
           //pin i is still being touched
@@ -48,7 +52,7 @@ void readTouchInputs(){
         if(touchStates[i] == 1){
           //pin i is no longer being touched
           char buffer[4];
-          sprintf(buffer, "%02dU", i);
+          sprintf(buffer, "K: %02dUx", i);
           Serial.print(buffer);
          }   
         touchStates[i] = 0;
@@ -137,7 +141,7 @@ boolean checkInterrupt(void){
 
 void set_register(int address, unsigned char r, unsigned char v){
     Wire.beginTransmission(address);
-    Wire.send(r);
-    Wire.send(v);
+    Wire.write(r);
+    Wire.write(v);
     Wire.endTransmission();
 }
