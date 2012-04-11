@@ -8,6 +8,7 @@ import javax.swing.JTextField;
 
 import util.EventType;
 
+import actions.SocketTalkAction;
 import bridge.ArduinoToDisplayBridge;
 import bridge.ArduinoToSliderBridge;
 import display.ArduinoSensorButton;
@@ -98,6 +99,9 @@ public class ArduinoDispatcher {
         }
       }
     }
+    
+    // now we just push everything out to a websocket
+    new SocketTalkAction("http://localhost:8080").doAction();
   }
   
   void setWhatISee() {

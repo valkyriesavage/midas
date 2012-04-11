@@ -245,11 +245,13 @@ public class SetUp extends JFrame {
     printingPanel.add(printSensors);
     printingPanel.add(generatePathways);
     printingPanel.setBorder(BorderFactory.createTitledBorder("print"));
+    JPanel printingPanelContainer = new JPanel();
+    printingPanelContainer.add(printingPanel);
     
     templatePanel.setBorder(BorderFactory.createTitledBorder("sensors"));
 
     buttonCreatorPanel.add(templatePanel);
-    buttonCreatorPanel.add(printingPanel);
+    buttonCreatorPanel.add(printingPanelContainer);
   }
 
   private void cleanUpDeletions() {
@@ -368,10 +370,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("name"));
       propertiesPane.add(buttonBridge.interfacePiece.nameField);
 
-      propertiesPane.add(new JLabel("interaction type"));
-      propertiesPane.add(interactionType);
-
-      propertiesPane.add(placeholder());
+      propertiesPane.add(new JLabel("interaction"));
       propertiesPane.add(buttonBridge.interactionSetter());
       
       propertiesPane.add(placeholder());
@@ -386,10 +385,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("name"));
       propertiesPane.add(sliderBridge.interfacePiece.nameField);
       
-      propertiesPane.add(new JLabel("interaction type"));
-      propertiesPane.add(interactionType);
-
-      propertiesPane.add(placeholder());
+      propertiesPane.add(new JLabel("interaction"));
       propertiesPane.add(sliderBridge.interactionSetter());
       propertiesPane.add(placeholder());
       propertiesPane.add(new JLabel("current:"));
@@ -426,10 +422,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("name"));
       propertiesPane.add(padBridge.interfacePiece.nameField);
 
-      propertiesPane.add(new JLabel("interaction type"));
-      propertiesPane.add(interactionType);
-
-      propertiesPane.add(placeholder());
+      propertiesPane.add(new JLabel("interaction"));
       propertiesPane.add(padBridge.interactionSetter());
       propertiesPane.add(placeholder());
       propertiesPane.add(new JLabel("current:"));
@@ -462,10 +455,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("name"));
       propertiesPane.add(buttonBridge.interfacePiece.nameField);
 
-      propertiesPane.add(new JLabel("interaction type"));
-      propertiesPane.add(interactionType);
-
-      propertiesPane.add(placeholder());
+      propertiesPane.add(new JLabel("interaction"));
       propertiesPane.add(buttonBridge.interactionSetter());
       propertiesPane.add(placeholder());
       propertiesPane.add(new JLabel("current:"));
