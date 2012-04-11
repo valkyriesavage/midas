@@ -84,7 +84,7 @@ public class ArduinoDispatcher {
     lastEvent = e;
 
     recentEvents.add(e);
-    setWhatISee();
+    //setWhatISee();
     
     if (e.isHellaSlider) {
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
@@ -101,7 +101,7 @@ public class ArduinoDispatcher {
     }
     
     // now we just push everything out to a websocket
-    new SocketTalkAction("http://localhost:8080").doAction();
+    //new SocketTalkAction("http://localhost:8080").doAction();
   }
   
   void setWhatISee() {
