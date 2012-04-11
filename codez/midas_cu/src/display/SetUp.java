@@ -239,8 +239,27 @@ public class SetUp extends JFrame {
     printingPanel.add(printSensors);
     printingPanel.add(generatePathways);
     printingPanel.setBorder(BorderFactory.createTitledBorder("print"));
-    JPanel printingPanelContainer = new JPanel();
+    JPanel printingPanelContainer = new JPanel(new GridLayout(0,1));
     printingPanelContainer.add(printingPanel);
+    
+    JButton resetArduino = new JButton("connect/reconnect dongle");
+    resetArduino.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        serialCommunication = new SerialCommunication();
+        try {
+          serialCommunication.initialize(false);
+        } catch (AWTException e) {
+          e.printStackTrace();
+        }
+        serialCommunication.bridgeObjects = bridgeObjects;
+      }
+    });
+    JPanel arduinoPanel = new JPanel();
+    arduinoPanel.setBorder(BorderFactory.createTitledBorder("dongle"));
+    arduinoPanel.add(resetArduino);
+    JPanel arduinoContainer = new JPanel();
+    arduinoContainer.add(arduinoPanel);
+    printingPanelContainer.add(arduinoContainer);
     
     templatePanel.setBorder(BorderFactory.createTitledBorder("sensors"));
 
