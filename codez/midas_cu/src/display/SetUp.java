@@ -49,7 +49,7 @@ import display.SensorShape.shapes;
 public class SetUp extends JFrame {
   private static final long serialVersionUID = -7176602414855781819L;
 
-  public static final int CANVAS_X = 450;
+  public static final int CANVAS_X = 400;
   public static final int CANVAS_Y = 600;
 
   public static final Integer HELLA_SLIDER = 256;
