@@ -1,11 +1,5 @@
 package display;
 
-/**
- * TODO
- *  make sure gridded registration works
- *  enforce single hellaslider
- */
-
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -55,8 +49,8 @@ import display.SensorShape.shapes;
 public class SetUp extends JFrame {
   private static final long serialVersionUID = -7176602414855781819L;
 
-  public static final int CANVAS_X = 300;
-  public static final int CANVAS_Y = 520;
+  public static final int CANVAS_X = 450;
+  public static final int CANVAS_Y = 600;
 
   public static final Integer HELLA_SLIDER = 256;
   public static final Integer[] SLIDER_SENSITIVITIES = { 3, 4, 5, 6, 7, 8,
@@ -292,11 +286,10 @@ public class SetUp extends JFrame {
     // build a list of which sensors go to which bridges
     for (Map.Entry<ArduinoSensorButton, Integer> entry : buttonMap.entrySet()) {
     	ArduinoSensorButton button = entry.getKey();
-    	int i = entry.getValue();
+    	int i = entry.getValue() - 1; // we need to 0-index here
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
         if (bridge.contains(button)) {
           ArduinoEvent event = new ArduinoEvent(ArduinoSetup.sensors[i], TouchDirection.TOUCH);
-          
           if (sensorsToAssign.containsKey(bridge)) {
             sensorsToAssign.get(bridge).add(event);
           }
@@ -312,7 +305,12 @@ public class SetUp extends JFrame {
     
     // assign those sensors to those bridges (because we have to do this in chunks, sigh
     for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+      if(bridge.isHellaSlider) {
+        bridge.updateColor();
+        continue;
+      }
       bridge.setArduinoSequence(sensorsToAssign.get(bridge));
+      bridge.updateColor();
     }
   }
 

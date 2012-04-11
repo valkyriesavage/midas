@@ -80,6 +80,11 @@ public abstract class ArduinoToDisplayBridge {
         || arduinoPiece.sensor() == null) {
       return null;
     }
+    
+    if (isHellaSlider) {
+      Color[] ret = {Color.BLACK};
+      return ret;
+    }
 
     Color[] colors = { CanvasPanel.DARK_COPPER, Color.RED, Color.ORANGE,
         Color.YELLOW, Color.GREEN, Color.BLUE, new Color(255, 0, 255) };
@@ -171,5 +176,9 @@ public abstract class ArduinoToDisplayBridge {
   
   public JComponent colorBar() {
     return myColorBar;
+  }
+  
+  public void updateColor() {
+    myColorBar.setColor(arduinoTies());
   }
 }

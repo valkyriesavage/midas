@@ -67,7 +67,7 @@ public class InstructionsGenerator {
   }
   
   private static String svg(String svgLoc) {
-    return "<embed src=\""+svgLoc+"\" type=\"image/svg+xml\" height='525' width='275' />";
+    return "<embed src=\""+svgLoc+"\" type=\"image/svg+xml\" height='"+SetUp.CANVAS_Y +"' width='"+SetUp.CANVAS_X+"' />";
   }
   
   private static String img200(String imgLoc) {
