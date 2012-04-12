@@ -29,6 +29,8 @@ public class ArduinoDispatcher {
   
   private List<ArduinoEvent> capturedEvents;
   
+  private SocketTalkAction socketAction = new SocketTalkAction("http://localhost:8080");
+  
   public JTextField whatISee = new JTextField("I see...");
   
   public ArduinoDispatcher() throws AWTException { }
@@ -101,7 +103,7 @@ public class ArduinoDispatcher {
     }
     
     // now we just push everything out to a websocket
-    new SocketTalkAction("http://localhost:8080").doAction();
+    socketAction.doAction();
   }
   
   void setWhatISee() {
