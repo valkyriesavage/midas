@@ -49,7 +49,7 @@ public class SVGPathwaysGenerator {
 
 	public static boolean PRINT_DEBUG = true;
 
-	public static final int LINE_EXTENT = 1;
+	public static final int LINE_EXTENT = 3;
 
 	public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
 	public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH + 1; // should be
