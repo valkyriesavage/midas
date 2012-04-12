@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 
 import pathway.SVGPathwaysGenerator;
+import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSetup;
 import serialtalk.SerialCommunication;
@@ -82,7 +83,7 @@ public class SetUp extends JFrame {
     setTitle("Midas");
 
     serialCommunication = new SerialCommunication();
-    serialCommunication.initialize(test);
+    serialCommunication.initialize(test, null);
     bridgeObjects = serialCommunication.bridgeObjects;
     ArduinoToDisplayBridge.setRepainter(this);
 
@@ -245,9 +246,11 @@ public class SetUp extends JFrame {
     JButton resetArduino = new JButton("connect/reconnect dongle");
     resetArduino.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
+        ArduinoDispatcher currentDispatcher = serialCommunication.dispatcher;
+        serialCommunication.close();
         serialCommunication = new SerialCommunication();
         try {
-          serialCommunication.initialize(false);
+          serialCommunication.initialize(false, currentDispatcher);
         } catch (AWTException e) {
           e.printStackTrace();
         }
