@@ -44,7 +44,7 @@ public class SerialCommunication implements SerialPortEventListener {
   /** Default bits per second for COM port. */
   private static final int DATA_RATE = 9600;
 
-  public ArduinoDispatcher dispatcher;
+  private ArduinoDispatcher dispatcher;
   public List<ArduinoToDisplayBridge> bridgeObjects;
 
   boolean paused = false;
@@ -57,14 +57,13 @@ public class SerialCommunication implements SerialPortEventListener {
       .compile("(K:(\\d{1,2}) (U|D)){2}");
   private Pattern matchOneArduinoSliderMessage = Pattern
       .compile("S:(\\d{1,3}) (U|D)");
-
+  
   private static final String ARDUINO_TOUCH = "D";
   private static final String ARDUINO_RELEASE = "U";
 
   public boolean isGridded = false;
 
-  public void initialize(boolean test, ArduinoDispatcher dispatcher)
-      throws AWTException {
+  public void initialize(boolean test) throws AWTException {
     ArduinoSetup.initialize(test);
 
     CommPortIdentifier portId = null;
@@ -74,8 +73,11 @@ public class SerialCommunication implements SerialPortEventListener {
 
     @SuppressWarnings("rawtypes")
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
-
-    setUpDispatcher(dispatcher);
+    dispatcher = new ArduinoDispatcher();
+    ArduinoToDisplayBridge.setDispatcher(dispatcher);
+    ArduinoSensorButton.setDispatcher(dispatcher);
+    SocketTalkAction.setDispatcher(dispatcher);
+    bridgeObjects = dispatcher.bridgeObjects;
 
     // iterate through, looking for the port
     while (portEnum.hasMoreElements()) {
@@ -175,7 +177,7 @@ public class SerialCommunication implements SerialPortEventListener {
       }
 
       currentSerialInfo = (currentSerialInfo + new String(touched));
-      while (currentSerialInfo.startsWith("9")) {
+      while(currentSerialInfo.startsWith("9")) {
         currentSerialInfo = currentSerialInfo.substring(1);
         currentSerialInfo = currentSerialInfo.trim();
       }
@@ -184,8 +186,7 @@ public class SerialCommunication implements SerialPortEventListener {
       while (((oneMessage = matchOneLine.matcher(currentSerialInfo))
           .lookingAt())) {
 
-        String singleMessage = currentSerialInfo.substring(0, oneMessage.end()
-            - "x".length()); // strip the x
+        String singleMessage = currentSerialInfo.substring(0, oneMessage.end() - "x".length()); // strip the x
         currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
 
         if ((oneMessage = matchOneArduinoSliderMessage.matcher(singleMessage))

@@ -35,7 +35,6 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 
 import pathway.SVGPathwaysGenerator;
-import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSetup;
 import serialtalk.SerialCommunication;
@@ -83,7 +82,7 @@ public class SetUp extends JFrame {
     setTitle("Midas");
 
     serialCommunication = new SerialCommunication();
-    serialCommunication.initialize(test, null);
+    serialCommunication.initialize(test);
     bridgeObjects = serialCommunication.bridgeObjects;
     ArduinoToDisplayBridge.setRepainter(this);
 
@@ -240,29 +239,8 @@ public class SetUp extends JFrame {
     printingPanel.add(printSensors);
     printingPanel.add(generatePathways);
     printingPanel.setBorder(BorderFactory.createTitledBorder("print"));
-    JPanel printingPanelContainer = new JPanel(new GridLayout(0,1));
+    JPanel printingPanelContainer = new JPanel();
     printingPanelContainer.add(printingPanel);
-    
-    JButton resetArduino = new JButton("connect/reconnect dongle");
-    resetArduino.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) {
-        ArduinoDispatcher currentDispatcher = serialCommunication.dispatcher;
-        serialCommunication.close();
-        serialCommunication = new SerialCommunication();
-        try {
-          serialCommunication.initialize(false, currentDispatcher);
-        } catch (AWTException e) {
-          e.printStackTrace();
-        }
-        serialCommunication.bridgeObjects = bridgeObjects;
-      }
-    });
-    JPanel arduinoPanel = new JPanel();
-    arduinoPanel.setBorder(BorderFactory.createTitledBorder("dongle"));
-    arduinoPanel.add(resetArduino);
-    JPanel arduinoContainer = new JPanel();
-    arduinoContainer.add(arduinoPanel);
-    printingPanelContainer.add(arduinoContainer);
     
     templatePanel.setBorder(BorderFactory.createTitledBorder("sensors"));
 
