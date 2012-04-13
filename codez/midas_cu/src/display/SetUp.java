@@ -52,6 +52,8 @@ public class SetUp extends JFrame {
 
   public static final int CANVAS_X = 500;
   public static final int CANVAS_Y = 600;
+  
+  public static final int MAX_OUTS_FOR_CHIP = 7;
 
   public static final Integer HELLA_SLIDER = 256;
   public static final Integer[] SLIDER_SENSITIVITIES = { 3, 4, 5, 6, 7, 8,
@@ -148,6 +150,35 @@ public class SetUp extends JFrame {
     addStock.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         cleanUpDeletions();
+        
+        int buttonCount = 0;
+        boolean hellaSliderFlag = false;
+        for(ArduinoToDisplayBridge bridge : bridgeObjects) {
+          if(bridge.isHellaSlider) {
+            if(hellaSliderFlag) {
+              JOptionPane
+              .showMessageDialog(
+                  null,
+                  "you may only have one continuous slider!\nplease make one a discrete slider.",
+                  "too many continuous sliders",
+                  JOptionPane.ERROR_MESSAGE);
+              return;
+            }
+            hellaSliderFlag = true;
+            continue;
+          }
+          buttonCount += bridge.interfacePiece.sensitivity;
+        }
+        if (buttonCount >= MAX_OUTS_FOR_CHIP) {
+          JOptionPane
+          .showMessageDialog(
+              null,
+              "you have too many buttons.  this chip only supports " + MAX_OUTS_FOR_CHIP +".\nplease delete some buttons before you add more.",
+              "pad registration instructions",
+              JOptionPane.INFORMATION_MESSAGE);
+          return;
+        }
+        
         SensorButtonGroup newButton = new SensorButtonGroup(queuedShape);
         ArduinoToDisplayBridge newBridge;
         if (queuedShape == shapes.SLIDER) {
