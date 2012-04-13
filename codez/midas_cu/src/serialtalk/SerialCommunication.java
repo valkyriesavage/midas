@@ -44,7 +44,7 @@ public class SerialCommunication implements SerialPortEventListener {
   /** Default bits per second for COM port. */
   private static final int DATA_RATE = 9600;
 
-  private ArduinoDispatcher dispatcher;
+  public ArduinoDispatcher dispatcher;
   public List<ArduinoToDisplayBridge> bridgeObjects;
 
   boolean paused = false;
@@ -63,7 +63,7 @@ public class SerialCommunication implements SerialPortEventListener {
 
   public boolean isGridded = false;
 
-  public void initialize(boolean test) throws AWTException {
+  public void initialize(boolean test, ArduinoDispatcher dispatcher) throws AWTException {
     ArduinoSetup.initialize(test);
 
     CommPortIdentifier portId = null;
@@ -73,11 +73,8 @@ public class SerialCommunication implements SerialPortEventListener {
 
     @SuppressWarnings("rawtypes")
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
-    dispatcher = new ArduinoDispatcher();
-    ArduinoToDisplayBridge.setDispatcher(dispatcher);
-    ArduinoSensorButton.setDispatcher(dispatcher);
-    SocketTalkAction.setDispatcher(dispatcher);
-    bridgeObjects = dispatcher.bridgeObjects;
+    
+    setUpDispatcher(dispatcher);
 
     // iterate through, looking for the port
     while (portEnum.hasMoreElements()) {

@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 
 import pathway.SVGPathwaysGenerator;
+import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoSetup;
 import serialtalk.SerialCommunication;
@@ -49,7 +50,7 @@ import display.SensorShape.shapes;
 public class SetUp extends JFrame {
   private static final long serialVersionUID = -7176602414855781819L;
 
-  public static final int CANVAS_X = 400;
+  public static final int CANVAS_X = 500;
   public static final int CANVAS_Y = 600;
 
   public static final Integer HELLA_SLIDER = 256;
@@ -82,7 +83,7 @@ public class SetUp extends JFrame {
     setTitle("Midas");
 
     serialCommunication = new SerialCommunication();
-    serialCommunication.initialize(test);
+    serialCommunication.initialize(test, null);
     bridgeObjects = serialCommunication.bridgeObjects;
     ArduinoToDisplayBridge.setRepainter(this);
 
@@ -239,8 +240,26 @@ public class SetUp extends JFrame {
     printingPanel.add(printSensors);
     printingPanel.add(generatePathways);
     printingPanel.setBorder(BorderFactory.createTitledBorder("print"));
-    JPanel printingPanelContainer = new JPanel();
+    JPanel printingPanelContainer = new JPanel(new GridLayout(0,1));
     printingPanelContainer.add(printingPanel);
+    
+    JButton reconnectDongle = new JButton("connect/reconnect dongle");
+    reconnectDongle.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        ArduinoDispatcher dispatcher = serialCommunication.dispatcher;
+        serialCommunication.close();
+        serialCommunication = new SerialCommunication();
+        try {
+          serialCommunication.initialize(false, dispatcher);
+        } catch (AWTException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    JPanel dongleContainer = new JPanel();
+    dongleContainer.setBorder(BorderFactory.createTitledBorder("dongle"));
+    dongleContainer.add(reconnectDongle);
+    printingPanelContainer.add(dongleContainer);
     
     templatePanel.setBorder(BorderFactory.createTitledBorder("sensors"));
 
