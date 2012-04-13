@@ -117,6 +117,13 @@ public abstract class ArduinoToDisplayBridge {
                     "slide your finger from left to right along each row,\nbeginning on the top row",
                     "pad registration instructions",
                     JOptionPane.INFORMATION_MESSAGE);
+          } else {
+            JOptionPane
+            .showMessageDialog(
+                null,
+                "touch the physical sensor that you would like to to this to",
+                "button registration instructions",
+                JOptionPane.INFORMATION_MESSAGE);
           }
           src.setText("done");
           dispatcher.beginCapturing();
