@@ -205,7 +205,7 @@ public class SetUp extends JFrame {
     templatePanel.add(addStockButtonPanel);
 
     JPanel addCustomButtonPanel = new JPanel();
-    JButton addCustom = new JButton("add custom button");
+    JButton addCustom = new JButton("custom sticker shape");
     addCustom.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         JFileChooser fc = new JFileChooser();
@@ -238,7 +238,7 @@ public class SetUp extends JFrame {
     templatePanel.add(addCustomButtonPanel);
 
     JPanel printingPanel = new JPanel();
-    JButton printSensors = new JButton("print sensors");
+    JButton printSensors = new JButton("create stickers");
     printSensors.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         cleanUpDeletions();
@@ -262,14 +262,14 @@ public class SetUp extends JFrame {
           setSelectedBridge(currentBridge);
 
         } else {
-          JOptionPane.showMessageDialog(null, "there are no buttons to print!",
-              "no buttons to print", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(null, "there are no stickers to print!",
+              "no stickers to print", JOptionPane.ERROR_MESSAGE);
         }
       }
     });
     printingPanel.add(printSensors);
     printingPanel.add(generatePathways);
-    printingPanel.setBorder(BorderFactory.createTitledBorder("print"));
+    printingPanel.setBorder(BorderFactory.createTitledBorder("create stickers"));
     JPanel printingPanelContainer = new JPanel(new GridLayout(0,1));
     printingPanelContainer.add(printingPanel);
     
@@ -291,7 +291,7 @@ public class SetUp extends JFrame {
     dongleContainer.add(reconnectDongle);
     printingPanelContainer.add(dongleContainer);
     
-    templatePanel.setBorder(BorderFactory.createTitledBorder("sensors"));
+    templatePanel.setBorder(BorderFactory.createTitledBorder("design stickers"));
 
     buttonCreatorPanel.add(templatePanel);
     buttonCreatorPanel.add(printingPanelContainer);
@@ -365,7 +365,7 @@ public class SetUp extends JFrame {
 
   private URI generateInstructionsPage() {
     try {
-      File temp = File.createTempFile("midas_cu", ".html");
+      File temp = File.createTempFile("midas", ".html");
       temp.deleteOnExit();
 
       BufferedWriter out = new BufferedWriter(new FileWriter(temp));
