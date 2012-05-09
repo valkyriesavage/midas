@@ -50,8 +50,8 @@ import display.SensorShape.shapes;
 public class SetUp extends JFrame {
   private static final long serialVersionUID = -7176602414855781819L;
 
-  public static final int CANVAS_X = 500;
-  public static final int CANVAS_Y = 600;
+  public static int CANVAS_X = 500;
+  public static int CANVAS_Y = 600;
   
   public static final int MAX_OUTS_FOR_CHIP = 7;
 

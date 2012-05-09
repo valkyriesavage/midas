@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -136,6 +137,31 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
   private void setTemplateImage(File fileLocation) {
     try{
       templateImage = ImageIO.read(fileLocation);
+      // create a media tracker to track the loading of
+      // my_image. my_component cannot be null, set it
+      // to the component where you will draw the image
+      // or to the main Frame in your application
+      MediaTracker media_tracker = new MediaTracker(this);
+
+      // add your image to the tracker with an arbitrary id
+      int id = 0;
+      media_tracker.addImage(templateImage,id);
+
+      // try to wait for image to be loaded
+      // catch if loading was interrupted
+      try
+      {
+        media_tracker.waitForID(id);
+      }
+      catch(InterruptedException e)
+      {
+        System.out.println("Image loading interrupted : " + e);
+      }
+      
+      SetUp.CANVAS_X = templateImage.getWidth(null);
+      SetUp.CANVAS_Y = templateImage.getHeight(null);
+      setSize(SetUp.CANVAS_X, SetUp.CANVAS_Y);
+      setPreferredSize(new Dimension(SetUp.CANVAS_X, SetUp.CANVAS_Y));
     } catch (IOException ioe) {
       // well, poop
       ioe.printStackTrace();
