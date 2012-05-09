@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -18,9 +20,12 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
 import serialtalk.ArduinoSetup;
+import util.ExtensionFileFilter;
 import bridge.ArduinoToDisplayBridge;
 
 public class CanvasPanel extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
@@ -40,6 +45,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
   private Point prevPoint;
   
   public boolean isInteractive = true;
+  
+  BufferedImage templateImage;
 
   public CanvasPanel(SetUp setUp, List<SensorButtonGroup> buttonsToDisplay) {
     super();
@@ -52,6 +59,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     this.addMouseMotionListener(this);
     this.setFocusable(true);
     this.addKeyListener(this);
+    
+    setTemplateImage(new File("src/display/images/musicpage_template.png"));
   }
   
   @Override
@@ -60,19 +69,12 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     
     super.paintComponent(g2);
 
-    BufferedImage templateImage;
-    try {
-      templateImage = ImageIO.read(new File("src/display/images/musicpage_template.png"));
       g2.drawImage(templateImage, 0, 0, Color.BLACK, new ImageObserver() {
         public boolean imageUpdate(Image img, int infoflags, int x, int y,
             int width, int height) {
           return false;
         }
       });
-    } catch (IOException e) {
-      // well, poop
-      e.printStackTrace();
-    }
 
     // this is a dumb place to have to do this counting nonsense, but we'll do it anyway!
     int totalButtons = 0;
@@ -112,6 +114,34 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
       }
     }
     return null;
+  }
+  
+  JButton templateButton() {
+    JButton button = new JButton("load new template image");
+    button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(new ExtensionFileFilter("images", new String[] {
+            "JPG", "jpg", "JPEG", "jpeg", "GIF", "gif", "BMP", "bmp", "PNG", "png" }));
+        int returnVal = fc.showOpenDialog(null);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+          File selectedFile = fc.getSelectedFile();
+          setTemplateImage(selectedFile);
+        }
+      }
+    });
+    return button;
+  }
+  
+  private void setTemplateImage(File fileLocation) {
+    try{
+      templateImage = ImageIO.read(fileLocation);
+    } catch (IOException ioe) {
+      // well, poop
+      ioe.printStackTrace();
+    }
+    setUp.repaint();
+    repaint();
   }
  
   @Override

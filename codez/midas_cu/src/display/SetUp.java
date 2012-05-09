@@ -130,8 +130,7 @@ public class SetUp extends JFrame {
     
     JPanel templatePanel = new JPanel(new GridLayout(0,1));
     JPanel holder = new JPanel();
-    JButton templateButton = new JButton("load new template image");
-    holder.add(templateButton);
+    holder.add(buttonCanvas.templateButton());
     templatePanel.add(holder);
 
     JPanel addStockButtonPanel = new JPanel();
