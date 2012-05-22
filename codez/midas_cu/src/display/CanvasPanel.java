@@ -121,7 +121,7 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
     JButton button = new JButton("load new template image");
     button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
-        JFileChooser fc = new JFileChooser();
+        JFileChooser fc = new JFileChooser("src/display/images");
         fc.setFileFilter(new ExtensionFileFilter("images", new String[] {
             "JPG", "jpg", "JPEG", "jpeg", "GIF", "gif", "BMP", "bmp", "PNG", "png" }));
         int returnVal = fc.showOpenDialog(null);
