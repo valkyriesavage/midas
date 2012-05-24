@@ -11,6 +11,7 @@
 codez/midas_cu/bin/*
 codez/cad/*
 codez/midas_cu/src/examples/*
+codez/autocad/midas/midas/bin
 *.metadata
 *.classpath
 *.project*
