@@ -2,6 +2,7 @@ package pathway;
 
 import java.awt.Point;
 
+//Not currently used, as Inkscape gives me what I need
 class Line {
 	Point start, end;
 

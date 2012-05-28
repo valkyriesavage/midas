@@ -8,6 +8,7 @@ import java.awt.Shape;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -37,6 +38,7 @@ import display.CanvasPanel;
 import display.SensorButtonGroup;
 import display.SetUp;
 
+//todo: replace inkscape with jts
 public class SVGPathwaysGenerator {
 
 	SetUp mySetup;
@@ -59,6 +61,10 @@ public class SVGPathwaysGenerator {
 	public static final int PATH_INFLUENCE_WIDTH = 2 * LINE_WIDTH; // should be
 																	// 2*LINE_WIDTH
 
+	/**
+	 * Call this method after a successful generatePathways
+	 * @return
+	 */
 	public Map<ArduinoSensorButton, Integer> getButtonMap() {
 		return buttonMap;
 	}
@@ -211,6 +217,11 @@ public class SVGPathwaysGenerator {
 		List<Shape> allShapes = new LinkedList();
 		
 		for (SensorButtonGroup s : groups) {
+			if(s.isCustom) {
+//				BufferedImage bi = (BufferedImage)s.getCustomImage();
+//				bi.getRGB
+//				System.out.println(bi);
+			}
 			if (s.sensitivity == SetUp.HELLA_SLIDER) {
 				slider = s;
 				allShapes.addAll(s.getHSP().getShapes());
@@ -227,6 +238,9 @@ public class SVGPathwaysGenerator {
 		if (generatePathways) {
 //			Grid g = new Grid(SetUp.CANVAS_X, SetUp.CANVAS_Y);
 			
+			//This block will iterate through all the possible configurations and call tryFullGeneration with that configuration.
+			//tryFullGeneration will either return void on failure, or throw a SuccessfulException on success, which will be caught
+			//by the try/catch block to leave the iteration early.
 			try{
 				int configNum = 1;
 				for(Corner C : Corner.values()) {
@@ -240,10 +254,6 @@ public class SVGPathwaysGenerator {
 									if(PRINT_DEBUG) System.out.println("Attempting config "+(configNum++));
 									tryFullGeneration(buttons, slider, C, D, O, L);
 								}
-//								
-//								for(Corner Cc : C.others()) { //don't try other corner routing for now
-//									tryFullGeneration(buttonGenShapes, sliderGenShapes, C, Cc, D, O);
-//								}
 							}
 						}
 					}
@@ -416,6 +426,7 @@ public class SVGPathwaysGenerator {
 				}
 		}
 		
+		//should this ever actually run?
 		throw new RuntimeException("not implemented yet");
 	}
 	
@@ -472,44 +483,6 @@ public class SVGPathwaysGenerator {
 		}
 
 		return new Pair<List<List<Point>>, Map<Shape, Integer>>(paths, map);
-	}
-	
-	private class Pair<S, T> {
-		public S _1;
-		public T _2;
-		public Pair(S s, T t) {
-			super();
-			this._1 = s;
-			this._2 = t;
-		}
-	}
-	
-
-	public List<ArduinoSensorButton> sortButtonsByUpperLeft (List<SensorButtonGroup> buttonsToSort) {
-		List<ArduinoSensorButton> allButtons = new ArrayList<ArduinoSensorButton>();
-	    for (SensorButtonGroup s : buttonsToSort)
-	      allButtons.addAll(s.triggerButtons);
-	
-//	    Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
-//	
-//	      @Override
-//	      public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
-//	        return (new Integer(o1.upperLeft.y)).compareTo(new Integer(
-//	            o2.upperLeft.y));
-//	      }
-//	
-//	    });
-	    
-	    Collections.sort(allButtons, new Comparator<ArduinoSensorButton>() {
-
-			@Override
-			public int compare(ArduinoSensorButton o1, ArduinoSensorButton o2) {
-				return (new Double(o1.getShape().getBounds2D().getY())).compareTo(o2.getShape().getBounds2D().getY());
-			}
-
-		});
-	    
-	    return allButtons;
 	}
 	
 	// taken from
