@@ -28,7 +28,6 @@ public class ArduinoSensorButton extends JButton {
   public ArduinoSensor sensor;
   SensorShape.shapes shape = null;
   Image customImage = null;
-  private Area imageOutlineCache;
   boolean locationChecked = false;
   
   public Point upperLeft;
@@ -79,12 +78,9 @@ public class ArduinoSensorButton extends JButton {
 	}
   
   public Area imageOutline() {
-	  if(imageOutlineCache == null) {
-		  
-		  imageOutlineCache = imageOutline((BufferedImage)customImage);
-		  imageOutlineCache.transform(AffineTransform.getTranslateInstance(upperLeft.x, upperLeft.y));
-	  }
-	  return imageOutlineCache;
+	  Area outline = imageOutline((BufferedImage)customImage);
+	  outline.transform(AffineTransform.getTranslateInstance(upperLeft.x, upperLeft.y));
+	  return outline;
   }
   
   public Shape getPathwayShape() {

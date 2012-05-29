@@ -71,6 +71,12 @@ public class SVGPathwaysGenerator {
 		return buttonMap;
 	}
 	
+	/**
+	 * Returns 
+	 * @param p
+	 * @param extent
+	 * @return
+	 */
 	static List<Point> cellsOfInfluence(Point p, int extent) {
 		List<Point> list = new LinkedList<Point>();
 		for (int x = p.x - extent; x <= p.x + extent; x++) {
@@ -218,6 +224,7 @@ public class SVGPathwaysGenerator {
 		
 		List<Shape> allShapes = new LinkedList();
 		
+		//Iterate through the groups, separating the slider from the normal buttons while also aggregating all the shapes.
 		for (SensorButtonGroup s : groups) {
 //			if(s.isCustom) {
 //				allShapes.add(s.triggerButtons.get(0).imageOutline());
@@ -621,19 +628,29 @@ public class SVGPathwaysGenerator {
 		g.setColor(Color.red);
 
 		// draw all of the buttons
+		Area sum = new Area();
+		
 		if(generatePathways) {
+			//here, we want to convert the path into an area
 			for(List<Point> path : paths) {
-				for (Point p : path) {
-					point(g, p.x, p.y);
+//				for (Point p : path) {
+//					point(g, p.x, p.y);
+//				}
+//				Area a = new Area();
+				for(Point p : path) {
+					sum.add(new Area(new Rectangle(p.x - LINE_EXTENT, p.y - LINE_EXTENT, LINE_WIDTH, LINE_WIDTH)));
 				}
+//				g.draw(a);
 			}
 		}
 		for (Shape b : buttons) {
 //			b.paint(g);
-			g.setColor(new Color((float) Math.random(), (float) Math.random(), (float) Math.random()));
-			g.draw(b);
-
+//			g.setColor(new Color((float) Math.random(), (float) Math.random(), (float) Math.random()));
+//			g.setColor(Color.black);
+//			g.draw(b);
+			sum.add(new Area(b));
 		}
+		g.draw(sum);
 
 		// Finally, stream out SVG to the standard output using
 		// UTF-8 encoding.
@@ -648,7 +665,7 @@ public class SVGPathwaysGenerator {
 			if (PRINT_DEBUG)
 				System.out.println("SVG successfully written! Simplifying...");
 
-			simplifySVG(svg.getName());
+//			simplifySVG(svg.getName());
 			
 			mySetup.repaint();
 		} catch (IOException e) {
@@ -659,42 +676,42 @@ public class SVGPathwaysGenerator {
 		}
 	}
 
-	private void simplifySVG(String fileName) {
-		try {
-			String line;
-			String commandStart;
-			String osName = System.getProperty("os.name").toLowerCase();
-
-			if (osName.startsWith("windows")) {
-				commandStart = "inkscape/inkscape";
-			} else if (osName.startsWith("mac")) {
-				commandStart = "Inkscape.app/Contents/Resources/bin/inkscape";
-			} else {
-				System.err.println("Unrecognised OS " + osName
-						+ "... aborting SVG simplification!");
-				return;
-			}
-
-			String commandEnd = fileName
-					+ " --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose";
-
-			String command = commandStart + " " + commandEnd;
-			Process p = Runtime.getRuntime().exec(command);
-			BufferedReader bri = new BufferedReader(new InputStreamReader(
-					p.getInputStream()));
-			BufferedReader bre = new BufferedReader(new InputStreamReader(
-					p.getErrorStream()));
-			while ((line = bri.readLine()) != null) {
-				System.out.println("\t" + line);
-			}
-			bri.close();
-			while ((line = bre.readLine()) != null) {
-				System.out.println("\t" + line);
-			}
-			bre.close();
-			p.waitFor();
-		} catch (Exception err) {
-			err.printStackTrace();
-		}
-	}
+//	private void simplifySVG(String fileName) {
+//		try {
+//			String line;
+//			String commandStart;
+//			String osName = System.getProperty("os.name").toLowerCase();
+//
+//			if (osName.startsWith("windows")) {
+//				commandStart = "inkscape/inkscape";
+//			} else if (osName.startsWith("mac")) {
+//				commandStart = "Inkscape.app/Contents/Resources/bin/inkscape";
+//			} else {
+//				System.err.println("Unrecognised OS " + osName
+//						+ "... aborting SVG simplification!");
+//				return;
+//			}
+//
+//			String commandEnd = fileName
+//					+ " --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose";
+//
+//			String command = commandStart + " " + commandEnd;
+//			Process p = Runtime.getRuntime().exec(command);
+//			BufferedReader bri = new BufferedReader(new InputStreamReader(
+//					p.getInputStream()));
+//			BufferedReader bre = new BufferedReader(new InputStreamReader(
+//					p.getErrorStream()));
+//			while ((line = bri.readLine()) != null) {
+//				System.out.println("\t" + line);
+//			}
+//			bri.close();
+//			while ((line = bre.readLine()) != null) {
+//				System.out.println("\t" + line);
+//			}
+//			bre.close();
+//			p.waitFor();
+//		} catch (Exception err) {
+//			err.printStackTrace();
+//		}
+//	}
 }
