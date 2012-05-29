@@ -4,7 +4,9 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Area;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
@@ -217,18 +219,16 @@ public class SVGPathwaysGenerator {
 		List<Shape> allShapes = new LinkedList();
 		
 		for (SensorButtonGroup s : groups) {
-			if(s.isCustom) {
-//				BufferedImage bi = (BufferedImage)s.getCustomImage();
-//				bi.getRGB
-//				System.out.println(bi);
-			}
+//			if(s.isCustom) {
+//				allShapes.add(s.triggerButtons.get(0).imageOutline());
+//			} else 
 			if (s.sensitivity == SetUp.HELLA_SLIDER) {
 				slider = s;
 				allShapes.addAll(s.getHSP().getShapes());
 			} else {
 				buttons.addAll(s.triggerButtons);
 				for(ArduinoSensorButton b : s.triggerButtons) {
-					allShapes.add(b.getShape());
+					allShapes.add(b.getPathwayShape());
 				}
 			}
 		}
@@ -290,7 +290,7 @@ public class SVGPathwaysGenerator {
 		Map<Shape, ArduinoSensorButton> shapeToButton = new HashMap();
 		List<Shape> buttonShapes = new ArrayList();
 		for(ArduinoSensorButton b : buttons) {
-			Shape s = b.getShape();
+			Shape s = b.getPathwayShape();
 			buttonShapes.add(s);
 			shapeToButton.put(s, b);
 		}
@@ -334,7 +334,7 @@ public class SVGPathwaysGenerator {
 		Map<Shape, ArduinoSensorButton> shapeToButton = new HashMap();
 		List<Shape> buttonShapes = new ArrayList();
 		for(ArduinoSensorButton b : buttons) {
-			Shape s = b.getShape();
+			Shape s = b.getPathwayShape();
 			buttonShapes.add(s);
 			shapeToButton.put(s, b);
 		}
