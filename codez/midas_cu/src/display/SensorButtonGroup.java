@@ -40,7 +40,8 @@ public class SensorButtonGroup extends JPanel {
 
   private SensorShape.shapes shape;
   private Image customImage;
-  private int spacing = 5;
+
+private int spacing = 5;
   private int size = MIN_SIZE + 4 * SIZE_CHANGE;
   public Direction orientation = Direction.VERTICAL;
 
@@ -74,6 +75,10 @@ public class SensorButtonGroup extends JPanel {
     generalSetup();
 
     isCustom = true;
+  }
+  
+  public Image getCustomImage() {
+	return customImage;
   }
   
   public Point center() {

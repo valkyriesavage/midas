@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+//Not currently used, as Inkscape gives me what I need
 class Simplifier {
 	
 	private void tryAdd(Set<Line> lines, Line l) {

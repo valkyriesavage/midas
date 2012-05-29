@@ -1,0 +1,53 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+KeepAttributesHorizontal
+</name>
+</assembly>
+<members>
+<member name="P:KeepAttributesHorizontal.My.Resources.Resources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:KeepAttributesHorizontal.My.Resources.Resources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="T:KeepAttributesHorizontal.My.Resources.Resources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:KeepAttributesHorizontal.myCommands.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:KeepAttributesHorizontal.myCommands.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:KeepAttributesHorizontal.myCommands.MyCommandLocal">
+	<summary>
+  Looks up a localized string similar to MyCommand.
+</summary>
+</member><member name="P:KeepAttributesHorizontal.myCommands.MyLispFunctionLocal">
+	<summary>
+  Looks up a localized string similar to MyLispFunction.
+</summary>
+</member><member name="P:KeepAttributesHorizontal.myCommands.MyPickFirstLocal">
+	<summary>
+  Looks up a localized string similar to MyPickFirst.
+</summary>
+</member><member name="P:KeepAttributesHorizontal.myCommands.MySessionCmdLocal">
+	<summary>
+  Looks up a localized string similar to MySessionCmd.
+</summary>
+</member><member name="T:KeepAttributesHorizontal.myCommands">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+</members>
+</doc>

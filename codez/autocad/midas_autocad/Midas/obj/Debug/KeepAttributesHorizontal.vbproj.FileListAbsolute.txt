@@ -1,0 +1,12 @@
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\bin\Debug\KeepAttributesHorizontal.dll
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\bin\Debug\KeepAttributesHorizontal.pdb
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\bin\Debug\KeepAttributesHorizontal.xml
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\bin\Debug\AcCoreMgd.dll
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\obj\Debug\KeepAttributesHorizontal.Resources.resources
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\obj\Debug\KeepAttributesHorizontal.HorizontalAttributes.Commands.resources
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\obj\Debug\GenerateResource.write.1.tlog
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\obj\Debug\KeepAttributesHorizontal.dll
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\obj\Debug\KeepAttributesHorizontal.xml
+C:\Users\Valkyrie\projects\autocad\lesson1_VisualExpress2010\KeepAttributesHorizontal\obj\Debug\KeepAttributesHorizontal.pdb

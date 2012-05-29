@@ -6,8 +6,12 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.Random;
 
@@ -32,6 +36,60 @@ public class ArduinoSensorButton extends JButton {
   private int width;
   private int height;
   
+
+	static Area imageOutline(BufferedImage bi) {
+//		final Area a = new Area();
+//		for(int x = 0; x < bi.getWidth(); x++) {
+//			for(int y = 0; y < bi.getHeight(); y++) {
+//				Color c = new Color(bi.getRGB(x, y), true);
+//				if(c.getAlpha() > 0) {
+//					a.add(new Area(new Rectangle(x, y, 1, 1)));
+//				}
+//			}
+//		}
+//		return a;
+
+        GeneralPath gp = new GeneralPath();
+
+        boolean cont = false;
+        for (int xx=0; xx<bi.getWidth(); xx++) {
+            for (int yy=0; yy<bi.getHeight(); yy++) {
+                if ((new Color(bi.getRGB(xx,yy), true)).getAlpha() > 0) {
+                    if (cont) {
+                        gp.lineTo(xx,yy);
+                        gp.lineTo(xx,yy+1);
+                        gp.lineTo(xx+1,yy+1);
+                        gp.lineTo(xx+1,yy);
+                        gp.lineTo(xx,yy);
+                    } else {
+                        gp.moveTo(xx,yy);
+                    }
+                    cont = true;
+                } else {
+                    cont = false;
+                }
+            }
+            cont = false;
+        }
+        gp.closePath();
+
+        // construct the Area from the GP & return it
+        return new Area(gp);
+	}
+  
+  public Area imageOutline() {
+	  Area outline = imageOutline((BufferedImage)customImage);
+	  outline.transform(AffineTransform.getTranslateInstance(upperLeft.x, upperLeft.y));
+	  return outline;
+  }
+  
+  public Shape getPathwayShape() {
+	  if(customImage == null) {
+		  return getShape();
+	  } else {
+		  return imageOutline();
+	  }
+  }
   public Color relevantColor = CanvasPanel.COPPER;
   
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {

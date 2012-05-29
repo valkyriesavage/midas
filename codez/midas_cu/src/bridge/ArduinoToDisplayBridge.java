@@ -82,7 +82,7 @@ public abstract class ArduinoToDisplayBridge {
     }
     
     if (isHellaSlider) {
-      Color[] ret = {Color.BLACK};
+      Color[] ret = {Color.BLACK, Color.GRAY, Color.WHITE};
       return ret;
     }
 

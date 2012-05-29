@@ -1,7 +1,7 @@
 package display;
 
 public class InstructionsGenerator {
-  private static final String MIDAS_DIR = "file:///Users/valkyrie/projects/midas_cu/";
+  private static final String MIDAS_DIR = (SetUp.class.getProtectionDomain().getCodeSource().getLocation()).toString().replace("codez/midas_cu/bin/", "");
   private static final String MIDAS_FIGS = MIDAS_DIR + "paper/figures/";
   private static final String OUTLINE_FILE = MIDAS_DIR + "codez/midas_cu/outline.svg";
   private static final String MASK_FILE = MIDAS_DIR + "codez/midas_cu/mask.svg";
