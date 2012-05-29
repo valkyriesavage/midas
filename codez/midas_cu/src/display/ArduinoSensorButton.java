@@ -9,6 +9,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
@@ -38,16 +39,43 @@ public class ArduinoSensorButton extends JButton {
   
 
 	static Area imageOutline(BufferedImage bi) {
-		final Area a = new Area();
-		for(int x = 0; x < bi.getWidth(); x++) {
-			for(int y = 0; y < bi.getHeight(); y++) {
-				Color c = new Color(bi.getRGB(x, y), true);
-				if(c.getAlpha() > 0) {
-					a.add(new Area(new Rectangle(x, y, 1, 1)));
-				}
-			}
-		}
-		return a;
+//		final Area a = new Area();
+//		for(int x = 0; x < bi.getWidth(); x++) {
+//			for(int y = 0; y < bi.getHeight(); y++) {
+//				Color c = new Color(bi.getRGB(x, y), true);
+//				if(c.getAlpha() > 0) {
+//					a.add(new Area(new Rectangle(x, y, 1, 1)));
+//				}
+//			}
+//		}
+//		return a;
+
+        GeneralPath gp = new GeneralPath();
+
+        boolean cont = false;
+        for (int xx=0; xx<bi.getWidth(); xx++) {
+            for (int yy=0; yy<bi.getHeight(); yy++) {
+                if ((new Color(bi.getRGB(xx,yy), true)).getAlpha() > 0) {
+                    if (cont) {
+                        gp.lineTo(xx,yy);
+                        gp.lineTo(xx,yy+1);
+                        gp.lineTo(xx+1,yy+1);
+                        gp.lineTo(xx+1,yy);
+                        gp.lineTo(xx,yy);
+                    } else {
+                        gp.moveTo(xx,yy);
+                    }
+                    cont = true;
+                } else {
+                    cont = false;
+                }
+            }
+            cont = false;
+        }
+        gp.closePath();
+
+        // construct the Area from the GP & return it
+        return new Area(gp);
 	}
   
   public Area imageOutline() {
