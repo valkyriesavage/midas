@@ -419,11 +419,23 @@ public class SetUp extends JFrame {
 
       propertiesPane.add(new JLabel("interaction"));
       propertiesPane.add(buttonBridge.interactionSetter());
-      
+      propertiesPane.add(placeholder());
+      propertiesPane.add(new JLabel("current:"));
+      propertiesPane.add(placeholder());
+      propertiesPane.add(buttonBridge.interactionDisplay());
       propertiesPane.add(placeholder());
       propertiesPane.add(buttonBridge.goButton());
-
-      propertiesPane.add(buttonBridge.setArduinoSequenceButton());
+      
+      propertiesPane.add(new JLabel("registration"));
+      JButton seqButton = buttonBridge.setArduinoSequenceButton();
+      seqButton.addActionListener(repainter());
+      propertiesPane.add(seqButton);
+      propertiesPane.add(placeholder());
+      propertiesPane.add(new JLabel("current:"));
+      propertiesPane.add(placeholder());
+      propertiesPane.add(buttonBridge.colorBar());
+      
+      propertiesPane.add(placeholder());
       JButton delete = buttonBridge.interfacePiece.delete;
       delete.addActionListener(repainter());
       propertiesPane.add(delete);
