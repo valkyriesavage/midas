@@ -196,5 +196,6 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
   
   public void touch(int hellaSliderPosition) {
     interfacePiece.hellaTouch(hellaSliderPosition);
+    repainter.repaint();
   }
 }

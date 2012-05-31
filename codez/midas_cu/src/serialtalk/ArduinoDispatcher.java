@@ -161,4 +161,13 @@ public class ArduinoDispatcher {
     }
     return null;
   }
+  
+  public ArduinoToDisplayBridge getHellaSliderBridge() {
+    for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+      if (bridge.isHellaSlider) {
+        return bridge;
+      }
+    }
+    return null;
+  }
 }

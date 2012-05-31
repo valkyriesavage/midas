@@ -58,8 +58,11 @@ public class ArduinoTestWindow extends JFrame {
       @Override
       public void stateChanged(ChangeEvent event) {
         JSlider hellaSlider = (JSlider)event.getSource();
-        int value = hellaSlider.getValue();
-        dispatcher.handleFakeEvent(value);
+        if (!hellaSlider.getValueIsAdjusting()) {
+          int value = hellaSlider.getValue();
+          dispatcher.handleEvent(new ArduinoEvent(value, TouchDirection.TOUCH));
+          //dispatcher.handleEvent(new ArduinoEvent(value, TouchDirection.RELEASE));
+        }
       }
     });
     add(hellaSlider);

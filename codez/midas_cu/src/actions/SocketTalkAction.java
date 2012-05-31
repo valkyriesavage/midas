@@ -12,6 +12,8 @@ import javax.swing.ImageIcon;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import display.SetUp;
+
 import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoPad;
@@ -79,17 +81,19 @@ public class SocketTalkAction implements UIAction, IOCallback {
     try {
       json.put("type", type);
       json.put("direction", event.touchDirection);
-      json.put("name", dispatcher.getBridgeForSensor(event.whichSensor)
-          .toString());
+      if (event.isHellaSlider) {
+        json.put("name", dispatcher.getHellaSliderBridge().toString());
+        json.put("position", dispatcher.lastEvent.hellaSliderLocation / (1.0*SetUp.HELLA_SLIDER));
+      } else {
+        json.put("name", dispatcher.getBridgeForSensor(event.whichSensor)
+            .toString());
+      }
       if (type == EventType.SLIDER) {
-        if (event.isHellaSlider) {
-          json.put("position", dispatcher.lastEvent.hellaSliderLocation / 256.0);
-        } else {
-          json.put("position",
-              ((ArduinoSlider) ((ArduinoToSliderBridge) dispatcher
-                  .getBridgeForSensor(event.whichSensor)).arduinoPiece)
-                  .positionInSlider(event.whichSensor));
-        }
+
+        json.put("position",
+            ((ArduinoSlider) ((ArduinoToSliderBridge) dispatcher
+                .getBridgeForSensor(event.whichSensor)).arduinoPiece)
+                .positionInSlider(event.whichSensor));
       }
       if (type == EventType.PAD) {
         json.put("xposition", ((ArduinoPad) ((ArduinoToPadBridge) dispatcher
@@ -109,13 +113,14 @@ public class SocketTalkAction implements UIAction, IOCallback {
   public void doAction() {
     if (dispatcher.lastEvent != null) {
       socket.send(buildJSon());
-      System.out.println(buildJSon());
+      System.out.println("Sending JSON : " + buildJSon());
     } else {
       socket.send("");
     }
-    // we never need to disconnect because we're immediately forgetting about this object
+    // we never need to disconnect because we're immediately forgetting about
+    // this object
     // and if we do, it doesn't have time to send.
-    //socket.disconnect();
+    // socket.disconnect();
   }
 
   public ImageIcon icon() {

@@ -20,7 +20,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 
-import serialtalk.ArduinoSensor;
 import util.Direction;
 
 public class SensorButtonGroup extends JPanel {
@@ -215,10 +214,10 @@ public class SensorButtonGroup extends JPanel {
         if (marker > UNMARKED) {
           g.setColor(Color.PINK);
           if (orientation == Direction.VERTICAL) {
-            g.drawRect((int) getHSP().bounds().getX(), yAt(marker) - 5,
+            g.fillRect((int) getHSP().bounds().getX(), yAt(marker) - 5,
                 (int) getHSP().bounds().getWidth(), 10);
           } else {
-            g.drawRect(xAt(marker) - 5, (int) getHSP().bounds().getY(), 10,
+            g.fillRect(xAt(marker) - 5, (int) getHSP().bounds().getY(), 10,
                 (int) getHSP().bounds().getWidth());
           }
         }
@@ -231,12 +230,12 @@ public class SensorButtonGroup extends JPanel {
   }
 
   private int xAt(int hellaSliderPosition) {
-    return (int) (getHSP().bounds().getWidth() / hellaSliderPosition + getHSP()
+    return (int) ((getHSP().bounds().getWidth()*hellaSliderPosition / (SetUp.HELLA_SLIDER*1.0)) + getHSP()
         .bounds().getMinX());
   }
 
   private int yAt(int hellaSliderPosition) {
-    return (int) (getHSP().bounds().getHeight() / hellaSliderPosition + getHSP()
+    return (int) ((getHSP().bounds().getHeight()*hellaSliderPosition / (SetUp.HELLA_SLIDER*1.0)) + getHSP()
         .bounds().getMinY());
   }
 
@@ -269,7 +268,6 @@ public class SensorButtonGroup extends JPanel {
         }
       }
     } else if (sensitivity == SetUp.HELLA_SLIDER) { // we have a hella slider
-      // note that for hella sliders we render a full bar with no spaces in it.
       if (orientation == Direction.HORIZONTAL) {
         for (int i = 0; i < SetUp.SLIDER_SENSITIVITIES[0]; i++) {
           triggerButtons.get(i).moveTo(new Point(i * (size) + base.x, base.y));
@@ -430,7 +428,7 @@ public class SensorButtonGroup extends JPanel {
   }
   
   public void touch(Point whereInPad) {
-    //TODO
+    
   }
 
   public void hellaTouch(int hellaSliderPosition) {
