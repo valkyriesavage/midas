@@ -1,5 +1,6 @@
 package display;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
@@ -19,6 +20,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 
+import serialtalk.ArduinoSensor;
 import util.Direction;
 
 public class SensorButtonGroup extends JPanel {
@@ -28,6 +30,7 @@ public class SensorButtonGroup extends JPanel {
   public static final int SIZE_CHANGE = 1;
   public static final int BUFFER = 2;
   private static final int WIDTH_OF_NAME_FIELD = 10;
+  private static final int UNMARKED = -1;
 
   public List<ArduinoSensorButton> triggerButtons = new ArrayList<ArduinoSensorButton>();
   private Point base = new Point(BASE, BASE);
@@ -41,7 +44,7 @@ public class SensorButtonGroup extends JPanel {
   private SensorShape.shapes shape;
   private Image customImage;
 
-private int spacing = 5;
+  private int spacing = 5;
   private int size = MIN_SIZE + 4 * SIZE_CHANGE;
   public Direction orientation = Direction.VERTICAL;
 
@@ -54,6 +57,7 @@ private int spacing = 5;
   public Integer sensitivity;
 
   private boolean isIntersecting = false;
+  private int marker = UNMARKED;
 
   public SensorButtonGroup(SensorShape.shapes shape) {
     isSlider = (shape == SensorShape.shapes.SLIDER);
@@ -76,11 +80,11 @@ private int spacing = 5;
 
     isCustom = true;
   }
-  
+
   public Image getCustomImage() {
-	return customImage;
+    return customImage;
   }
-  
+
   public Point center() {
     return base;
   }
@@ -196,24 +200,44 @@ private int spacing = 5;
 
   public void paint(Graphics2D g) {
     if (!deleteMe) {
-    	if(isPad) {
-    		PadPositioner p = getPP();
-    		g.setColor(triggerButtons.get(0).relevantColor);
-    		for(Shape s : p.getShapes()) {
-    			g.fill(s);
-    		}
-    	} else if(sensitivity == SetUp.HELLA_SLIDER) {
-    		HellaSliderPositioner hsp = getHSP();
-    		g.setColor(triggerButtons.get(0).relevantColor);
-    		g.fill(hsp.getSeg1());
-    		g.fill(hsp.getSeg2());
-    		g.fill(hsp.getOuter());
-    	} else {
-	      for (ArduinoSensorButton button : triggerButtons) {
-	        button.paint(g);
-	      }
-    	}
+      if (isPad) {
+        PadPositioner p = getPP();
+        g.setColor(triggerButtons.get(0).relevantColor);
+        for (Shape s : p.getShapes()) {
+          g.fill(s);
+        }
+      } else if (sensitivity == SetUp.HELLA_SLIDER) {
+        HellaSliderPositioner hsp = getHSP();
+        g.setColor(triggerButtons.get(0).relevantColor);
+        g.fill(hsp.getSeg1());
+        g.fill(hsp.getSeg2());
+        g.fill(hsp.getOuter());
+        if (marker > UNMARKED) {
+          g.setColor(Color.PINK);
+          if (orientation == Direction.VERTICAL) {
+            g.drawRect((int) getHSP().bounds().getX(), yAt(marker) - 5,
+                (int) getHSP().bounds().getWidth(), 10);
+          } else {
+            g.drawRect(xAt(marker) - 5, (int) getHSP().bounds().getY(), 10,
+                (int) getHSP().bounds().getWidth());
+          }
+        }
+      } else {
+        for (ArduinoSensorButton button : triggerButtons) {
+          button.paint(g);
+        }
+      }
     }
+  }
+
+  private int xAt(int hellaSliderPosition) {
+    return (int) (getHSP().bounds().getWidth() / hellaSliderPosition + getHSP()
+        .bounds().getMinX());
+  }
+
+  private int yAt(int hellaSliderPosition) {
+    return (int) (getHSP().bounds().getHeight() / hellaSliderPosition + getHSP()
+        .bounds().getMinY());
   }
 
   public String toString() {
@@ -348,7 +372,7 @@ private int spacing = 5;
     moveTo(base);
     repaint();
   }
-  
+
   public void larger() {
     size += SIZE_CHANGE;
     for (ArduinoSensorButton button : triggerButtons) {
@@ -357,26 +381,28 @@ private int spacing = 5;
     moveTo(base);
     repaint();
   }
-  
+
   public PadPositioner getPP() {
-	  PadPositioner p = new PadPositioner();
-	  
-	  p.moveToOrigin();
-	  //bring to origin;
-	  //set the bounds to be the bounds of the trigger buttons
+    PadPositioner p = new PadPositioner();
 
-	  Rectangle2D wantedBounds = null;
-		for( ArduinoSensorButton b : triggerButtons) {
-			Rectangle2D temp = b.getShape().getBounds2D();
-			if(wantedBounds == null) wantedBounds = temp;
-			else wantedBounds = wantedBounds.createUnion(temp);
-		}
-		
+    p.moveToOrigin();
+    // bring to origin;
+    // set the bounds to be the bounds of the trigger buttons
 
-		p.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
-		p.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(), wantedBounds.getY()));
-		
-		return p;
+    Rectangle2D wantedBounds = null;
+    for (ArduinoSensorButton b : triggerButtons) {
+      Rectangle2D temp = b.getShape().getBounds2D();
+      if (wantedBounds == null)
+        wantedBounds = temp;
+      else
+        wantedBounds = wantedBounds.createUnion(temp);
+    }
+
+    p.setDimension(wantedBounds.getWidth(), wantedBounds.getHeight());
+    p.transformed(AffineTransform.getTranslateInstance(wantedBounds.getX(),
+        wantedBounds.getY()));
+
+    return p;
   }
 
   @Override
@@ -391,5 +417,30 @@ private int spacing = 5;
         + last.width, (last.y - first.y) + last.width);
     bounds.grow(BUFFER, BUFFER);
     return bounds;
+  }
+
+  public void touch() {
+    for (ArduinoSensorButton b : triggerButtons) {
+      b.activate();
+    }
+  }
+  
+  public void touch(int whichInSlider) {
+    triggerButtons.get(whichInSlider).activate();
+  }
+  
+  public void touch(Point whereInPad) {
+    //TODO
+  }
+
+  public void hellaTouch(int hellaSliderPosition) {
+    marker = hellaSliderPosition;
+  }
+
+  public void release() {
+    for (ArduinoSensorButton b : triggerButtons) {
+        b.deactivate();
+    }
+    marker = UNMARKED;
   }
 }

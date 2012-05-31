@@ -75,6 +75,17 @@ public class ArduinoDispatcher {
       capturedEvents.add(e);
       return;
     }
+    
+    if (e.touchDirection == TouchDirection.RELEASE){
+      // we don't need to activate the button, but we do need to tell it to release
+        for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+          if (bridge.contains(e.whichSensor)) {
+            bridge.release(e.whichSensor);
+          }
+        }
+      // don't go execute it now.  just be done.
+      return;
+    }
 
     // phase out old events
     int newestReasonableEvent;
@@ -89,16 +100,19 @@ public class ArduinoDispatcher {
     lastEvent = e;
 
     recentEvents.add(e);
+    
     if (e.isHellaSlider) {
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
         if (bridge.isHellaSlider) {
           ((ArduinoToSliderBridge) bridge).execute(e.hellaSliderLocation);
+          ((ArduinoToSliderBridge) bridge).touch(e.hellaSliderLocation);
         }
       }
     } else {
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
         if (bridge.contains(e.whichSensor)) {
           bridge.execute(e.whichSensor, e.touchDirection);
+          bridge.touch(e.whichSensor);
         }
       }
     }

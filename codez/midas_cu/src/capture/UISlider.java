@@ -30,6 +30,9 @@ public class UISlider {
   }
   
   private boolean isHorizontal() {
+    if (highEndOfSlider == null) {
+      return false;
+    }
     return ((highEndOfSlider.y - lowEndOfSlider.y) < (highEndOfSlider.x - lowEndOfSlider.x));
   }
   

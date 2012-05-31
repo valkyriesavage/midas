@@ -24,6 +24,7 @@ import sl.shapes.StarPolygon;
 public class ArduinoSensorButton extends JButton {
   private static final long serialVersionUID = -5603499266721585353L;
   private static ArduinoDispatcher dispatcher;
+  public static final Color BASE_COLOR = CanvasPanel.COPPER;
   
   public ArduinoSensor sensor;
   SensorShape.shapes shape = null;
@@ -36,19 +37,9 @@ public class ArduinoSensorButton extends JButton {
   private int width;
   private int height;
   
+  public Color relevantColor = CanvasPanel.COPPER;
 
 	static Area imageOutline(BufferedImage bi) {
-//		final Area a = new Area();
-//		for(int x = 0; x < bi.getWidth(); x++) {
-//			for(int y = 0; y < bi.getHeight(); y++) {
-//				Color c = new Color(bi.getRGB(x, y), true);
-//				if(c.getAlpha() > 0) {
-//					a.add(new Area(new Rectangle(x, y, 1, 1)));
-//				}
-//			}
-//		}
-//		return a;
-
         GeneralPath gp = new GeneralPath();
 
         boolean cont = false;
@@ -90,7 +81,6 @@ public class ArduinoSensorButton extends JButton {
 		  return imageOutline();
 	  }
   }
-  public Color relevantColor = CanvasPanel.COPPER;
   
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
@@ -124,13 +114,6 @@ public class ArduinoSensorButton extends JButton {
     return sensor;
   }
   
-  public void rotateLeft() {
-    
-  }
-  public void rotateRight() {
-    
-  }
-  
   public void smaller() {
     size -= SensorButtonGroup.SIZE_CHANGE;
     upperLeft.x += SensorButtonGroup.SIZE_CHANGE/2;
@@ -145,7 +128,6 @@ public class ArduinoSensorButton extends JButton {
   
   public void activate() {
     relevantColor = Color.PINK;
-    dispatcher.handleFakeEvent(this);
   }
 
   public void deactivate() {

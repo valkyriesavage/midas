@@ -10,19 +10,15 @@ import java.awt.geom.Area;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +31,8 @@ import org.apache.batik.svggen.SVGGraphics2D;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
+import com.sun.tools.javac.util.Pair;
+
 import display.ArduinoSensorButton;
 import display.CanvasPanel;
 import display.SensorButtonGroup;
@@ -45,7 +43,7 @@ public class SVGPathwaysGenerator {
 
 	SetUp mySetup;
 	private List<List<Point>> allPaths = new ArrayList<List<Point>>();
-	private Map<ArduinoSensorButton, Integer> buttonMap = new HashMap();
+	private Map<ArduinoSensorButton, Integer> buttonMap = new HashMap<ArduinoSensorButton, Integer>();
 
 	public SVGPathwaysGenerator(SetUp s) {
 		mySetup = s;
@@ -162,7 +160,8 @@ public class SVGPathwaysGenerator {
 			});
 		}
 		
-		Corner[] others() {
+		@SuppressWarnings("unused")
+    Corner[] others() {
 			Corner[] others = new Corner[3];
 			int i = 0;
 			for(Corner c : values()) if(c != this) others[i++] = c;
@@ -200,7 +199,11 @@ public class SVGPathwaysGenerator {
 		//	a) a list of lists of points, representing the paths
 		//	b) a mapping between ArduinoSensorButtons to indices, representing which button is mapped to which port.
 		
-		List<List<Point>> paths;
+		/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    List<List<Point>> paths;
 		Map<ArduinoSensorButton, Integer> map;
 		SuccessfulException(List<List<Point>> paths, Map<ArduinoSensorButton, Integer> map) {
 			super();
@@ -222,7 +225,7 @@ public class SVGPathwaysGenerator {
 		List<ArduinoSensorButton> buttons = new ArrayList<ArduinoSensorButton>();
 		SensorButtonGroup slider = null; //possibly null!
 		
-		List<Shape> allShapes = new LinkedList();
+		List<Shape> allShapes = new LinkedList<Shape>();
 		
 		//Iterate through the groups, separating the slider from the normal buttons while also aggregating all the shapes.
 		for (SensorButtonGroup s : groups) {
@@ -294,8 +297,8 @@ public class SVGPathwaysGenerator {
 	private void tryFullGeneration(List<ArduinoSensorButton> buttons, Corner C) throws SuccessfulException {
 		Grid g = new Grid();
 		
-		Map<Shape, ArduinoSensorButton> shapeToButton = new HashMap();
-		List<Shape> buttonShapes = new ArrayList();
+		Map<Shape, ArduinoSensorButton> shapeToButton = new HashMap<Shape, ArduinoSensorButton>();
+		List<Shape> buttonShapes = new ArrayList<Shape>();
 		for(ArduinoSensorButton b : buttons) {
 			Shape s = b.getPathwayShape();
 			buttonShapes.add(s);
@@ -318,11 +321,11 @@ public class SVGPathwaysGenerator {
 //			generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
 			
 			Pair<List<List<Point>>, Map<Shape, Integer>> buttonInfo = generateIndividual(g, buttonGenPairs);
-			List<List<Point>> paths = new ArrayList();
-		    paths.addAll(buttonInfo._1);
+			List<List<Point>> paths = new ArrayList<List<Point>>();
+		    paths.addAll(buttonInfo.fst);
 		    
-		    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap();
-		    for(Map.Entry<Shape, Integer> entry : buttonInfo._2.entrySet()) {
+		    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap<ArduinoSensorButton, Integer>();
+		    for(Map.Entry<Shape, Integer> entry : buttonInfo.snd.entrySet()) {
 		    	buttonMap.put(shapeToButton.get(entry.getKey()), entry.getValue());
 		    }
 		    
@@ -338,8 +341,8 @@ public class SVGPathwaysGenerator {
 			Corner C, HSDirection D, RouteOrder O, HSPortLocation L) throws SuccessfulException {
 		Grid g = new Grid();
 		
-		Map<Shape, ArduinoSensorButton> shapeToButton = new HashMap();
-		List<Shape> buttonShapes = new ArrayList();
+		Map<Shape, ArduinoSensorButton> shapeToButton = new HashMap<Shape, ArduinoSensorButton>();
+		List<Shape> buttonShapes = new ArrayList<Shape>();
 		for(ArduinoSensorButton b : buttons) {
 			Shape s = b.getPathwayShape();
 			buttonShapes.add(s);
@@ -380,12 +383,12 @@ public class SVGPathwaysGenerator {
 				}
 				break;
 		}
-		if(D == HSDirection.REVERSE) {
+		/*if(D == HSDirection.REVERSE) {
 			Point p1 = sliderGenPairs.get(0)._2,
-				  p3 = sliderGenPairs.get(2)._2;
+				    p3 = sliderGenPairs.get(2)._2;
 			sliderGenPairs.get(0)._2 = p3;
 			sliderGenPairs.get(2)._2 = p1; //swap orders
-		}
+		}*/
 //		generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method; generate depending on O
 		
 		switch(O) {
@@ -395,11 +398,11 @@ public class SVGPathwaysGenerator {
 //					generate wirings depending on order - 							possibly do generateIndividual; may have to decompose method
 					Pair<List<List<Point>>, Map<Shape, Integer>> buttonInfo = generateIndividual(g, buttonGenPairs);
 					Pair<List<List<Point>>, Map<Shape, Integer>> sliderInfo = generateIndividual(g, sliderGenPairs);
-					List<List<Point>> paths = new ArrayList();
-				    paths.addAll(buttonInfo._1); paths.addAll(sliderInfo._1);
+					List<List<Point>> paths = new ArrayList<List<Point>>();
+				    paths.addAll(buttonInfo.fst); paths.addAll(sliderInfo.fst);
 				    
-				    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap();
-				    for(Map.Entry<Shape, Integer> entry : buttonInfo._2.entrySet()) {
+				    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap<ArduinoSensorButton, Integer>();
+				    for(Map.Entry<Shape, Integer> entry : buttonInfo.snd.entrySet()) {
 				    	buttonMap.put(shapeToButton.get(entry.getKey()), entry.getValue());
 				    }
 				    
@@ -419,11 +422,11 @@ public class SVGPathwaysGenerator {
 					
 					Pair<List<List<Point>>, Map<Shape, Integer>> buttonInfo = generateIndividual(g, buttonGenPairs);
 					
-					List<List<Point>> paths = new ArrayList();
-				    paths.addAll(buttonInfo._1); paths.addAll(sliderInfo._1);
+					List<List<Point>> paths = new ArrayList<List<Point>>();
+				    paths.addAll(buttonInfo.fst); paths.addAll(sliderInfo.fst);
 				    
-				    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap();
-				    for(Map.Entry<Shape, Integer> entry : buttonInfo._2.entrySet()) {
+				    Map<ArduinoSensorButton, Integer> buttonMap = new HashMap<ArduinoSensorButton, Integer>();
+				    for(Map.Entry<Shape, Integer> entry : buttonInfo.snd.entrySet()) {
 				    	buttonMap.put(shapeToButton.get(entry.getKey()), entry.getValue());
 				    }
 				    
@@ -462,7 +465,7 @@ public class SVGPathwaysGenerator {
 	 */
 	private Pair<List<List<Point>>, Map<Shape, Integer>> generateIndividual(Grid g, List<Pair<Shape, Point>> pairs) throws PathwayGenerationException {
 		List<List<Point>> paths = new ArrayList<List<Point>>();
-		Map<Shape, Integer> map = new HashMap();
+		Map<Shape, Integer> map = new HashMap<Shape, Integer>();
 
 		int i = 0;
 		for (Pair<Shape, Point> p : pairs) { // generate pathways for
@@ -471,8 +474,8 @@ public class SVGPathwaysGenerator {
 			if (PRINT_DEBUG)
 				System.out.println("\tGenerating path " + i + " of "
 						+ pairs.size());
-			Shape button = p._1;
-			Point port = p._2;
+			Shape button = p.fst;
+			Point port = p.snd;
 
 			List<Point> nearButton = outlineFor(button);
 			List<Point> path;
@@ -669,7 +672,6 @@ public class SVGPathwaysGenerator {
 			
 			mySetup.repaint();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.out.println("An error " + e
 					+ " occured while trying to write the SVG file to disk.");

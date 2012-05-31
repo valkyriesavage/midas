@@ -193,4 +193,8 @@ public class ArduinoToSliderBridge extends ArduinoToDisplayBridge {
     arduinoPiece = new ArduinoSlider(sensors);
     ArduinoSetup.addSlider((ArduinoSlider) arduinoPiece);
   }
+  
+  public void touch(int hellaSliderPosition) {
+    interfacePiece.hellaTouch(hellaSliderPosition);
+  }
 }

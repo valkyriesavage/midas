@@ -15,9 +15,9 @@ public class ArduinoTestWindow extends JFrame {
 
   private static final long serialVersionUID = 3277478961128936670L;
 
-  private static ArduinoDispatcher dispatcher;
+  private ArduinoDispatcher dispatcher;
   
-  public static void setDispatcher(ArduinoDispatcher newDispatcher) {
+  public void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
   }
   
@@ -40,8 +40,6 @@ public class ArduinoTestWindow extends JFrame {
           dispatcher.handleEvent(touchEvent);
         }
       });
-      /*
-       * TODO: make this a reasonable thing to do.  right now these events are just deleted, anyway.
       StorageJButton pinRelease = new StorageJButton("release "+i);
       pinRelease.sensorData = ArduinoSetup.sensors[i];
       pinRelease.addActionListener(new ActionListener() {
@@ -50,10 +48,10 @@ public class ArduinoTestWindow extends JFrame {
           ArduinoEvent releaseEvent = new ArduinoEvent(activated, TouchDirection.RELEASE);
           dispatcher.handleEvent(releaseEvent);
         }
-      });*/
+      });
       
       add(pinTouch);
-      //add(pinRelease);
+      add(pinRelease);
     }
     JSlider hellaSlider = new JSlider(0, 255);
     hellaSlider.addChangeListener(new ChangeListener() {

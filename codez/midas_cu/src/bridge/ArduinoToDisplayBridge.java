@@ -16,7 +16,9 @@ import javax.swing.JTextField;
 import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
 import serialtalk.ArduinoObject;
+import serialtalk.ArduinoPad;
 import serialtalk.ArduinoSensor;
+import serialtalk.ArduinoSlider;
 import serialtalk.TouchDirection;
 import util.ColorBar;
 import actions.UIAction;
@@ -187,5 +189,21 @@ public abstract class ArduinoToDisplayBridge {
   
   public void updateColor() {
     myColorBar.setColor(arduinoTies());
+  }
+  
+  public void touch(ArduinoSensor whichSensor) {
+    if (interfacePiece.isPad) {
+      interfacePiece.touch(((ArduinoPad)arduinoPiece).locationOnPad(whichSensor));
+    } else if (interfacePiece.isSlider) {
+      interfacePiece.touch(((ArduinoSlider)arduinoPiece).whichInSlider(whichSensor));
+    } else {
+      interfacePiece.touch();
+    }
+    repainter.repaint();
+  }
+  
+  public void release(ArduinoSensor whichSensor) {
+    interfacePiece.release();
+    repainter.repaint();
   }
 }

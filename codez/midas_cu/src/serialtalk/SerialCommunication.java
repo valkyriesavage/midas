@@ -92,8 +92,8 @@ public class SerialCommunication implements SerialPortEventListener {
       System.out.println("Could not find COM port.");
       if (test) {
         // we want to make a new window that we can use to inject ArduinoEvents
-        ArduinoTestWindow.setDispatcher(dispatcher);
-        new ArduinoTestWindow();
+        ArduinoTestWindow window = new ArduinoTestWindow();
+        window.setDispatcher(this.dispatcher);
       }
       return;
     }
