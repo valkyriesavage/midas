@@ -1,5 +1,20 @@
 package display;
 
+/** TODO
+ * video for some steps:
+ *  ?loading copper sheet into cutter
+ *  vinyl cutter cutting away
+ *  ?weeding for copper
+ *  transfer taping
+ *  wire attaching
+ *  ?loading vinyl sheet into cutter
+ *  repeat vinyl cutter cutting away
+ *  ?weeding for vinyl
+ *  transfer taping with vinyl
+ * @author valkyrie
+ *
+ */
+
 public class InstructionsGenerator {
   private static final String MIDAS_DIR = (SetUp.class.getProtectionDomain().getCodeSource().getLocation()).toString().replace("codez/midas_cu/bin/", "");
   private static final String MIDAS_FIGS = MIDAS_DIR + "paper/figures/";
