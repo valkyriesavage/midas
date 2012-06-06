@@ -2,14 +2,10 @@ package display;
 
 /** TODO
  * video for some steps:
- *  ?loading copper sheet into cutter
  *  vinyl cutter cutting away
- *  ?weeding for copper
  *  transfer taping
  *  wire attaching
- *  ?loading vinyl sheet into cutter
  *  repeat vinyl cutter cutting away
- *  ?weeding for vinyl
  *  transfer taping with vinyl
  * @author valkyrie
  *
@@ -17,7 +13,7 @@ package display;
 
 public class InstructionsGenerator {
   private static final String MIDAS_DIR = (SetUp.class.getProtectionDomain().getCodeSource().getLocation()).toString().replace("codez/midas_cu/bin/", "");
-  private static final String MIDAS_FIGS = MIDAS_DIR + "paper/figures/";
+  private static final String MIDAS_FIGS = MIDAS_DIR + "other/instructions_images/";
   private static final String OUTLINE_FILE = MIDAS_DIR + "codez/midas_cu/outline.svg";
   private static final String MASK_FILE = MIDAS_DIR + "codez/midas_cu/mask.svg";
   
@@ -41,7 +37,7 @@ public class InstructionsGenerator {
   private static String body(boolean hellaSlider, boolean noTails) {
     String ret = "<body><h2>Instructions to make shiny new sensors</h2>";
     ret += "<table border=1>";
-    ret += row(number() + "Load the copper sheet into the cutter", "");
+    ret += row(number() + "Load the copper sheet into the cutter", img200(MIDAS_FIGS+"loadcopper.gif"));
 
     if (noTails)
       ret += row(number() + "Download <a href='"+MASK_FILE+"'>this file</a>", svg(MASK_FILE));
@@ -54,24 +50,24 @@ public class InstructionsGenerator {
     ret += row(number() + "Cut out the file",img(MIDAS_FIGS+"cut-out.png"));
     
     if (noTails) {
-      ret += row(number() + "Remove the unnecessary background pieces from the sensors",img200(MIDAS_FIGS+"copper-cutouts-no-background.jpg"));
+      ret += row(number() + "Remove the unnecessary background pieces from the sensors",img200(MIDAS_FIGS+"weedcopper.gif"));
       ret += row(number() + "Move your sensors on your object as you like", "");
       ret += row(number() + "Attach one wire to each sensor", "");
       ret += row(number() + "Return to the Midas interface and register the connections using each sensor's \"register\" button", img(MIDAS_FIGS+"register-sensors.tiff"));
     }
     else {
-      ret += row(number() + "Remove the unnecessary background pieces from the sensors and tails, leaving the sensors undisturbed if possible","<img width=\"200\" src='"+MIDAS_FIGS+"copper-cutouts-no-background.jpg'>");
+      ret += row(number() + "Remove the unnecessary background pieces from the sensors and tails, leaving the sensors undisturbed if possible",img200(MIDAS_FIGS+"weedcopper.gif"));
       ret += row(number() + "Using the transfer tape, put the newly-cut sensors onto your object", img200(MIDAS_FIGS+"transfer-tape-on-phone.jpg"));
-      ret += row(number() + "Attach one rainbow wire to each copper tail that leads to a button. Note that you should begin with the brown wire attaching to the top tail.", "<img width=\"200\" src='"+MIDAS_FIGS+"attached-rainbow-wire.jpg'>");
+      ret += row(number() + "Attach one rainbow wire to each copper tail that leads to a button. Note that you should begin with the brown wire attaching to the top tail.", img200(MIDAS_FIGS+"attached-rainbow-wire.jpg"));
       if(hellaSlider)
         ret += row(number() + "Attach the grey, white, and black wires to the copper tails leading to the slider","");
-      ret += row(number() + "Load a vinyl sheet into the cutter", "");
+      ret += row(number() + "Load a vinyl sheet into the cutter", img200(MIDAS_FIGS+"loadvinyl.gif"));
       ret += row(number() + "Download <a href='"+MASK_FILE+"'>this file</a>", svg(MASK_FILE));
       ret += row(number() + "Open your downloaded file in SignCutPro", img(MIDAS_FIGS+"signcut-icon.png"));
       ret += row(number() + "Use the mirror tool at the bottom to flip the image",img(MIDAS_FIGS+"mirror-button.png"));
       ret += row(number() + "Cut out the file", img(MIDAS_FIGS+"cut-out.png"));
-      ret += row(number() + "Remove the positive parts of the cutout, i.e. the shapes", "");
-      ret += row(number() + "Transfer the mask onto your object so that your sensors show through the holes", "");
+      ret += row(number() + "Remove the positive parts of the cutout, i.e. the shapes", img200(MIDAS_FIGS+"weedvinyl.gif"));
+      ret += row(number() + "Transfer the mask onto your object so that your sensors show through the holes", img200(MIDAS_FIGS+"vinyloncopper.gif"));
     }
     ret += row(number() + "In the Midas interface, program some interactions!", "");
     
