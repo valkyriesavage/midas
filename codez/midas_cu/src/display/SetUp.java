@@ -3,6 +3,7 @@ package display;
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -71,6 +72,7 @@ public class SetUp extends JFrame {
   CanvasPanel buttonCanvas = new CanvasPanel(this, displayedButtons, obstacles);
   public List<ArduinoToDisplayBridge> bridgeObjects;
   JPanel buttonCreatorPanel = new JPanel();
+  JPanel newButtonsPanel;
   JPanel listsOfThingsHappening = new JPanel();
   JPanel propertiesPane = new JPanel();
   JPanel tempButtonDisplay = new JPanel();
@@ -132,10 +134,10 @@ public class SetUp extends JFrame {
     buttonCreatorPanel.removeAll();
     buttonCreatorPanel.setLayout(new GridLayout(0, 1));
 
-    JPanel templatePanel = new JPanel(new GridLayout(0, 1));
+    newButtonsPanel = new JPanel(new GridLayout(0, 1));
     JPanel holder = new JPanel();
     holder.add(buttonCanvas.templateButton());
-    templatePanel.add(holder);
+    newButtonsPanel.add(holder);
 
     JPanel addStockButtonPanel = new JPanel();
     JComboBox shapeChooser = new JComboBox(SensorShape.shapesList);
@@ -207,7 +209,7 @@ public class SetUp extends JFrame {
       }
     });
     addStockButtonPanel.add(addStock);
-    templatePanel.add(addStockButtonPanel);
+    newButtonsPanel.add(addStockButtonPanel);
 
     JPanel addCustomButtonPanel = new JPanel();
     JButton addCustom = new JButton("custom sticker shape");
@@ -240,7 +242,7 @@ public class SetUp extends JFrame {
       }
     });
     addCustomButtonPanel.add(addCustom);
-    templatePanel.add(addCustomButtonPanel);
+    newButtonsPanel.add(addCustomButtonPanel);
 
     JPanel defineObstaclePanel = new JPanel();
     JButton defineObstacle = new JButton("define obstacles");
@@ -267,11 +269,22 @@ public class SetUp extends JFrame {
       }
     });
     defineObstaclePanel.add(defineObstacle);
-    templatePanel.add(defineObstaclePanel);
+    newButtonsPanel.add(defineObstaclePanel);
 
     JPanel printingPanel = new JPanel();
     JButton printSensors = new JButton("create stickers");
     printSensors.addActionListener(new ActionListener() {
+      private void recursiveDisable(JComponent j) {
+        for(int i=0; i < j.getComponents().length; i++) {
+          j.getComponent(i).setEnabled(false);
+          try {
+            recursiveDisable((JComponent) j.getComponent(i));
+          } catch (ClassCastException e) {
+            continue;
+          }
+        }
+      }
+      
       public void actionPerformed(ActionEvent event) {
         cleanUpDeletions();
         if (displayedButtons.size() > 0) {
@@ -292,6 +305,8 @@ public class SetUp extends JFrame {
           }
 
           setSelectedBridge(currentBridge);
+          
+          recursiveDisable(newButtonsPanel);
 
         } else {
           JOptionPane.showMessageDialog(null,
@@ -325,10 +340,10 @@ public class SetUp extends JFrame {
     dongleContainer.add(reconnectDongle);
     printingPanelContainer.add(dongleContainer);
 
-    templatePanel
+    newButtonsPanel
         .setBorder(BorderFactory.createTitledBorder("design stickers"));
 
-    buttonCreatorPanel.add(templatePanel);
+    buttonCreatorPanel.add(newButtonsPanel);
     buttonCreatorPanel.add(printingPanelContainer);
   }
 
