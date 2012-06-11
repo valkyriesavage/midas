@@ -64,7 +64,8 @@ public class SetUp extends JFrame {
 
   JPanel buttonDisplayGrid = new JPanel();
   List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
-  CanvasPanel buttonCanvas = new CanvasPanel(this, displayedButtons);
+  List<ObstacleMarker> obstacles = new ArrayList<ObstacleMarker>();
+  CanvasPanel buttonCanvas = new CanvasPanel(this, displayedButtons, obstacles);
   public List<ArduinoToDisplayBridge> bridgeObjects;
   JPanel buttonCreatorPanel = new JPanel();
   JPanel listsOfThingsHappening = new JPanel();
@@ -236,6 +237,32 @@ public class SetUp extends JFrame {
     });
     addCustomButtonPanel.add(addCustom);
     templatePanel.add(addCustomButtonPanel);
+    
+    JPanel defineObstaclePanel = new JPanel();
+    JButton defineObstacle = new JButton("define obstacle");
+    defineObstacle.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        final String DEFINE = "define obstacle"; 
+        final String DONE = "done with obstacles"; 
+
+        JButton target = (JButton)e.getSource();
+        if (target.getText().equals(DEFINE)) {
+          JOptionPane
+          .showMessageDialog(
+              null,
+              "an obstacle is a place you don't want sensors or traces on. define an obstacle by drawing a polygon around it.",
+              "obstacle definition instructions",
+              JOptionPane.INFORMATION_MESSAGE);
+          target.setText(DONE);
+          buttonCanvas.obstacleDefinitionMode();
+        } else {
+          buttonCanvas.regularMode();
+          target.setText(DEFINE);
+        }
+      }
+    });
+    defineObstaclePanel.add(defineObstacle);
+    templatePanel.add(defineObstaclePanel);
 
     JPanel printingPanel = new JPanel();
     JButton printSensors = new JButton("create stickers");
