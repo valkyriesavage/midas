@@ -52,13 +52,16 @@ public class SetUp extends JFrame {
 
   public static int CANVAS_X = 500;
   public static int CANVAS_Y = 600;
-  
+
   public static final int MAX_OUTS_FOR_CHIP = 7;
 
   public static final Integer HELLA_SLIDER = 256;
   public static final Integer[] SLIDER_SENSITIVITIES = { 3, 4, 5, 6, 7, 8,
       HELLA_SLIDER };
   public static final Integer[] PAD_SENSITIVITIES = { 4, 9, 16, 25, 36 };
+
+  private static final String HTML_HEAD = "<html><body width='200'>";
+  private static final String HTML_TAIL = "</body></html>";
 
   SerialCommunication serialCommunication;
 
@@ -78,7 +81,7 @@ public class SetUp extends JFrame {
   SensorShape.shapes queuedShape;
 
   public ArduinoToDisplayBridge currentBridge;
-  
+
   Border blackline = BorderFactory.createLineBorder(Color.black);
 
   public SetUp(boolean test) throws AWTException {
@@ -108,7 +111,7 @@ public class SetUp extends JFrame {
     holder.add(buttonCreatorPanel, BorderLayout.SOUTH);
     add(holder, BorderLayout.EAST);
 
-    //add(serialCommunication.whatISee(), BorderLayout.SOUTH);
+    // add(serialCommunication.whatISee(), BorderLayout.SOUTH);
   }
 
   private void setUpTheGrid() {
@@ -128,8 +131,8 @@ public class SetUp extends JFrame {
   private void setUpButtonCreator() {
     buttonCreatorPanel.removeAll();
     buttonCreatorPanel.setLayout(new GridLayout(0, 1));
-    
-    JPanel templatePanel = new JPanel(new GridLayout(0,1));
+
+    JPanel templatePanel = new JPanel(new GridLayout(0, 1));
     JPanel holder = new JPanel();
     holder.add(buttonCanvas.templateButton());
     templatePanel.add(holder);
@@ -150,18 +153,19 @@ public class SetUp extends JFrame {
     addStock.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         cleanUpDeletions();
-        
+
         int buttonCount = 0;
         boolean hellaSliderFlag = false;
-        for(ArduinoToDisplayBridge bridge : bridgeObjects) {
-          if(bridge.isHellaSlider) {
-            if(hellaSliderFlag) {
+        for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+          if (bridge.isHellaSlider) {
+            if (hellaSliderFlag) {
               JOptionPane
-              .showMessageDialog(
-                  null,
-                  "you may only have one continuous slider!\nplease make one a discrete slider.",
-                  "too many continuous sliders",
-                  JOptionPane.ERROR_MESSAGE);
+                  .showMessageDialog(
+                      null,
+                      HTML_HEAD
+                          + "you may only have one continuous slider!<br/>please make one a discrete slider."
+                          + HTML_TAIL, "too many continuous sliders",
+                      JOptionPane.ERROR_MESSAGE);
               return;
             }
             hellaSliderFlag = true;
@@ -170,15 +174,15 @@ public class SetUp extends JFrame {
           buttonCount += bridge.interfacePiece.sensitivity;
         }
         if (buttonCount >= MAX_OUTS_FOR_CHIP) {
-          JOptionPane
-          .showMessageDialog(
-              null,
-              "you have too many buttons.  this chip only supports " + MAX_OUTS_FOR_CHIP +".\nplease delete some buttons before you add more.",
-              "pad registration instructions",
+          JOptionPane.showMessageDialog(null, HTML_HEAD
+              + "you have too many buttons.  this chip only supports "
+              + MAX_OUTS_FOR_CHIP
+              + ".<br/>please delete some buttons before you add more."
+              + HTML_TAIL, "pad registration instructions",
               JOptionPane.INFORMATION_MESSAGE);
           return;
         }
-        
+
         SensorButtonGroup newButton = new SensorButtonGroup(queuedShape);
         ArduinoToDisplayBridge newBridge;
         if (queuedShape == shapes.SLIDER) {
@@ -237,22 +241,23 @@ public class SetUp extends JFrame {
     });
     addCustomButtonPanel.add(addCustom);
     templatePanel.add(addCustomButtonPanel);
-    
+
     JPanel defineObstaclePanel = new JPanel();
-    JButton defineObstacle = new JButton("define obstacle");
+    JButton defineObstacle = new JButton("define obstacles");
     defineObstacle.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        final String DEFINE = "define obstacle"; 
-        final String DONE = "done with obstacles"; 
+        final String DEFINE = "define obstacles";
+        final String DONE = "done with obstacles";
 
-        JButton target = (JButton)e.getSource();
+        JButton target = (JButton) e.getSource();
         if (target.getText().equals(DEFINE)) {
           JOptionPane
-          .showMessageDialog(
-              null,
-              "an obstacle is a place you don't want sensors or traces on. define an obstacle by drawing a polygon around it.",
-              "obstacle definition instructions",
-              JOptionPane.INFORMATION_MESSAGE);
+              .showMessageDialog(
+                  null,
+                  HTML_HEAD
+                      + "an obstacle is an area you don't want sensors or traces.<br/>define an obstacle by drawing a polygon around it.<br/>finalize an obstacle by clicking on the first point."
+                      + HTML_TAIL, "obstacle definition instructions",
+                  JOptionPane.INFORMATION_MESSAGE);
           target.setText(DONE);
           buttonCanvas.obstacleDefinitionMode();
         } else {
@@ -270,7 +275,7 @@ public class SetUp extends JFrame {
       public void actionPerformed(ActionEvent event) {
         cleanUpDeletions();
         if (displayedButtons.size() > 0) {
-        	generatePathways();
+          generatePathways();
           // code related to desktop inspired by johnbokma.com
           if (!Desktop.isDesktopSupported()) {
             System.err.println("Can't get browser opener");
@@ -285,21 +290,23 @@ public class SetUp extends JFrame {
           } catch (IOException e) {
             e.printStackTrace();
           }
-          
+
           setSelectedBridge(currentBridge);
 
         } else {
-          JOptionPane.showMessageDialog(null, "there are no stickers to print!",
-              "no stickers to print", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(null,
+              "there are no stickers to print!", "no stickers to print",
+              JOptionPane.ERROR_MESSAGE);
         }
       }
     });
     printingPanel.add(printSensors);
     printingPanel.add(generatePathways);
-    printingPanel.setBorder(BorderFactory.createTitledBorder("create stickers"));
-    JPanel printingPanelContainer = new JPanel(new GridLayout(0,1));
+    printingPanel
+        .setBorder(BorderFactory.createTitledBorder("create stickers"));
+    JPanel printingPanelContainer = new JPanel(new GridLayout(0, 1));
     printingPanelContainer.add(printingPanel);
-    
+
     JButton reconnectDongle = new JButton("connect/reconnect dongle");
     reconnectDongle.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
@@ -317,8 +324,9 @@ public class SetUp extends JFrame {
     dongleContainer.setBorder(BorderFactory.createTitledBorder("dongle"));
     dongleContainer.add(reconnectDongle);
     printingPanelContainer.add(dongleContainer);
-    
-    templatePanel.setBorder(BorderFactory.createTitledBorder("design stickers"));
+
+    templatePanel
+        .setBorder(BorderFactory.createTitledBorder("design stickers"));
 
     buttonCreatorPanel.add(templatePanel);
     buttonCreatorPanel.add(printingPanelContainer);
@@ -346,42 +354,46 @@ public class SetUp extends JFrame {
   }
 
   public void generatePathways() {
-    pathwaysGenerator.generatePathways(displayedButtons, generatePathways.isSelected());
-    
-    if(generatePathways.isSelected()) {
+    pathwaysGenerator.generatePathways(displayedButtons, obstacles,
+        generatePathways.isSelected());
+
+    if (generatePathways.isSelected()) {
       assignArduinoConnectionsFromSVG();
       buttonCanvas.isInteractive = false;
     }
   }
-  
+
   public void assignArduinoConnectionsFromSVG() {
-    // we are cheating; we know that the SVG just assigns based on the order in which the buttons appear...
-    Map<ArduinoSensorButton, Integer> buttonMap = pathwaysGenerator.getButtonMap();
+    // we are cheating; we know that the SVG just assigns based on the order in
+    // which the buttons appear...
+    Map<ArduinoSensorButton, Integer> buttonMap = pathwaysGenerator
+        .getButtonMap();
     Map<ArduinoToDisplayBridge, List<ArduinoEvent>> sensorsToAssign = new HashMap<ArduinoToDisplayBridge, List<ArduinoEvent>>();
 
     // build a list of which sensors go to which bridges
     for (Map.Entry<ArduinoSensorButton, Integer> entry : buttonMap.entrySet()) {
-    	ArduinoSensorButton button = entry.getKey();
-    	int i = entry.getValue() - 1; // we need to 0-index here
+      ArduinoSensorButton button = entry.getKey();
+      int i = entry.getValue() - 1; // we need to 0-index here
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
         if (bridge.contains(button)) {
-          ArduinoEvent event = new ArduinoEvent(ArduinoSetup.sensors[i], TouchDirection.TOUCH);
+          ArduinoEvent event = new ArduinoEvent(ArduinoSetup.sensors[i],
+              TouchDirection.TOUCH);
           if (sensorsToAssign.containsKey(bridge)) {
             sensorsToAssign.get(bridge).add(event);
-          }
-          else {
+          } else {
             List<ArduinoEvent> assignToBridge = new ArrayList<ArduinoEvent>();
             assignToBridge.add(event);
             sensorsToAssign.put(bridge, assignToBridge);
           }
-          
+
         }
       }
     }
-    
-    // assign those sensors to those bridges (because we have to do this in chunks, sigh
+
+    // assign those sensors to those bridges (because we have to do this in
+    // chunks, sigh
     for (ArduinoToDisplayBridge bridge : bridgeObjects) {
-      if(bridge.isHellaSlider) {
+      if (bridge.isHellaSlider) {
         bridge.updateColor();
         continue;
       }
@@ -396,7 +408,8 @@ public class SetUp extends JFrame {
       temp.deleteOnExit();
 
       BufferedWriter out = new BufferedWriter(new FileWriter(temp));
-      out.write(InstructionsGenerator.instructions(false, !generatePathways.isSelected()));
+      out.write(InstructionsGenerator.instructions(false,
+          !generatePathways.isSelected()));
       out.close();
 
       return temp.toURI();
@@ -438,7 +451,7 @@ public class SetUp extends JFrame {
     propertiesPane.removeAll();
     JComboBox interactionType = bridge.chooseInteractionType();
     interactionType.addActionListener(refreshSelected());
-    
+
     if (bridge.isCustom) {
       ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
       propertiesPane.add(new JLabel("name"));
@@ -452,7 +465,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(buttonBridge.interactionDisplay());
       propertiesPane.add(placeholder());
       propertiesPane.add(buttonBridge.goButton());
-      
+
       propertiesPane.add(new JLabel("registration"));
       JButton seqButton = buttonBridge.setArduinoSequenceButton();
       seqButton.addActionListener(repainter());
@@ -461,7 +474,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
       propertiesPane.add(buttonBridge.colorBar());
-      
+
       propertiesPane.add(placeholder());
       JButton delete = buttonBridge.interfacePiece.delete;
       delete.addActionListener(repainter());
@@ -470,7 +483,7 @@ public class SetUp extends JFrame {
       ArduinoToSliderBridge sliderBridge = (ArduinoToSliderBridge) bridge;
       propertiesPane.add(new JLabel("name"));
       propertiesPane.add(sliderBridge.interfacePiece.nameField);
-      
+
       propertiesPane.add(new JLabel("interaction"));
       propertiesPane.add(sliderBridge.interactionSetter());
       propertiesPane.add(placeholder());
@@ -498,7 +511,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
       propertiesPane.add(sliderBridge.colorBar());
-      
+
       propertiesPane.add(placeholder());
       JButton delete = sliderBridge.interfacePiece.delete;
       delete.addActionListener(repainter());
@@ -514,7 +527,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
       propertiesPane.add(padBridge.interactionDisplay());
-      
+
       propertiesPane.add(placeholder());
       propertiesPane.add(padBridge.goButton());
 
@@ -531,7 +544,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
       propertiesPane.add(padBridge.colorBar());
-      
+
       propertiesPane.add(placeholder());
       JButton delete = padBridge.interfacePiece.delete;
       delete.addActionListener(repainter());
@@ -547,7 +560,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
       propertiesPane.add(buttonBridge.interactionDisplay());
-      
+
       propertiesPane.add(placeholder());
       propertiesPane.add(buttonBridge.goButton());
 
@@ -559,7 +572,7 @@ public class SetUp extends JFrame {
       propertiesPane.add(new JLabel("current:"));
       propertiesPane.add(placeholder());
       propertiesPane.add(buttonBridge.colorBar());
-      
+
       propertiesPane.add(placeholder());
       JButton delete = buttonBridge.interfacePiece.delete;
       delete.addActionListener(repainter());
@@ -573,7 +586,7 @@ public class SetUp extends JFrame {
     propertiesPane.removeAll();
     propertiesPane.setSize(300, 300);
     propertiesPane.setPreferredSize(new Dimension(300, 300));
-    propertiesPane.setLayout(new GridLayout(0, 2,4,4));
+    propertiesPane.setLayout(new GridLayout(0, 2, 4, 4));
     propertiesPane.setVisible(true);
     propertiesPane.setBorder(BorderFactory.createTitledBorder("properties"));
   }

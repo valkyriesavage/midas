@@ -33,6 +33,7 @@ import org.w3c.dom.Document;
 
 import display.ArduinoSensorButton;
 import display.CanvasPanel;
+import display.ObstacleMarker;
 import display.SensorButtonGroup;
 import display.SetUp;
 
@@ -232,7 +233,7 @@ public class SVGPathwaysGenerator {
    * @param generatePathways
    * @return
    */
-  public boolean generatePathways(List<SensorButtonGroup> groups,
+  public boolean generatePathways(List<SensorButtonGroup> groups, List<ObstacleMarker> obstacles,
       boolean generatePathways) {
     allPaths.clear();
     buttonMap.clear();
@@ -277,14 +278,14 @@ public class SVGPathwaysGenerator {
           if (slider == null) {
             if (PRINT_DEBUG)
               System.out.println("Attempting config " + (configNum++));
-            tryFullGeneration(buttons, C);
+            tryFullGeneration(buttons, obstacles, C);
           } else {
             for (HSDirection D : HSDirection.values()) {
               for (RouteOrder O : RouteOrder.values()) {
                 for (HSPortLocation L : HSPortLocation.values()) {
                   if (PRINT_DEBUG)
                     System.out.println("Attempting config " + (configNum++));
-                  tryFullGeneration(buttons, slider, C, D, O, L);
+                  tryFullGeneration(buttons, obstacles, slider, C, D, O, L);
                 }
               }
             }
@@ -320,10 +321,18 @@ public class SVGPathwaysGenerator {
       return true;
     }
   }
+  
+  private void avoidObstacles(Grid g, List<ObstacleMarker> obstacles) {
+    List<Shape> obstaclePolygons = new ArrayList<Shape>();
+    for (ObstacleMarker obstacle : obstacles) {
+      obstaclePolygons.add(obstacle.getPathwayShape());
+    }
+    g.restrictExactly(obstaclePolygons);
+  }
 
   // On failure, tryFullGeneration simply returns and does nothing. On success,
   // will throw SuccessfulException carrying the data.
-  private void tryFullGeneration(List<ArduinoSensorButton> buttons, Corner C)
+  private void tryFullGeneration(List<ArduinoSensorButton> buttons, List<ObstacleMarker> obstacles, Corner C)
       throws SuccessfulException {
     Grid g = new Grid();
 
@@ -334,11 +343,11 @@ public class SVGPathwaysGenerator {
       buttonShapes.add(s);
       shapeToButton.put(s, b);
     }
-
     C.sort(buttonShapes);
-
     // restrict shape outlines - restrict all buttonShapes
     g.restrictAll(buttonShapes);
+    
+    avoidObstacles(g, obstacles);
 
     // create port-maps between buttons and their respective points - iterate
     // through, make points
@@ -371,7 +380,7 @@ public class SVGPathwaysGenerator {
 
   // On failure, tryFullGeneration simply returns and does nothing. On success,
   // will throw SuccessfulException carrying the data.
-  private void tryFullGeneration(List<ArduinoSensorButton> buttons,
+  private void tryFullGeneration(List<ArduinoSensorButton> buttons, List<ObstacleMarker> obstacles,
       SensorButtonGroup slider, Corner C, HSDirection D, RouteOrder O,
       HSPortLocation L) throws SuccessfulException {
     Grid g = new Grid();
@@ -384,12 +393,13 @@ public class SVGPathwaysGenerator {
       shapeToButton.put(s, b);
     }
     List<Shape> sliderShapes = slider.getHSP().getShapes();
-
     C.sort(buttonShapes);
 
     // restrict shape outlines - restrict all buttonShapes, all sliderShapes
     g.restrictAll(buttonShapes);
     g.restrictAll(sliderShapes);
+    
+    avoidObstacles(g, obstacles);
 
     // create port-maps between buttons and their respective points - iterate
     // through, make points depending on L and D
