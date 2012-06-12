@@ -74,7 +74,22 @@ public class ArduinoDispatcher {
     if (isCapturing) {
       capturedEvents.add(e);
       return;
+    } 
+
+    /*
+    // phase out old events
+    int newestReasonableEvent;
+    for (newestReasonableEvent = 0; newestReasonableEvent < recentEvents.size(); newestReasonableEvent++) {
+      if (recentEvents.get(newestReasonableEvent).timestamp >= System
+          .currentTimeMillis() - TIMEOUT_FOR_INSTRUCTION) {
+        break;
+      }
     }
+    recentEvents = recentEvents.subList(newestReasonableEvent,
+        recentEvents.size());*/
+    lastEvent = e;
+
+    addRecentEvent(e);
     
     if (e.touchDirection == TouchDirection.RELEASE){
       // we don't need to activate the button, but we do need to tell it to release
@@ -86,20 +101,6 @@ public class ArduinoDispatcher {
       // don't go execute it now.  just be done.
       return;
     }
-
-    // phase out old events
-    int newestReasonableEvent;
-    for (newestReasonableEvent = 0; newestReasonableEvent < recentEvents.size(); newestReasonableEvent++) {
-      if (recentEvents.get(newestReasonableEvent).timestamp >= System
-          .currentTimeMillis() - TIMEOUT_FOR_INSTRUCTION) {
-        break;
-      }
-    }
-    recentEvents = recentEvents.subList(newestReasonableEvent,
-        recentEvents.size());
-    lastEvent = e;
-
-    recentEvents.add(e);
     
     if (e.isHellaSlider) {
       for (ArduinoToDisplayBridge bridge : bridgeObjects) {
@@ -124,6 +125,19 @@ public class ArduinoDispatcher {
   void setWhatISee() {
     whatISee.setText((recentEvents.toString()).substring("[".length(),
         recentEvents.toString().length() - "]".length()));
+  }
+  
+  private void addRecentEvent(ArduinoEvent e) {
+    recentEvents.add(e);
+    String test = "";
+    for (ArduinoEvent event : recentEvents) {
+      test += event.regexableString();
+    }
+    System.out.println(test);
+    System.out.println("\t" + FaultyConnectionRegexMatcher.containsFaultyConnection(test));
+    if (FaultyConnectionRegexMatcher.containsFaultyConnection(test) != FaultyConnectionType.OK) {
+      System.out.println(FaultyConnectionRegexMatcher.containsFaultyConnection(test));
+    }
   }
 
   void clearRecentEvents() {

@@ -82,11 +82,10 @@ public class SocketTalkAction implements UIAction, IOCallback {
       json.put("type", type);
       json.put("direction", event.touchDirection);
       if (event.isHellaSlider) {
-        json.put("name", dispatcher.getHellaSliderBridge().toString());
+        json.put("name", dispatcher.getHellaSliderBridge());
         json.put("position", dispatcher.lastEvent.hellaSliderLocation / (1.0*SetUp.HELLA_SLIDER));
       } else {
-        json.put("name", dispatcher.getBridgeForSensor(event.whichSensor)
-            .toString());
+        json.put("name", dispatcher.getBridgeForSensor(event.whichSensor));
       }
       if (type == EventType.SLIDER) {
 

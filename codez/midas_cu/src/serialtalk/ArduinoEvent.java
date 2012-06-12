@@ -56,6 +56,28 @@ public class ArduinoEvent implements ArduinoObject {
     return retStr;
   }
   
+  public String regexableString() {
+    // let's output a regexable string:
+    // timestamp(t|r)(pin|ssliderloc);
+    String retStr = "" + timestamp;
+    if (touchDirection == TouchDirection.TOUCH){
+      retStr += "t";
+    } else if (touchDirection == TouchDirection.RELEASE) {
+      retStr += "r";
+    }
+    if (whichSensor != null && whichSensor.location != null) {
+      retStr += whichSensor.location.x;
+      if (whichSensor.location.y >= 0) {
+        retStr += ", " + whichSensor.location.y;
+      }
+    } else if (hellaSliderLocation >= 0) {
+      retStr += " s" + hellaSliderLocation;
+    }
+    retStr += ";";
+
+    return retStr;
+  }
+  
   @Override
   public boolean equals(Object o) {
     if ((o.getClass() == ArduinoEvent.class) && (this.hashCode() == o.hashCode())) {
