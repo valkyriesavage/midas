@@ -46,6 +46,26 @@ public class FaultyConnectionRegexMatcher {
     return FaultyConnectionType.OK;
   }
   
+  public static int[] whichConnectionIsFaulty(String eventStream) {
+    Matcher flickerMatcher = flicker.matcher(eventStream);
+    Matcher alwaysOnMatcher = alwaysOn.matcher(eventStream);
+    
+    while (flickerMatcher.find()) {
+      long firstFlickerTime = (new BigInteger(flickerMatcher.group(1))).longValue();
+      long fourthFlickerTime = (new BigInteger(flickerMatcher.group(13))).longValue();
+      if (fourthFlickerTime - firstFlickerTime < REASONABLE_HUMAN_REACTION) {
+        return new int[] {Integer.parseInt(flickerMatcher.group(3)), Integer.parseInt(alwaysOnMatcher.group(11))};
+      }
+    } while (alwaysOnMatcher.find()) {
+      long startTime = (new BigInteger(alwaysOnMatcher.group(1))).longValue();
+      long endTime = (new BigInteger(alwaysOnMatcher.group(5))).longValue();
+      if (endTime - startTime > REASONABLE_HOLDING_TIME) {
+        return new int[] {Integer.parseInt(alwaysOnMatcher.group(3))};
+      }
+    }
+    return new int[] {-1};
+  }
+  
   public static void main(String[] args) {
     List<String> testStrs = new ArrayList<String>();
     testStrs.add("00t0;01r0;02t0;03r0;");

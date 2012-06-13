@@ -87,7 +87,7 @@ public class SetUp extends JFrame {
   Border blackline = BorderFactory.createLineBorder(Color.black);
 
   public SetUp(boolean test) throws AWTException {
-    setSize(CANVAS_X + 350, CANVAS_Y + 100);
+    setSize(CANVAS_X + 350, CANVAS_Y + 135);
     setTitle("Midas");
 
     serialCommunication = new SerialCommunication();
@@ -335,9 +335,14 @@ public class SetUp extends JFrame {
         }
       }
     });
-    JPanel dongleContainer = new JPanel();
+    JPanel dongleContainer = new JPanel(new GridLayout(0,1));
     dongleContainer.setBorder(BorderFactory.createTitledBorder("dongle"));
-    dongleContainer.add(reconnectDongle);
+    JPanel dongleButtonContainer = new JPanel();
+    dongleButtonContainer.add(reconnectDongle);
+    JPanel stupidThingForGettingNewline = new JPanel();
+    stupidThingForGettingNewline.add(serialCommunication.whatISee());
+    dongleContainer.add(dongleButtonContainer);
+    dongleContainer.add(stupidThingForGettingNewline);
     printingPanelContainer.add(dongleContainer);
 
     newButtonsPanel

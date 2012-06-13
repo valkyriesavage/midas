@@ -4,10 +4,9 @@ import java.awt.AWTException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JTextField;
+import javax.swing.JLabel;
 
 import util.EventType;
-
 import actions.SocketTalkAction;
 import bridge.ArduinoToDisplayBridge;
 import bridge.ArduinoToSliderBridge;
@@ -20,8 +19,7 @@ public class ArduinoDispatcher {
 
   public ArduinoEvent lastEvent;
 
-  // we want to phase out old events since they won't be part of the same
-  // gesture
+  // we want to phase out old events since they will keep tripping our regexs
   private static final int TIMEOUT_FOR_INSTRUCTION = 8000;
 
   private boolean isCapturing = false;
@@ -31,7 +29,7 @@ public class ArduinoDispatcher {
   
   private SocketTalkAction socketAction = new SocketTalkAction("http://localhost:8080");
   
-  public JTextField whatISee = new JTextField("I see...");
+  public JLabel whatISee = new JLabel("connection: ");
 
   public ArduinoDispatcher() throws AWTException {
   }
@@ -76,17 +74,6 @@ public class ArduinoDispatcher {
       return;
     } 
 
-    /*
-    // phase out old events
-    int newestReasonableEvent;
-    for (newestReasonableEvent = 0; newestReasonableEvent < recentEvents.size(); newestReasonableEvent++) {
-      if (recentEvents.get(newestReasonableEvent).timestamp >= System
-          .currentTimeMillis() - TIMEOUT_FOR_INSTRUCTION) {
-        break;
-      }
-    }
-    recentEvents = recentEvents.subList(newestReasonableEvent,
-        recentEvents.size());*/
     lastEvent = e;
 
     addRecentEvent(e);
@@ -122,9 +109,33 @@ public class ArduinoDispatcher {
     socketAction.doAction();
   }
 
-  void setWhatISee() {
-    whatISee.setText((recentEvents.toString()).substring("[".length(),
-        recentEvents.toString().length() - "]".length()));
+  void setWhatISee(FaultyConnectionType problem, int[] problematicSensors) {
+    
+    String HTML_HEAD = "<html><span style='color:black'>connection : ";
+    String HTML_RED = "</span><span style='color:red'>";
+    String HTML_TAIL = "</span></html>";
+    String text = HTML_HEAD;
+    switch(problem) {
+      case OK:
+        text += "OK";
+        break;
+      case ALWAYS_ON:
+        text += HTML_RED + ArduinoToDisplayBridge.COLOR_NAMES[problematicSensors[0]] + " sensor is wonky. ?";
+        whatISee.setToolTipText("try moving your tails farther apart. this sometimes happens when two tails are touching.");
+        break;
+      case FLICKER:
+        if (problematicSensors[0] != problematicSensors[1]) {
+          text += HTML_RED + ArduinoToDisplayBridge.COLOR_NAMES[problematicSensors[0]] + " and " + ArduinoToDisplayBridge.COLOR_NAMES[problematicSensors[1]] + " are wonky. ?";
+        } else {
+          text += HTML_RED + ArduinoToDisplayBridge.COLOR_NAMES[problematicSensors[0]] + " is wonky. ?";
+        }
+        whatISee.setToolTipText("check your soldered connections. this sometimes happens when you have a loose connection to the dongle.");
+        break;
+      default:
+        text += "indeterminate";
+        break;
+    }
+    whatISee.setText(text + HTML_TAIL);
   }
   
   private void addRecentEvent(ArduinoEvent e) {
@@ -133,10 +144,19 @@ public class ArduinoDispatcher {
     for (ArduinoEvent event : recentEvents) {
       test += event.regexableString();
     }
-    System.out.println(test);
-    System.out.println("\t" + FaultyConnectionRegexMatcher.containsFaultyConnection(test));
+    setWhatISee(FaultyConnectionRegexMatcher.containsFaultyConnection(test), FaultyConnectionRegexMatcher.whichConnectionIsFaulty(test));
+    
     if (FaultyConnectionRegexMatcher.containsFaultyConnection(test) != FaultyConnectionType.OK) {
-      System.out.println(FaultyConnectionRegexMatcher.containsFaultyConnection(test));
+      // phase out old events, so we don't trigger the same thing every damn time
+      int newestReasonableEvent;
+      for (newestReasonableEvent = 0; newestReasonableEvent < recentEvents.size(); newestReasonableEvent++) {
+        if (recentEvents.get(newestReasonableEvent).timestamp >= System
+            .currentTimeMillis() - TIMEOUT_FOR_INSTRUCTION) {
+          break;
+        }
+      }
+      recentEvents = recentEvents.subList(newestReasonableEvent,
+          recentEvents.size());
     }
   }
 

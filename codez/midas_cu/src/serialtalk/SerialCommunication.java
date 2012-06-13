@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JTextField;
+import javax.swing.JLabel;
 
 import actions.SocketTalkAction;
 import bridge.ArduinoToDisplayBridge;
@@ -27,9 +27,8 @@ import display.ArduinoSensorButton;
 public class SerialCommunication implements SerialPortEventListener {
   SerialPort serialPort;
 
-  private static final String PORT_NAMES[] = { "/dev/tty.usbmodemfa131", // Mac,
-                                                                         // Arduino
-                                                                         // Uno
+  private static final String PORT_NAMES[] = { 
+      "/dev/tty.usbmodemfa131", // Mac, Arduino Uno
       "/dev/tty.usbmodemfa121", // Mac, Arduino Uno
       "/dev/tty.usbmodem12341", // Mac, Teensy
       "/dev/ttyACM0", // Linux, Arduino Uno
@@ -236,7 +235,7 @@ public class SerialCommunication implements SerialPortEventListener {
     dispatcher.handleEvent(e);
   }
 
-  public JTextField whatISee() {
+  public JLabel whatISee() {
     return dispatcher.whatISee;
   }
 }

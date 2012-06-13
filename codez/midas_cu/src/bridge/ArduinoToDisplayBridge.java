@@ -30,6 +30,10 @@ import display.SetUp;
 public abstract class ArduinoToDisplayBridge {
   public ArduinoObject arduinoPiece;
   public SensorButtonGroup interfacePiece;
+  
+  public static final Color[] CONNECTION_COLORS = { CanvasPanel.DARK_COPPER, Color.RED, Color.ORANGE,
+      Color.YELLOW, Color.GREEN, Color.BLUE, new Color(255, 0, 255) };
+  public static final String[] COLOR_NAMES = { "brown", "red", "orange", "yellow", "green", "blue", "purple" };
 
   public boolean isCustom = false;
   public boolean isHellaSlider = false;
@@ -88,13 +92,10 @@ public abstract class ArduinoToDisplayBridge {
       return ret;
     }
 
-    Color[] colors = { CanvasPanel.DARK_COPPER, Color.RED, Color.ORANGE,
-        Color.YELLOW, Color.GREEN, Color.BLUE, new Color(255, 0, 255) };
-
     Color[] used = new Color[arduinoPiece.sensor().length];
 
     for (int i = 0; i < arduinoPiece.sensor().length; i++) {
-      used[i] = colors[arduinoPiece.sensor()[i]];
+      used[i] = CONNECTION_COLORS[arduinoPiece.sensor()[i]];
     }
 
     return used;
