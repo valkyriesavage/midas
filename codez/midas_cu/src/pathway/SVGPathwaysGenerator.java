@@ -33,7 +33,6 @@ import org.w3c.dom.Document;
 
 import display.ArduinoSensorButton;
 import display.CanvasPanel;
-import display.ObstacleMarker;
 import display.SensorButtonGroup;
 import display.SetUp;
 
@@ -233,7 +232,7 @@ public class SVGPathwaysGenerator {
    * @param generatePathways
    * @return
    */
-  public boolean generatePathways(List<SensorButtonGroup> groups, List<ObstacleMarker> obstacles,
+  public boolean generatePathways(List<SensorButtonGroup> groups, List<SensorButtonGroup> obstacles,
       boolean generatePathways) {
     allPaths.clear();
     buttonMap.clear();
@@ -322,17 +321,17 @@ public class SVGPathwaysGenerator {
     }
   }
   
-  private void avoidObstacles(Grid g, List<ObstacleMarker> obstacles) {
+  private void avoidObstacles(Grid g, List<SensorButtonGroup> obstacles) {
     List<Shape> obstaclePolygons = new ArrayList<Shape>();
-    for (ObstacleMarker obstacle : obstacles) {
-      obstaclePolygons.add(obstacle.getPathwayShape());
+    for (SensorButtonGroup obstacle : obstacles) {
+      obstaclePolygons.add(obstacle.triggerButtons.get(0).getPathwayShape());
     }
     g.restrictExactly(obstaclePolygons);
   }
 
   // On failure, tryFullGeneration simply returns and does nothing. On success,
   // will throw SuccessfulException carrying the data.
-  private void tryFullGeneration(List<ArduinoSensorButton> buttons, List<ObstacleMarker> obstacles, Corner C)
+  private void tryFullGeneration(List<ArduinoSensorButton> buttons, List<SensorButtonGroup> obstacles, Corner C)
       throws SuccessfulException {
     Grid g = new Grid();
 
@@ -380,7 +379,7 @@ public class SVGPathwaysGenerator {
 
   // On failure, tryFullGeneration simply returns and does nothing. On success,
   // will throw SuccessfulException carrying the data.
-  private void tryFullGeneration(List<ArduinoSensorButton> buttons, List<ObstacleMarker> obstacles,
+  private void tryFullGeneration(List<ArduinoSensorButton> buttons, List<SensorButtonGroup> obstacles,
       SensorButtonGroup slider, Corner C, HSDirection D, RouteOrder O,
       HSPortLocation L) throws SuccessfulException {
     Grid g = new Grid();

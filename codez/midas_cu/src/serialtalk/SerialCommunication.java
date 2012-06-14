@@ -125,7 +125,6 @@ public class SerialCommunication implements SerialPortEventListener {
     }
     this.dispatcher = dispatcher;
     ArduinoToDisplayBridge.setDispatcher(dispatcher);
-    ArduinoSensorButton.setDispatcher(dispatcher);
     SocketTalkAction.setDispatcher(dispatcher);
     bridgeObjects = dispatcher.bridgeObjects;
   }

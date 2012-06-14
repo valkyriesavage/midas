@@ -37,6 +37,7 @@ public abstract class ArduinoToDisplayBridge {
 
   public boolean isCustom = false;
   public boolean isHellaSlider = false;
+  private boolean isObstacle = false;
 
   private static ArduinoDispatcher dispatcher;
 
@@ -47,13 +48,22 @@ public abstract class ArduinoToDisplayBridge {
   protected static SetUp repainter;
   
   protected ColorBar myColorBar = new ColorBar(null);
-
+  
   public static void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
   }
 
   public static void setRepainter(SetUp newRepainter) {
     repainter = newRepainter;
+  }
+  
+  public void setIsObstacle(boolean isObstacle) {
+    this.isObstacle = isObstacle;
+    interfacePiece.setIsObstacle(isObstacle);
+  }
+  
+  public boolean isObstacle() {
+    return isObstacle;
   }
 
   public void setInterfacePiece(SensorButtonGroup interfacePiece) {

@@ -5,7 +5,7 @@ public class SensorShape {
   public static final SensorShape[] shapesList = {new SensorShape(),
                                                   new SensorShape(shapes.CIRCLE), new SensorShape(shapes.SQUARE),
                                                   new SensorShape(shapes.STAR), new SensorShape(shapes.SLIDER),
-                                                  new SensorShape(shapes.PAD)};
+                                                  new SensorShape(shapes.PAD), new SensorShape(shapes.POLYGON)};
   
   public static enum shapes {
     CIRCLE,
@@ -14,6 +14,7 @@ public class SensorShape {
     SLIDER,
     PAD,
     HELLA_SLIDER,
+    POLYGON,
   }
   public shapes shape = null;
 

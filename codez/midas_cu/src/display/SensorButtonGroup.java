@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -35,13 +36,13 @@ public class SensorButtonGroup extends JPanel {
   private Point base = new Point(BASE, BASE);
 
   public JButton orientationFlip = new JButton("make horizontal");
-  public JButton larger = new JButton("larger");
-  public JButton smaller = new JButton("smaller");
   public JButton delete = new JButton("delete");
   public JTextField nameField;
 
-  private SensorShape.shapes shape;
-  private Image customImage;
+  protected SensorShape.shapes shape;
+  protected Polygon customShape;
+  public List<Point> vertices;
+  protected Image customImage;
 
   private int spacing = 5;
   private int size = MIN_SIZE + 4 * SIZE_CHANGE;
@@ -58,13 +59,33 @@ public class SensorButtonGroup extends JPanel {
   private boolean isIntersecting = false;
   private int marker = UNMARKED;
 
+  protected SensorButtonGroup() {}
+  
   public SensorButtonGroup(SensorShape.shapes shape) {
     isSlider = (shape == SensorShape.shapes.SLIDER);
     isPad = (shape == SensorShape.shapes.PAD);
+    
+    if (shape == SensorShape.shapes.POLYGON) {
+      customShape = new Polygon();
+    }
 
     name = shape.name().toLowerCase();
     this.shape = shape;
 
+    generalSetup();
+  }
+  
+  public SensorButtonGroup(List<Point> vertices) {
+    isSlider = false;
+    isPad = false;
+    
+    customShape = new Polygon();
+    
+    for (Point p : vertices) {
+      customShape.addPoint(p.x, p.y);
+    }
+    this.vertices = vertices;
+    
     generalSetup();
   }
 
@@ -78,6 +99,19 @@ public class SensorButtonGroup extends JPanel {
     generalSetup();
 
     isCustom = true;
+  }
+  
+  public void setIsObstacle(boolean isObstacle) {
+    for (ArduinoSensorButton button : triggerButtons) {
+      button.setIsObstacle(isObstacle);
+    }
+  }
+  
+  public void setVertices(List<Point> vertices) {
+    customShape = new Polygon();
+    for (Point p : vertices) {
+      customShape.addPoint(p.x, p.y);
+    }
   }
 
   public Image getCustomImage() {
@@ -127,6 +161,9 @@ public class SensorButtonGroup extends JPanel {
     if (isCustom) {
       triggerButtons.add(new ArduinoSensorButton(customImage, new Point(base.x,
           (size + spacing) + base.y), size));
+    } else if (customShape != null) {
+      triggerButtons.clear();
+      triggerButtons.add(new ArduinoSensorButton(customShape));
     } else {
       if (!isPad && sensitivity != SetUp.HELLA_SLIDER) { // we have a slider or
                                                          // a single button
@@ -180,16 +217,7 @@ public class SensorButtonGroup extends JPanel {
         repaint();
       }
     });
-    smaller.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) {
-        smaller();
-      }
-    });
-    larger.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) {
-        larger();
-      }
-    });
+
     delete.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         deleteMe = true;
@@ -440,5 +468,9 @@ public class SensorButtonGroup extends JPanel {
         b.deactivate();
     }
     marker = UNMARKED;
+  }
+  
+  public boolean isObstacle() {
+    return triggerButtons.get(0).isObstacle();
   }
 }

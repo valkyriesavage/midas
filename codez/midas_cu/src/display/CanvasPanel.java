@@ -38,6 +38,11 @@ public class CanvasPanel extends JPanel implements MouseListener,
   public static final Color COPPER = new Color(204, 76, 22);
   public static final Color LIGHT_COPPER = new Color(236, 112, 20);
   public static final Color DARK_COPPER = new Color(140, 45, 4);
+  
+  public static final Color OBSTACLE_COLOR = Color.GRAY;
+  public static final Color OBSTACLE_SELECTED_COLOR = Color.LIGHT_GRAY;
+  
+  public static final int REASONABLE_DISTANCE_TO_CLOSE_POLYGON = 25;
 
   List<SensorButtonGroup> displayedButtons;
   List<File> displayedCustomButtons;
@@ -49,19 +54,16 @@ public class CanvasPanel extends JPanel implements MouseListener,
   private Point prevPoint;
 
   public boolean isInteractive = true;
-  private boolean obstacleDefinitionMode = false;
+  private boolean polyDefinitionMode = false;
 
-  List<Point> alreadyChosenObstaclePoints = new ArrayList<Point>();
-  List<ObstacleMarker> obstacles;
+  List<Point> alreadyChosenPolyPoints = new ArrayList<Point>();
 
   BufferedImage templateImage;
 
-  public CanvasPanel(SetUp setUp, List<SensorButtonGroup> buttonsToDisplay,
-      List<ObstacleMarker> obstacles) {
+  public CanvasPanel(SetUp setUp, List<SensorButtonGroup> buttonsToDisplay) {
     super();
     this.setUp = setUp;
     displayedButtons = buttonsToDisplay;
-    this.obstacles = obstacles;
     setSize(SetUp.CANVAS_X, SetUp.CANVAS_Y);
     setPreferredSize(new Dimension(SetUp.CANVAS_X, SetUp.CANVAS_Y));
     setVisible(true);
@@ -94,13 +96,13 @@ public class CanvasPanel extends JPanel implements MouseListener,
       sbg.setIntersecting(false);
 
       // count the total number of buttons to see if we need grid sensing
-      if (!sbg.deleteMe && !(sbg.sensitivity == SetUp.HELLA_SLIDER)) {
+      if (!sbg.deleteMe && !(sbg.sensitivity == SetUp.HELLA_SLIDER) && !sbg.isObstacle()) {
         totalButtons += sbg.sensitivity;
       }
 
       // test for intersections to see if we need to color differently
       for (SensorButtonGroup intersecting : displayedButtons) {
-        if (sbg == intersecting
+        if (sbg == intersecting || intersecting.isObstacle()
             || (sbg.isIntersecting() && intersecting.isIntersecting())) {
           continue;
         }
@@ -117,10 +119,6 @@ public class CanvasPanel extends JPanel implements MouseListener,
 
     // do we need grid sensing?
     setUp.serialCommunication.isGridded = (totalButtons > ArduinoSetup.NUM_TERMINALS);
-
-    for (ObstacleMarker marker : obstacles) {
-      marker.paint(g2);
-    }
   }
 
   SensorButtonGroup determineIntersection(Point pointClicked) {
@@ -185,24 +183,22 @@ public class CanvasPanel extends JPanel implements MouseListener,
 
   @Override
   public void mouseClicked(MouseEvent event) {
-    if (obstacleDefinitionMode) {
+    if (polyDefinitionMode) {
       Point clicked = event.getPoint();
       // check to see if we are "close enough" to the first point that the user
       // probably wants to terminate the shape; also we check to make sure we
       // have at least a triangle's worth of points
-      if (alreadyChosenObstaclePoints.size() > 3
-          && clicked.distance(alreadyChosenObstaclePoints.get(0)) < ObstacleMarker.REASONABLE_DISTANCE_TO_CLOSE_OBSTACLE) {
-        // we have already added the obstacle, so we just need to start a new one
-        alreadyChosenObstaclePoints = new ArrayList<Point>();
+      if (alreadyChosenPolyPoints.size() > 3
+          && clicked.distance(alreadyChosenPolyPoints.get(0)) < REASONABLE_DISTANCE_TO_CLOSE_POLYGON) {
+        // we have already added the obstacle, so we just need to start a new one and go back to the right mode
+        alreadyChosenPolyPoints = new ArrayList<Point>();
+        regularMode();
       } else {
-        alreadyChosenObstaclePoints.add(clicked);
-        if (alreadyChosenObstaclePoints.size() >= 3) {
-          if (alreadyChosenObstaclePoints.size() > 3) {
-            // remove the old one...
-            obstacles.remove(obstacles.size() - 1);
-          }
-          // add a new one for feedback
-          obstacles.add(new ObstacleMarker(alreadyChosenObstaclePoints));
+        alreadyChosenPolyPoints.add(clicked);
+        if (alreadyChosenPolyPoints.size() >= 3) {
+          //we need to display this!
+          displayedButtons.get(displayedButtons.size() - 1).setVertices(alreadyChosenPolyPoints);
+          displayedButtons.get(displayedButtons.size() - 1).setSensitivity(1);
         }
       }
       setUp.repaint();
@@ -252,7 +248,7 @@ public class CanvasPanel extends JPanel implements MouseListener,
 
   @Override
   public void mouseDragged(MouseEvent event) {
-    if (!isInteractive || obstacleDefinitionMode) {
+    if (!isInteractive || polyDefinitionMode) {
       return;
     }
 
@@ -301,15 +297,15 @@ public class CanvasPanel extends JPanel implements MouseListener,
         .distance(draggingGroup.center()));
   }
 
-  public void obstacleDefinitionMode() {
+  public void polyDefinitionMode() {
     this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-    obstacleDefinitionMode = true;
-    alreadyChosenObstaclePoints = new ArrayList<Point>();
+    polyDefinitionMode = true;
+    alreadyChosenPolyPoints = new ArrayList<Point>();
   }
 
   public void regularMode() {
     this.setCursor(Cursor.getDefaultCursor());
-    obstacleDefinitionMode = false;
-    alreadyChosenObstaclePoints = null;
+    polyDefinitionMode = false;
+    alreadyChosenPolyPoints = null;
   }
 }

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -16,20 +17,16 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.Random;
 
-import javax.swing.JButton;
-
-import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoSensor;
 import sl.shapes.StarPolygon;
-import util.BufferedImageUtil;
 
-public class ArduinoSensorButton extends JButton {
+public class ArduinoSensorButton {
   private static final long serialVersionUID = -5603499266721585353L;
-  private static ArduinoDispatcher dispatcher;
   public static final Color BASE_COLOR = CanvasPanel.COPPER;
 
   public ArduinoSensor sensor;
   SensorShape.shapes shape = null;
+  Polygon customShape = null;
   Image customImage = null;
   boolean locationChecked = false;
 
@@ -38,6 +35,9 @@ public class ArduinoSensorButton extends JButton {
 
   private int width;
   private int height;
+
+  private boolean isObstacle;
+  private boolean isSelected = true;
 
   public Color relevantColor = CanvasPanel.COPPER;
 
@@ -85,10 +85,6 @@ public class ArduinoSensorButton extends JButton {
     }
   }
 
-  public static void setDispatcher(ArduinoDispatcher newDispatcher) {
-    dispatcher = newDispatcher;
-  }
-
   public ArduinoSensorButton(SensorShape.shapes shape) {
     this.shape = shape;
 
@@ -96,6 +92,15 @@ public class ArduinoSensorButton extends JButton {
     upperLeft = new Point(random.nextInt(SetUp.CANVAS_X - 50),
         random.nextInt(SetUp.CANVAS_Y - 50));
     size = (random.nextInt(10) + 4) * 8;
+  }
+
+  public void setIsObstacle(boolean isObstacle) {
+    this.isObstacle = isObstacle;
+    changeColor();
+  }
+
+  public boolean isObstacle() {
+    return isObstacle;
   }
 
   public ArduinoSensorButton(SensorShape.shapes shape, Point upperLeft, int size) {
@@ -110,6 +115,11 @@ public class ArduinoSensorButton extends JButton {
     this.size = size;
   }
 
+  public ArduinoSensorButton(Polygon shape) {
+    this.customShape = shape;
+    this.upperLeft = new Point(customShape.xpoints[0], customShape.ypoints[0]);
+  }
+
   public void setSensor(ArduinoSensor sensor) {
     this.sensor = sensor;
   }
@@ -120,15 +130,17 @@ public class ArduinoSensorButton extends JButton {
 
   public void smaller() {
     size -= SensorButtonGroup.SIZE_CHANGE;
-    
+
     if (customImage != null) {
-      /*customImage = customImage.getScaledInstance(customImage.getWidth(null)
-          - SensorButtonGroup.SIZE_CHANGE, customImage.getHeight(null)
-          - SensorButtonGroup.SIZE_CHANGE, Image.SCALE_DEFAULT);
-          /*BufferedImageUtil.scaleImage((BufferedImage) customImage,
-          customImage.getWidth(null) - SensorButtonGroup.SIZE_CHANGE,
-          customImage.getHeight(null) - SensorButtonGroup.SIZE_CHANGE,
-          Color.BLACK);*/
+      /*
+       * customImage = customImage.getScaledInstance(customImage.getWidth(null)
+       * - SensorButtonGroup.SIZE_CHANGE, customImage.getHeight(null) -
+       * SensorButtonGroup.SIZE_CHANGE, Image.SCALE_DEFAULT);
+       * /*BufferedImageUtil.scaleImage((BufferedImage) customImage,
+       * customImage.getWidth(null) - SensorButtonGroup.SIZE_CHANGE,
+       * customImage.getHeight(null) - SensorButtonGroup.SIZE_CHANGE,
+       * Color.BLACK);
+       */
     } else {
       upperLeft.x += SensorButtonGroup.SIZE_CHANGE / 2;
       upperLeft.y += SensorButtonGroup.SIZE_CHANGE / 2;
@@ -137,17 +149,19 @@ public class ArduinoSensorButton extends JButton {
 
   public void larger() {
     size += SensorButtonGroup.SIZE_CHANGE;
-    
+
     if (customImage != null) {
-      /*customImage = customImage.getScaledInstance(customImage.getWidth(null)
-          + SensorButtonGroup.SIZE_CHANGE, customImage.getHeight(null)
-          + SensorButtonGroup.SIZE_CHANGE, Image.SCALE_DEFAULT);
       /*
+       * customImage = customImage.getScaledInstance(customImage.getWidth(null)
+       * + SensorButtonGroup.SIZE_CHANGE, customImage.getHeight(null) +
+       * SensorButtonGroup.SIZE_CHANGE, Image.SCALE_DEFAULT); /*
        * BufferedImageUtil.scaleImage((BufferedImage) customImage,
        * customImage.getWidth(null) + SensorButtonGroup.SIZE_CHANGE,
        * customImage.getHeight(null) + SensorButtonGroup.SIZE_CHANGE,
        * Color.BLACK);
        */
+    } else if (customShape != null) {
+
     } else {
       upperLeft.x -= SensorButtonGroup.SIZE_CHANGE / 2;
       upperLeft.y -= SensorButtonGroup.SIZE_CHANGE / 2;
@@ -159,7 +173,7 @@ public class ArduinoSensorButton extends JButton {
   }
 
   public void deactivate() {
-    relevantColor = CanvasPanel.COPPER;
+    changeColor();
   }
 
   public void changeShape(SensorShape.shapes newShape) {
@@ -181,6 +195,9 @@ public class ArduinoSensorButton extends JButton {
       Shape drawShape = getShape();
       g.setColor(relevantColor);
       g.fill(drawShape);
+    } else if (customShape != null) {
+      g.setColor(relevantColor);
+      g.fill(customShape);
     } else if (customImage != null) {
       g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
           RenderingHints.VALUE_INTERPOLATION_BICUBIC);
@@ -197,6 +214,9 @@ public class ArduinoSensorButton extends JButton {
   }
 
   public Shape getShape() {
+    if (customShape != null) {
+      return customShape;
+    }
     if (shape == null) {
       return new Rectangle2D.Double(upperLeft.x - width / 2, upperLeft.y
           - width / 2, width, height);
@@ -238,8 +258,10 @@ public class ArduinoSensorButton extends JButton {
     return square();
   }
 
-  @Override
   public boolean contains(Point p) {
+    if (customShape != null) {
+      return customShape.contains(p);
+    }
     if (shape == null && customImage == null) {
       return false;
     }
@@ -251,29 +273,45 @@ public class ArduinoSensorButton extends JButton {
   }
 
   public void moveTo(Point upperLeft) {
+    if (customShape != null) {
+      customShape.translate(upperLeft.x - this.upperLeft.x, upperLeft.y
+          - this.upperLeft.y);
+    }
     this.upperLeft = upperLeft;
   }
 
-  @Override
   public void setSelected(boolean selected) {
-    if (!selected) {
-      relevantColor = CanvasPanel.DARK_COPPER;
+    this.isSelected = selected;
+    changeColor();
+  }
+  
+  private void changeColor() {
+    if (isObstacle) {
+      if (isSelected) {
+        relevantColor = CanvasPanel.OBSTACLE_SELECTED_COLOR;
+      } else {
+        relevantColor = CanvasPanel.OBSTACLE_COLOR;
+      }
     } else {
-      relevantColor = CanvasPanel.COPPER;
+      if (isSelected) {
+        relevantColor = CanvasPanel.LIGHT_COPPER;
+      } else {
+        relevantColor = CanvasPanel.COPPER;
+      }
     }
+    
   }
 
   public void setIntersecting(boolean intersecting) {
-    if (intersecting) {
+    if (intersecting && !isObstacle) {
       relevantColor = Color.RED;
     }
   }
 
   public boolean intersects(Rectangle rectangle) {
-    return getShape().getBounds().intersects(rectangle);
+    return getShape().intersects(rectangle);
   }
 
-  @Override
   public Rectangle getBounds() {
     Rectangle bounds = getShape().getBounds();
     bounds.grow(SensorButtonGroup.BUFFER, SensorButtonGroup.BUFFER);

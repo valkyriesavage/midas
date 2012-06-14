@@ -3,7 +3,6 @@ package display;
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -24,6 +23,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -33,6 +33,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
 import pathway.SVGPathwaysGenerator;
@@ -68,8 +69,7 @@ public class SetUp extends JFrame {
 
   JPanel buttonDisplayGrid = new JPanel();
   List<SensorButtonGroup> displayedButtons = new ArrayList<SensorButtonGroup>();
-  List<ObstacleMarker> obstacles = new ArrayList<ObstacleMarker>();
-  CanvasPanel buttonCanvas = new CanvasPanel(this, displayedButtons, obstacles);
+  CanvasPanel buttonCanvas = new CanvasPanel(this, displayedButtons);
   public List<ArduinoToDisplayBridge> bridgeObjects;
   JPanel buttonCreatorPanel = new JPanel();
   JPanel newButtonsPanel;
@@ -187,6 +187,7 @@ public class SetUp extends JFrame {
 
         SensorButtonGroup newButton = new SensorButtonGroup(queuedShape);
         ArduinoToDisplayBridge newBridge;
+        
         if (queuedShape == shapes.SLIDER) {
           newButton.isSlider = true;
           newBridge = new ArduinoToSliderBridge(SLIDER_SENSITIVITIES[0]);
@@ -206,6 +207,17 @@ public class SetUp extends JFrame {
         bridgeObjects.add(newBridge);
         setSelectedBridge(newBridge);
         repaint();
+        
+        if (queuedShape == shapes.POLYGON) {
+          JOptionPane
+          .showMessageDialog(
+              null,
+              HTML_HEAD
+                  + "define a polygon by clicking where you want vertices.<br/>finalize a polygon by clicking on the first point."
+                  + HTML_TAIL, "polygon definition instructions",
+              JOptionPane.INFORMATION_MESSAGE);
+          buttonCanvas.polyDefinitionMode();
+        }
       }
     });
     addStockButtonPanel.add(addStock);
@@ -243,33 +255,6 @@ public class SetUp extends JFrame {
     });
     addCustomButtonPanel.add(addCustom);
     newButtonsPanel.add(addCustomButtonPanel);
-
-    JPanel defineObstaclePanel = new JPanel();
-    JButton defineObstacle = new JButton("define obstacles");
-    defineObstacle.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        final String DEFINE = "define obstacles";
-        final String DONE = "done with obstacles";
-
-        JButton target = (JButton) e.getSource();
-        if (target.getText().equals(DEFINE)) {
-          JOptionPane
-              .showMessageDialog(
-                  null,
-                  HTML_HEAD
-                      + "an obstacle is an area you don't want sensors or traces.<br/>define an obstacle by drawing a polygon around it.<br/>finalize an obstacle by clicking on the first point."
-                      + HTML_TAIL, "obstacle definition instructions",
-                  JOptionPane.INFORMATION_MESSAGE);
-          target.setText(DONE);
-          buttonCanvas.obstacleDefinitionMode();
-        } else {
-          buttonCanvas.regularMode();
-          target.setText(DEFINE);
-        }
-      }
-    });
-    defineObstaclePanel.add(defineObstacle);
-    newButtonsPanel.add(defineObstaclePanel);
 
     JPanel printingPanel = new JPanel();
     JButton printSensors = new JButton("create stickers");
@@ -374,7 +359,17 @@ public class SetUp extends JFrame {
   }
 
   public void generatePathways() {
-    pathwaysGenerator.generatePathways(displayedButtons, obstacles,
+    List<SensorButtonGroup> obstacles = new ArrayList<SensorButtonGroup>();
+    List<SensorButtonGroup> buttonsToRoute = new ArrayList<SensorButtonGroup>();
+
+    for (SensorButtonGroup group : displayedButtons) {
+      if (group.isObstacle()) {
+        obstacles.add(group);
+      } else {
+        buttonsToRoute.add(group);
+      }
+    }
+    pathwaysGenerator.generatePathways(buttonsToRoute, obstacles,
         generatePathways.isSelected());
 
     if (generatePathways.isSelected()) {
@@ -472,7 +467,38 @@ public class SetUp extends JFrame {
     JComboBox interactionType = bridge.chooseInteractionType();
     interactionType.addActionListener(refreshSelected());
 
-    if (bridge.isCustom) {
+    JRadioButton sensor = new JRadioButton("sensor");
+    sensor.setActionCommand("sensor");
+    sensor.setSelected(!bridge.isObstacle());
+    JRadioButton obstacle = new JRadioButton("obstacle");
+    obstacle.setActionCommand("obstacle");
+    obstacle.setSelected(bridge.isObstacle());
+    
+    ButtonGroup group = new ButtonGroup();
+    group.add(sensor);
+    group.add(obstacle);
+    
+    ActionListener changeType = new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        currentBridge.setIsObstacle(event.getActionCommand().equals("obstacle"));
+        setSelectedBridge(currentBridge);
+        repaint();
+      }
+    };
+    
+    sensor.addActionListener(changeType);
+    obstacle.addActionListener(changeType);
+
+    propertiesPane.add(sensor);
+    propertiesPane.add(obstacle);
+    
+    if (bridge.isObstacle()) {
+      JPanel deletePanel = new JPanel();
+      JButton delete = bridge.interfacePiece.delete;
+      delete.addActionListener(repainter());
+      deletePanel.add(delete);
+      propertiesPane.add(deletePanel);
+    } else if (bridge.isCustom) {
       ArduinoToButtonBridge buttonBridge = (ArduinoToButtonBridge) bridge;
       propertiesPane.add(new JLabel("name"));
       propertiesPane.add(buttonBridge.interfacePiece.nameField);
