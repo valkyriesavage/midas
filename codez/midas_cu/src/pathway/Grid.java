@@ -191,7 +191,8 @@ class Grid {
 
   public void obstacle(Iterable<Point> pts) {
     for (Point p : pts) {
-      arr[p.x][p.y] = CLOSED;
+      if (p.x >= 0 && p.y >= 0)
+        arr[p.x][p.y] = CLOSED;
     }
   }
 

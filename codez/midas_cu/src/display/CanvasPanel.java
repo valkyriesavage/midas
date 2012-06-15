@@ -42,7 +42,7 @@ public class CanvasPanel extends JPanel implements MouseListener,
   public static final Color OBSTACLE_COLOR = Color.GRAY;
   public static final Color OBSTACLE_SELECTED_COLOR = Color.LIGHT_GRAY;
   
-  public static final int REASONABLE_DISTANCE_TO_CLOSE_POLYGON = 25;
+  public static final int REASONABLE_DISTANCE_TO_CLOSE_POLYGON = 7;
 
   List<SensorButtonGroup> displayedButtons;
   List<File> displayedCustomButtons;
