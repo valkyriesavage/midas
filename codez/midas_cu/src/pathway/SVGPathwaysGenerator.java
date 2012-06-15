@@ -241,6 +241,7 @@ public class SVGPathwaysGenerator {
     SensorButtonGroup slider = null; // possibly null!
 
     List<Shape> allShapes = new LinkedList<Shape>();
+    List<Shape> sensorsPlusObstacles = new LinkedList<Shape>();
 
     // Iterate through the groups, separating the slider from the normal buttons
     // while also aggregating all the shapes.
@@ -251,15 +252,24 @@ public class SVGPathwaysGenerator {
       if (s.sensitivity == SetUp.HELLA_SLIDER) {
         slider = s;
         allShapes.addAll(s.getHSP().getShapes());
+        sensorsPlusObstacles.addAll(s.getHSP().getShapes());
       } else {
         buttons.addAll(s.triggerButtons);
         for (ArduinoSensorButton b : s.triggerButtons) {
           allShapes.add(b.getPathwayShape());
+          sensorsPlusObstacles.add(b.getPathwayShape());
         }
       }
     }
+    
+    for (SensorButtonGroup sbg : obstacles) {
+      for (ArduinoSensorButton b : sbg.triggerButtons) {
+        sensorsPlusObstacles.add(b.getPathwayShape());
+      }
+    }
+    
 
-    writeSVG(new File("mask.svg").getAbsoluteFile(), allShapes, null, false); // always
+    writeSVG(new File("mask.svg").getAbsoluteFile(), sensorsPlusObstacles, null, false); // always
                                                                               // output
                                                                               // mask.svg
 

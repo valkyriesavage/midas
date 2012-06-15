@@ -412,6 +412,10 @@ public class SetUp extends JFrame {
         bridge.updateColor();
         continue;
       }
+      if (!sensorsToAssign.containsKey(bridge)) {
+        // it is an obstacle
+        continue;
+      }
       bridge.setArduinoSequence(sensorsToAssign.get(bridge));
       bridge.updateColor();
     }

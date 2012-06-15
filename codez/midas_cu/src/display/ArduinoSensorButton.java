@@ -21,7 +21,6 @@ import serialtalk.ArduinoSensor;
 import sl.shapes.StarPolygon;
 
 public class ArduinoSensorButton {
-  private static final long serialVersionUID = -5603499266721585353L;
   public static final Color BASE_COLOR = CanvasPanel.COPPER;
 
   public ArduinoSensor sensor;

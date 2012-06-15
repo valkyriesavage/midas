@@ -456,7 +456,7 @@ public class SensorButtonGroup extends JPanel {
   }
   
   public void touch(Point whereInPad) {
-    
+    // TODO shit, this needs to show the position in the pad...
   }
 
   public void hellaTouch(int hellaSliderPosition) {
