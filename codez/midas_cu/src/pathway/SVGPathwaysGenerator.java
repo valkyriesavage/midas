@@ -48,7 +48,7 @@ public class SVGPathwaysGenerator {
 
   public static boolean PRINT_DEBUG = true;
 
-  public static final int LINE_EXTENT = 1;
+  public static final int LINE_EXTENT = 2;
 
   public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
   public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH + LINE_EXTENT;
@@ -726,6 +726,9 @@ public class SVGPathwaysGenerator {
       sum.add(new Area(b));
     }
     g.draw(sum);
+    
+    // be sure to add the outline of the whole thing for sizing.
+    g.draw(new Area(new Rectangle(0, 0, SetUp.CANVAS_X, SetUp.CANVAS_Y)));
 
     // Finally, stream out SVG to the standard output using
     // UTF-8 encoding.

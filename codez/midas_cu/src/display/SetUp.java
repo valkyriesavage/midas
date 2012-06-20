@@ -369,10 +369,10 @@ public class SetUp extends JFrame {
         buttonsToRoute.add(group);
       }
     }
-    pathwaysGenerator.generatePathways(buttonsToRoute, obstacles,
+    boolean success = pathwaysGenerator.generatePathways(buttonsToRoute, obstacles,
         generatePathways.isSelected());
 
-    if (generatePathways.isSelected()) {
+    if (generatePathways.isSelected() && success) {
       assignArduinoConnectionsFromSVG();
       buttonCanvas.isInteractive = false;
     }

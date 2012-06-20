@@ -264,6 +264,7 @@ public class CanvasPanel extends JPanel implements MouseListener,
       }
       repaint();
     }
+
     for (ArduinoToDisplayBridge bridge : setUp.bridgeObjects) {
       if (bridge.interfacePiece == draggingGroup) {
         setUp.setSelectedBridge(bridge);
