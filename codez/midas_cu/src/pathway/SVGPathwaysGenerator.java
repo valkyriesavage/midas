@@ -48,11 +48,15 @@ public class SVGPathwaysGenerator {
 
   public static boolean PRINT_DEBUG = true;
 
-  public static final int LINE_EXTENT = 2;
+  public static final int LINE_EXTENT = 1;
 
   public static final int LINE_WIDTH = LINE_EXTENT * 2 + 1;
   public static final int BUTTON_INFLUENCE_WIDTH = LINE_WIDTH + LINE_EXTENT;
   public static final int PATH_INFLUENCE_WIDTH = 2 * LINE_WIDTH;
+  
+  // TODO : debug why we need this.  paths don't draw correctly on the interface if we don't have it,
+  // and the outline of the canvas draws wrong on the SVG if we don't have it.
+  private static final int CORRECTION = PATH_INFLUENCE_WIDTH*3;
 
   /**
    * Call this method after a successful generatePathways
@@ -706,29 +710,19 @@ public class SVGPathwaysGenerator {
     if (generatePathways) {
       // here, we want to convert the path into an area
       for (List<Point> path : paths) {
-        // for (Point p : path) {
-        // point(g, p.x, p.y);
-        // }
-        // Area a = new Area();
         for (Point p : path) {
           sum.add(new Area(new Rectangle(p.x - LINE_EXTENT, p.y - LINE_EXTENT,
               LINE_WIDTH, LINE_WIDTH)));
         }
-        // g.draw(a);
       }
     }
     for (Shape b : buttons) {
-      // b.paint(g);
-      // g.setColor(new Color((float) Math.random(), (float) Math.random(),
-      // (float) Math.random()));
-      // g.setColor(Color.black);
-      // g.draw(b);
       sum.add(new Area(b));
     }
     g.draw(sum);
     
     // be sure to add the outline of the whole thing for sizing.
-    g.draw(new Area(new Rectangle(0, 0, SetUp.CANVAS_X, SetUp.CANVAS_Y)));
+    g.draw(new Area(new Rectangle(0, 0, SetUp.CANVAS_X+CORRECTION, SetUp.CANVAS_Y+CORRECTION)));
 
     // Finally, stream out SVG to the standard output using
     // UTF-8 encoding.
@@ -752,44 +746,4 @@ public class SVGPathwaysGenerator {
           + " occured while trying to write the SVG file to disk.");
     }
   }
-
-  // private void simplifySVG(String fileName) {
-  // try {
-  // String line;
-  // String commandStart;
-  // String osName = System.getProperty("os.name").toLowerCase();
-  //
-  // if (osName.startsWith("windows")) {
-  // commandStart = "inkscape/inkscape";
-  // } else if (osName.startsWith("mac")) {
-  // commandStart = "Inkscape.app/Contents/Resources/bin/inkscape";
-  // } else {
-  // System.err.println("Unrecognised OS " + osName
-  // + "... aborting SVG simplification!");
-  // return;
-  // }
-  //
-  // String commandEnd = fileName
-  // +
-  // " --verb=EditSelectAll --verb=SelectionCombine --verb=SelectionUnion --verb=FileSave --verb=FileClose";
-  //
-  // String command = commandStart + " " + commandEnd;
-  // Process p = Runtime.getRuntime().exec(command);
-  // BufferedReader bri = new BufferedReader(new InputStreamReader(
-  // p.getInputStream()));
-  // BufferedReader bre = new BufferedReader(new InputStreamReader(
-  // p.getErrorStream()));
-  // while ((line = bri.readLine()) != null) {
-  // System.out.println("\t" + line);
-  // }
-  // bri.close();
-  // while ((line = bre.readLine()) != null) {
-  // System.out.println("\t" + line);
-  // }
-  // bre.close();
-  // p.waitFor();
-  // } catch (Exception err) {
-  // err.printStackTrace();
-  // }
-  // }
 }

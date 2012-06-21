@@ -200,7 +200,7 @@ public class ArduinoSensorButton {
     } else if (customImage != null) {
       g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
           RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-      g.drawImage(customImage, upperLeft.x - size / 2, upperLeft.y - size / 2,
+      g.drawImage(customImage, upperLeft.x, upperLeft.y,
           null, new ImageObserver() {
             public boolean imageUpdate(Image img, int infoflags, int x, int y,
                 int imgWidth, int imgHeight) {

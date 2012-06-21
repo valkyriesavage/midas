@@ -160,7 +160,7 @@ public class SensorButtonGroup extends JPanel {
 
     if (isCustom) {
       triggerButtons.add(new ArduinoSensorButton(customImage, new Point(base.x,
-          (size + spacing) + base.y), size));
+          base.y), size));
     } else if (customShape != null) {
       triggerButtons.clear();
       triggerButtons.add(new ArduinoSensorButton(customShape));
