@@ -5,9 +5,11 @@ import java.awt.Shape;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import display.SetUp;
 
@@ -82,6 +84,13 @@ class Grid {
     return list;
   }
 
+
+  public List<Point> findPath(Shape button, Point port) throws PathwayGenerationException {
+    Set<Point> set = new HashSet();
+    set.add(port);
+    return findPath(button, set);
+  }
+  
   /**
    * Returns a path connecting End to any one of the starts without crossing
    * over any of the other paths/shapes; throws an exception if such a path
@@ -91,8 +100,10 @@ class Grid {
    * @param end
    * @return
    */
-  public List<Point> findPath(List<Point> starts, Point end, Shape shape)
+  public List<Point> findPath(Shape shape, Set<Point> ends)
       throws PathwayGenerationException {
+    Set<Point> starts = SVGPathwaysGenerator.immediateOutlineFor(shape);
+    if(starts.isEmpty()) throw new IllegalArgumentException("Shape is empty!");
     // step 1: wave expansion to create a mapping between locations and tags
     Map<Point, Integer> edges = new HashMap<Point, Integer>();
     for (Point p : starts)
@@ -101,7 +112,7 @@ class Grid {
 
     Map<Point, Integer> flood = new HashMap<Point, Integer>();
 
-    while (!flood.containsKey(end) && edges.size() != 0) {
+    while (!containsAny(flood.keySet(), ends) && edges.size() != 0) {
       flood.putAll(edges);
 
       Map<Point, Integer> newEdges = new HashMap<Point, Integer>();
@@ -128,7 +139,7 @@ class Grid {
     // otherwise, you've failed and return null
     // go until P's tag is zero, and return the list
     List<Point> backtrack = new ArrayList<Point>();
-    Point p = end;
+    Point p = findOneElementInIntersecting(flood.keySet(), ends);
 
     if (!flood.containsKey(p)) {
       if (SVGPathwaysGenerator.PRINT_DEBUG)
@@ -150,18 +161,41 @@ class Grid {
         }
       }
       if (!found) {
+        //This means that p didn't have any that were adjacent to it and also less than.
+        Set<Point> intersection = new HashSet(flood.keySet());
+        intersection.retainAll(ends);
         if (SVGPathwaysGenerator.PRINT_DEBUG)
           System.out.println("\t\t:(Backtracking got stuck at " + p);
-        throw new PathwayGenerationException();
+        throw new PathwayGenerationException(":(Backtracking got stuck at " + p);
       }
     }
     // connectionMap.put(shape, end);
     return backtrack;
   }
 
-  // public Map<Shape, Point> getConnections() {
-  // return new HashMap<Shape, Point>(connectionMap);
-  // }
+  /**
+   * Finds one common point between the two sets.
+   * @param keySet
+   * @param ends
+   * @return
+   */
+  private Point findOneElementInIntersecting(Set<Point> keySet, Set<Point> ends) {
+    keySet.retainAll(ends);
+    return keySet.iterator().next();
+  }
+
+  /**
+   * Returns whether the set of points contains any of the set of ends.
+   * @param set
+   * @param ends
+   * @return
+   */
+  private boolean containsAny(Set<Point> set, Set<Point> ends) {
+    if(set.isEmpty()) return false;
+    
+    set.retainAll(ends);
+    return !set.isEmpty();
+  }
 
   public void close(Iterable<Point> pts) {
     for (Point p : pts) {
@@ -204,7 +238,7 @@ class Grid {
 
   public void restrictExactly(Iterable<Shape> shapes) {
     for (Shape s : shapes) {  
-      obstacle(SVGPathwaysGenerator.outlineFor(s));
+      obstacle(SVGPathwaysGenerator.immediateOutlineFor(s));
     }
   }
 

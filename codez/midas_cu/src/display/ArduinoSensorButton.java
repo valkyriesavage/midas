@@ -86,11 +86,6 @@ public class ArduinoSensorButton {
 
   public ArduinoSensorButton(SensorShape.shapes shape) {
     this.shape = shape;
-
-    Random random = new Random();
-    upperLeft = new Point(random.nextInt(SetUp.CANVAS_X - 50),
-        random.nextInt(SetUp.CANVAS_Y - 50));
-    size = (random.nextInt(10) + 4) * 8;
   }
 
   public void setIsObstacle(boolean isObstacle) {

@@ -227,13 +227,14 @@ public class SensorButtonGroup extends JPanel {
 
   public void paint(Graphics2D g) {
     if (!deleteMe) {
-      if (isPad) {
-        PadPositioner p = getPP();
-        g.setColor(triggerButtons.get(0).relevantColor);
-        for (Shape s : p.getShapes()) {
-          g.fill(s);
-        }
-      } else if (sensitivity == SetUp.HELLA_SLIDER) {
+//      if (isPad) {
+//        PadPositioner p = getPP();
+//        g.setColor(triggerButtons.get(0).relevantColor);
+//        for (Shape s : p.getShapes()) {
+//          g.fill(s);
+//        }
+//      } else 
+        if (sensitivity == SetUp.HELLA_SLIDER) {
         HellaSliderPositioner hsp = getHSP();
         g.setColor(triggerButtons.get(0).relevantColor);
         g.fill(hsp.getSeg1());
