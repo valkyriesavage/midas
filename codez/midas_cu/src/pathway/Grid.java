@@ -5,9 +5,11 @@ import java.awt.Shape;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import display.SetUp;
 
@@ -82,6 +84,13 @@ class Grid {
     return list;
   }
 
+
+  public List<Point> findPath(Shape button, Point port) throws PathwayGenerationException {
+    Set<Point> set = new HashSet();
+    set.add(port);
+    return findPath(button, set);
+  }
+  
   /**
    * Returns a path connecting End to any one of the starts without crossing
    * over any of the other paths/shapes; throws an exception if such a path
@@ -91,8 +100,11 @@ class Grid {
    * @param end
    * @return
    */
-  public List<Point> findPath(List<Point> starts, Point end, Shape shape)
+  public List<Point> findPath(Shape shape, Set<Point> ends)
       throws PathwayGenerationException {
+    Set<Point> starts = SVGPathwaysGenerator.immediateOutlineFor(shape);
+    if(starts.isEmpty()) throw new IllegalArgumentException("Shape is empty!");
+    if(ends.isEmpty()) throw new IllegalArgumentException("Ends are empty!");
     // step 1: wave expansion to create a mapping between locations and tags
     Map<Point, Integer> edges = new HashMap<Point, Integer>();
     for (Point p : starts)
@@ -100,10 +112,10 @@ class Grid {
     int i = 0;
 
     Map<Point, Integer> flood = new HashMap<Point, Integer>();
+//    flood.putAll(edges);
 
-    while (!flood.containsKey(end) && edges.size() != 0) {
+    while (isExclusive(flood.keySet(), ends)) {
       flood.putAll(edges);
-
       Map<Point, Integer> newEdges = new HashMap<Point, Integer>();
       for (Point loc : edges.keySet()) {
         // loc.adj.filter(x => arr(x) && !flood.contains(x)).map(_ ->
@@ -117,6 +129,11 @@ class Grid {
       }
       i += 1;
       edges = newEdges;
+      if(edges.isEmpty()) {
+        if (SVGPathwaysGenerator.PRINT_DEBUG)
+          System.out.println("\t\t:( Floodfill failed!");
+        throw new PathwayGenerationException();
+      }
     }
 
     // Flood is now filled in with the location/tag mapping.
@@ -128,13 +145,9 @@ class Grid {
     // otherwise, you've failed and return null
     // go until P's tag is zero, and return the list
     List<Point> backtrack = new ArrayList<Point>();
-    Point p = end;
-
-    if (!flood.containsKey(p)) {
-      if (SVGPathwaysGenerator.PRINT_DEBUG)
-        System.out.println("\t\t:( Floodfill couldn't get to " + p);
-      throw new PathwayGenerationException();
-    }
+    
+    // flood.keySet() and ends are MUTUALLY EXCLUSIVE?
+    Point p = findOneElementInIntersecting(flood.keySet(), ends);
 
     backtrack.add(p);
     while (flood.get(p) != 0) {
@@ -150,18 +163,40 @@ class Grid {
         }
       }
       if (!found) {
+        //This means that p didn't have any that were adjacent to it and also less than.
+        Set<Point> intersection = new HashSet(flood.keySet());
+        intersection.retainAll(ends);
         if (SVGPathwaysGenerator.PRINT_DEBUG)
           System.out.println("\t\t:(Backtracking got stuck at " + p);
-        throw new PathwayGenerationException();
+        throw new PathwayGenerationException(":(Backtracking got stuck at " + p);
       }
     }
     // connectionMap.put(shape, end);
     return backtrack;
   }
+  
+  private boolean isExclusive(Set<Point> p1, Set<Point> p2) {
+    boolean exclusive = true;
+    for(Point p : p2) {
+      if(p1.contains(p)) {
+        exclusive = false;
+        break;
+      }
+    }
+    return exclusive;
+  }
 
-  // public Map<Shape, Point> getConnections() {
-  // return new HashMap<Shape, Point>(connectionMap);
-  // }
+  /**
+   * Finds one common point between the two sets.
+   * @param keySet
+   * @param ends
+   * @return
+   */
+  private Point findOneElementInIntersecting(Set<Point> s, Set<Point> ends) {
+    Set<Point> keySet = new HashSet<Point>(s);
+    keySet.retainAll(ends);
+    return keySet.iterator().next();
+  }
 
   public void close(Iterable<Point> pts) {
     for (Point p : pts) {
@@ -204,7 +239,7 @@ class Grid {
 
   public void restrictExactly(Iterable<Shape> shapes) {
     for (Shape s : shapes) {  
-      obstacle(SVGPathwaysGenerator.outlineFor(s));
+      obstacle(SVGPathwaysGenerator.immediateOutlineFor(s));
     }
   }
 
