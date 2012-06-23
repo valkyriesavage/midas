@@ -104,6 +104,7 @@ class Grid {
       throws PathwayGenerationException {
     Set<Point> starts = SVGPathwaysGenerator.immediateOutlineFor(shape);
     if(starts.isEmpty()) throw new IllegalArgumentException("Shape is empty!");
+    if(ends.isEmpty()) throw new IllegalArgumentException("Ends are empty!");
     // step 1: wave expansion to create a mapping between locations and tags
     Map<Point, Integer> edges = new HashMap<Point, Integer>();
     for (Point p : starts)
@@ -111,10 +112,10 @@ class Grid {
     int i = 0;
 
     Map<Point, Integer> flood = new HashMap<Point, Integer>();
+//    flood.putAll(edges);
 
-    while (!containsAny(flood.keySet(), ends) && edges.size() != 0) {
+    while (isExclusive(flood.keySet(), ends)) {
       flood.putAll(edges);
-
       Map<Point, Integer> newEdges = new HashMap<Point, Integer>();
       for (Point loc : edges.keySet()) {
         // loc.adj.filter(x => arr(x) && !flood.contains(x)).map(_ ->
@@ -128,6 +129,11 @@ class Grid {
       }
       i += 1;
       edges = newEdges;
+      if(edges.isEmpty()) {
+        if (SVGPathwaysGenerator.PRINT_DEBUG)
+          System.out.println("\t\t:( Floodfill failed!");
+        throw new PathwayGenerationException();
+      }
     }
 
     // Flood is now filled in with the location/tag mapping.
@@ -139,13 +145,9 @@ class Grid {
     // otherwise, you've failed and return null
     // go until P's tag is zero, and return the list
     List<Point> backtrack = new ArrayList<Point>();
+    
+    // flood.keySet() and ends are MUTUALLY EXCLUSIVE?
     Point p = findOneElementInIntersecting(flood.keySet(), ends);
-
-    if (!flood.containsKey(p)) {
-      if (SVGPathwaysGenerator.PRINT_DEBUG)
-        System.out.println("\t\t:( Floodfill couldn't get to " + p);
-      throw new PathwayGenerationException();
-    }
 
     backtrack.add(p);
     while (flood.get(p) != 0) {
@@ -172,6 +174,17 @@ class Grid {
     // connectionMap.put(shape, end);
     return backtrack;
   }
+  
+  private boolean isExclusive(Set<Point> p1, Set<Point> p2) {
+    boolean exclusive = true;
+    for(Point p : p2) {
+      if(p1.contains(p)) {
+        exclusive = false;
+        break;
+      }
+    }
+    return exclusive;
+  }
 
   /**
    * Finds one common point between the two sets.
@@ -179,22 +192,10 @@ class Grid {
    * @param ends
    * @return
    */
-  private Point findOneElementInIntersecting(Set<Point> keySet, Set<Point> ends) {
+  private Point findOneElementInIntersecting(Set<Point> s, Set<Point> ends) {
+    Set<Point> keySet = new HashSet<Point>(s);
     keySet.retainAll(ends);
     return keySet.iterator().next();
-  }
-
-  /**
-   * Returns whether the set of points contains any of the set of ends.
-   * @param set
-   * @param ends
-   * @return
-   */
-  private boolean containsAny(Set<Point> set, Set<Point> ends) {
-    if(set.isEmpty()) return false;
-    
-    set.retainAll(ends);
-    return !set.isEmpty();
   }
 
   public void close(Iterable<Point> pts) {
