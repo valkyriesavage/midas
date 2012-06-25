@@ -15,7 +15,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.util.Random;
 
 import serialtalk.ArduinoSensor;
 import sl.shapes.StarPolygon;

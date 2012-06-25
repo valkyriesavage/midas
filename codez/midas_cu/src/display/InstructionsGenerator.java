@@ -20,12 +20,12 @@ public class InstructionsGenerator {
   }
   
   private static String head() {
-    return "<html><head><title>Instructions to make shiny new sensors!</title></head>";
+    return "<html><head><title align='center'>Instructions to make shiny new sensors!</title></head>";
   }
   
   private static String body(boolean hellaSlider, boolean noTails) {
     String ret = "<body><h2>Instructions to make shiny new sensors</h2>";
-    ret += "<table border=1>";
+    ret += "<table border=0>";
     ret += row(number() + "Load the copper sheet into the cutter", img200(MIDAS_FIGS+"loadcopper.gif"));
 
     if (noTails)
@@ -79,7 +79,11 @@ public class InstructionsGenerator {
   }
   
   private static String row(String col1, String col2) {
-    return "<tr><td width=50%>"+col1+"</td><td width=50%>"+col2+"</tr>\n";
+    if (currentInstruction%2 == 1) {
+      return "<tr><td width=50% style='vertical-align:top;padding:5px'>"+col1+"</td><td width=50% style='vertical-align:top;padding:5px'>"+col2+"</tr>\n";
+    } else {
+      return "<tr bgcolor='#E0E0E0'><td width=50% bgcolor='#E0E0E0' style='vertical-align:top;padding:5px'>"+col1+"</td><td width=50% bgcolor='#E0E0E0' style='vertical-align:top;padding:5px'>"+col2+"</tr>\n";
+    }
   }
   
   private static String number() {
