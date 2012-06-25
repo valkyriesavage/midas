@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class FaultyConnectionRegexMatcher {
   public static final int REASONABLE_HUMAN_REACTION = 200;
-  public static final int REASONABLE_HOLDING_TIME = 5000;
+  public static final int REASONABLE_HOLDING_TIME = 10000;
   
   private static final String timestamp = "(\\d{2,20})";
   private static final String UP_CODE = "r";
