@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
@@ -315,7 +316,7 @@ public class SVGPathwaysGenerator {
       }
     }
 
-    writeSVG("mask.svg", mask, null);
+    writeSVG("mask.svg", mask, null, null, null);
     if (!generatePathways)
       return true;
 
@@ -333,7 +334,7 @@ public class SVGPathwaysGenerator {
         topLayerPaths = s.paths; // woo we have the paths now
         buttonMap = s.map;
 
-        writeSVG("outline.svg", allShapes, s.paths);
+        writeSVG("outline.svg", allShapes, s.paths, null, null);
       } else {
         // get all grouped projections for pad
         // create fake arduinosensorbuttons for top layer of projections; call
@@ -352,9 +353,9 @@ public class SVGPathwaysGenerator {
 
         // topLefts will be grouped horizontally
         List<Area> topLefts = projections._1;
-        List<Shape> topLeftGrouped = new ArrayList();
+        List<Shape> topLeftGrouped = new ArrayList<Shape>();
         for (int x = 0; x < side_num; x++) {
-          Area groupedArea = connectShapes(new LinkedList(topLefts.subList(x * side_num,
+          Area groupedArea = connectShapes(new LinkedList<Area>(topLefts.subList(x * side_num,
               (x + 1) * side_num)));
           topLeftGrouped.add(groupedArea);
         }
@@ -362,32 +363,32 @@ public class SVGPathwaysGenerator {
         // bottomRights will be grouped vertically, and routed on the bottom
         // layer
         List<Area> bottomRights = projections._2;
-        List<Shape> bottomRightGrouped = new ArrayList();
+        List<Shape> bottomRightGrouped = new ArrayList<Shape>();
         for (int x = 0; x < side_num; x++) {
           // We want to get item x, x + side_num, x + 2*side_num, ... x +
           // (side_num - 1) * side_num
-          List<Area> components = new LinkedList();
+          List<Area> components = new LinkedList<Area>();
           for (int y = 0; y < side_num; y++)
             components.add(bottomRights.get(x + y * side_num));
           Area groupedArea = connectShapes(components);
           bottomRightGrouped.add(groupedArea);
         }
 
-        List<FakeArduinoSensorButton> fakeTopLefts = new ArrayList();
+        List<FakeArduinoSensorButton> fakeTopLefts = new ArrayList<FakeArduinoSensorButton>();
         for (Shape a : topLeftGrouped) {
           fakeTopLefts.add(fakeArduinoButtonFor(a));
         }
 
-        List<FakeArduinoSensorButton> fakeBottomRights = new ArrayList();
+        List<FakeArduinoSensorButton> fakeBottomRights = new ArrayList<FakeArduinoSensorButton>();
         for (Shape a : bottomRightGrouped) {
           fakeBottomRights.add(fakeArduinoButtonFor(a));
         }
 
-        List<ArduinoSensorButton> topLayerButtons = new ArrayList(buttons);
+        List<ArduinoSensorButton> topLayerButtons = new ArrayList<ArduinoSensorButton>(buttons);
         topLayerButtons.addAll(fakeTopLefts); // topLefts will be routed on the
                                               // top layer
 
-        List<ArduinoSensorButton> bottomLayerButtons = new ArrayList();
+        List<ArduinoSensorButton> bottomLayerButtons = new ArrayList<ArduinoSensorButton>();
         bottomLayerButtons.addAll(fakeBottomRights); // bottomRights on bottom
                                                   // layer
 
@@ -410,28 +411,29 @@ public class SVGPathwaysGenerator {
 
         buttonMap = sTop.map;
 
-        buttonPadMap = new HashMap();
+        buttonPadMap = new HashMap<ArduinoSensorButton, Pair<Integer, Integer>>();
         for (int x = 0; x < padButtons.size(); x++) {
           int p = x % side_num, q = x / side_num;
 
           int jm = sBottom.map.get(fakeBottomRights.get(p));
           int in = sTop.map.get(fakeTopLefts.get(q));
-          buttonPadMap.put(padButtons.get(x), new Pair(jm, in));
+          buttonPadMap.put(padButtons.get(x), new Pair<Integer, Integer>(jm, in));
         }
 
         // WriteSVG for bottom layer (need shapes for bottom layer, paths for
         // bottom layer), top layer (need shapes and paths)
-        List<Shape> topLayerShapes = new LinkedList();
-        for (ArduinoSensorButton b : topLayerButtons)
+        List<Shape> topLayerShapes = new LinkedList<Shape>();
+        for (ArduinoSensorButton b : topLayerButtons) {
           topLayerShapes.add(b.getPathwayShape());
+        }
         if(slider != null)
           topLayerShapes.addAll(slider.getHSP().getShapes());
-        writeSVG("top_layer.svg", topLayerShapes, topLayerPaths);
 
-        List<Shape> bottomLayerShapes = new LinkedList();
-        for (ArduinoSensorButton b : bottomLayerButtons)
+        List<Shape> bottomLayerShapes = new LinkedList<Shape>();
+        for (ArduinoSensorButton b : bottomLayerButtons) {
           bottomLayerShapes.add(b.getPathwayShape());
-        writeSVG("bottom_layer.svg", bottomLayerShapes, bottomLayerPaths);
+        }
+        writeSVG("outline.svg", topLayerShapes, topLayerPaths, bottomLayerShapes, bottomLayerPaths);
 
       }
       return true;
@@ -445,7 +447,7 @@ public class SVGPathwaysGenerator {
     }
   }
 
-  private static class FakeArduinoSensorButton extends ArduinoSensorButton {
+  public static class FakeArduinoSensorButton extends ArduinoSensorButton {
     Shape shape;
 
     public FakeArduinoSensorButton(Shape a) {
@@ -817,7 +819,7 @@ public class SVGPathwaysGenerator {
   }
 
   private void writeSVG(String filename, Iterable<Shape> buttons,
-      List<List<Point>> paths) {
+      List<List<Point>> paths, Iterable<Shape> bottomButtons, List<List<Point>> bottomPaths) {
     File svg = new File(filename).getAbsoluteFile();
     if (PRINT_DEBUG)
       System.out.println("Writing SVG file to " + svg);
@@ -855,6 +857,31 @@ public class SVGPathwaysGenerator {
       sum.add(new Area(b));
     }
     g.draw(sum);
+    g.draw(new Area(new Rectangle(0, 0, SetUp.CANVAS_X+CORRECTION, SetUp.CANVAS_Y+CORRECTION)));
+    
+    if (bottomButtons != null) {
+      sum = new Area();
+
+      if (bottomPaths != null) {
+        // here, we want to convert the path into an area
+        for (List<Point> path : bottomPaths) {
+          // for (Point p : path) {
+          // point(g, p.x, p.y);
+          // }
+          // Area a = new Area();
+          sum.add(pathToArea(path));
+          // g.draw(a);
+        }
+      }
+      for (Shape b : bottomButtons) {
+        sum.add(new Area(b));
+      }
+      AffineTransform translateToSide = new AffineTransform();
+      translateToSide.setToIdentity();
+      translateToSide.translate(SetUp.CANVAS_X+CORRECTION*2, 0);
+      g.setTransform(translateToSide);
+      g.draw(sum);
+    }
     
     // be sure to add the outline of the whole thing for sizing.
     g.draw(new Area(new Rectangle(0, 0, SetUp.CANVAS_X+CORRECTION, SetUp.CANVAS_Y+CORRECTION)));
