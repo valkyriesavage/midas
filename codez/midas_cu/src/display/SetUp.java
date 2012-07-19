@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
+import pathway.Pair;
 import pathway.SVGPathwaysGenerator;
 import serialtalk.ArduinoDispatcher;
 import serialtalk.ArduinoEvent;
@@ -383,6 +384,7 @@ public class SetUp extends JFrame {
     // which the buttons appear...
     Map<ArduinoSensorButton, Integer> buttonMap = pathwaysGenerator
         .getButtonMap();
+    Map<ArduinoSensorButton, Pair<Integer, Integer>> buttonPadMap = pathwaysGenerator.getButtonPadMap();
     Map<ArduinoToDisplayBridge, List<ArduinoEvent>> sensorsToAssign = new HashMap<ArduinoToDisplayBridge, List<ArduinoEvent>>();
 
     // build a list of which sensors go to which bridges
@@ -401,6 +403,29 @@ public class SetUp extends JFrame {
             sensorsToAssign.put(bridge, assignToBridge);
           }
 
+        }
+      }
+    }
+        
+    for (Map.Entry<ArduinoSensorButton, Pair<Integer, Integer>> entry : buttonPadMap.entrySet()) {
+      ArduinoSensorButton button = entry.getKey();
+      int x = entry.getValue()._1 - 1; // we need to 0-index here
+      int y = entry.getValue()._2 - 1; // we need to 0-index here
+      
+      if (!ArduinoSetup.griddedSensors.contains(x)) ArduinoSetup.griddedSensors.add(x);
+      if (!ArduinoSetup.griddedSensors.contains(y)) ArduinoSetup.griddedSensors.add(y);
+      
+      for (ArduinoToDisplayBridge bridge : bridgeObjects) {
+        if (bridge.contains(button)) {
+          ArduinoEvent event = new ArduinoEvent(ArduinoSetup.gridSensors[x][y],
+              TouchDirection.TOUCH);
+          if (sensorsToAssign.containsKey(bridge)) {
+            sensorsToAssign.get(bridge).add(event);
+          } else {
+            List<ArduinoEvent> assignToBridge = new ArrayList<ArduinoEvent>();
+            assignToBridge.add(event);
+            sensorsToAssign.put(bridge, assignToBridge);
+          }
         }
       }
     }

@@ -415,7 +415,7 @@ public class SVGPathwaysGenerator {
         for (int x = 0; x < padButtons.size(); x++) {
           int p = x % side_num, q = x / side_num;
 
-          int jm = sBottom.map.get(fakeBottomRights.get(p));
+          int jm = sBottom.map.get(fakeBottomRights.get(p)) + sTop.buttonStartIndex + topLayerButtons.size();
           int in = sTop.map.get(fakeTopLefts.get(q));
           buttonPadMap.put(padButtons.get(x), new Pair<Integer, Integer>(jm, in));
         }

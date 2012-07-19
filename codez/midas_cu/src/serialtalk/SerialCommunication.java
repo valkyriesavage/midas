@@ -18,7 +18,6 @@ import javax.swing.JLabel;
 
 import actions.SocketTalkAction;
 import bridge.ArduinoToDisplayBridge;
-import display.ArduinoSensorButton;
 
 /**
  * This code was inspired by the Internet.
@@ -52,15 +51,12 @@ public class SerialCommunication implements SerialPortEventListener {
   private Pattern matchOneLine = Pattern.compile(".*x");
   private Pattern matchOneArduinoMessage = Pattern
       .compile("K:(\\d{1,2}) (U|D)");
-  private Pattern matchOneArduino2DMessage = Pattern
-      .compile("(K:(\\d{1,2}) (U|D)){2}");
   private Pattern matchOneArduinoSliderMessage = Pattern
       .compile("S:(\\d{1,3}) (U|D)");
   
   private static final String ARDUINO_TOUCH = "D";
+  @SuppressWarnings("unused")
   private static final String ARDUINO_RELEASE = "U";
-
-  public boolean isGridded = false;
 
   public void initialize(boolean test, ArduinoDispatcher dispatcher) throws AWTException {
     ArduinoSetup.initialize(test);
@@ -180,45 +176,55 @@ public class SerialCommunication implements SerialPortEventListener {
 
       while (((oneMessage = matchOneLine.matcher(currentSerialInfo))
           .lookingAt())) {
+        
+        Matcher firstMessage, secondMessage;
 
         String singleMessage = currentSerialInfo.substring(0, oneMessage.end() - "x".length()); // strip the x
         currentSerialInfo = currentSerialInfo.substring(oneMessage.end());
-
-        if ((oneMessage = matchOneArduinoSliderMessage.matcher(singleMessage))
+        
+        if((firstMessage = matchOneArduinoMessage.matcher(singleMessage)).lookingAt()
+            && ArduinoSetup.griddedSensors.contains(Integer.parseInt(firstMessage.group(1)))) {
+          // we have a sensor that's part of a 2D pad, so we need to wait for the other direction
+          if ((secondMessage = matchOneLine.matcher(currentSerialInfo)).lookingAt() && 
+              ArduinoSetup.griddedSensors.contains(Integer.parseInt(secondMessage.group(1)))) {
+            // we have two 2D sensors, yay!
+            TouchDirection direction;
+            if (firstMessage.group(2).equals(ARDUINO_TOUCH)
+                && firstMessage.group(2).equals(firstMessage.group(4))) {
+              direction = TouchDirection.TOUCH;
+            } else {
+              direction = TouchDirection.RELEASE;
+            }
+            ArduinoEvent currentEvent = new ArduinoEvent(
+                ArduinoSetup.gridSensors[Integer.parseInt(firstMessage.group(1))][Integer
+                    .parseInt(firstMessage.group(3))], direction);
+            handleCompleteEvent(currentEvent);
+          } else {
+            // if we only have one message, we can't do jack.
+            return;
+          }
+        } else if ((firstMessage = matchOneArduinoSliderMessage.matcher(singleMessage))
             .lookingAt()) { // we have a slider thing to look at
           TouchDirection direction;
-          if (oneMessage.group(2).equals(ARDUINO_TOUCH)) {
+          if (firstMessage.group(2).equals(ARDUINO_TOUCH)) {
             direction = TouchDirection.TOUCH;
           } else {
             direction = TouchDirection.RELEASE;
           }
           ArduinoEvent currentEvent = new ArduinoEvent(
-              Integer.parseInt(oneMessage.group(1)), direction);
+              Integer.parseInt(firstMessage.group(1)), direction);
           handleCompleteEvent(currentEvent);
-        } else if (isGridded
-            && (oneMessage = matchOneArduino2DMessage.matcher(singleMessage))
-                .lookingAt()) { // we need to look at two touch informationz
-          TouchDirection direction;
-          if (oneMessage.group(2).equals(ARDUINO_TOUCH)
-              && oneMessage.group(2).equals(oneMessage.group(4))) {
-            direction = TouchDirection.TOUCH;
-          } else {
-            direction = TouchDirection.RELEASE;
-          }
-          ArduinoEvent currentEvent = new ArduinoEvent(
-              ArduinoSetup.gridSensors[Integer.parseInt(oneMessage.group(1))][Integer
-                  .parseInt(oneMessage.group(3))], direction);
-          handleCompleteEvent(currentEvent);
-        } else if ((oneMessage = matchOneArduinoMessage.matcher(singleMessage))
+        } else if ((firstMessage = matchOneArduinoMessage.matcher(singleMessage))
             .lookingAt()) { // we are looking at one touch information at a time
+          System.out.println("woo, party, we are wrong");
           TouchDirection direction;
-          if (oneMessage.group(2).equals(ARDUINO_TOUCH)) {
+          if (firstMessage.group(2).equals(ARDUINO_TOUCH)) {
             direction = TouchDirection.TOUCH;
           } else {
             direction = TouchDirection.RELEASE;
           }
           ArduinoEvent currentEvent = new ArduinoEvent(
-              ArduinoSetup.sensors[Integer.parseInt(oneMessage.group(1))],
+              ArduinoSetup.sensors[Integer.parseInt(firstMessage.group(1))],
               direction);
           handleCompleteEvent(currentEvent);
         }

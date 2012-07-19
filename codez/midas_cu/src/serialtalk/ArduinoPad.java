@@ -1,6 +1,9 @@
 package serialtalk;
 
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class ArduinoPad implements ArduinoObject {
@@ -67,11 +70,26 @@ public class ArduinoPad implements ArduinoObject {
   public int[] sensor() {
     sensitivity = sensors.length * sensors[0].length;
     int[] retSensors = new int[sensitivity];
-    for (int i=0; i<sensors.length; i++) {
-      for (int j=0; j<sensors[i].length; j++) {
-        retSensors[i*sensors.length + j] = sensors[i][j].location.x; 
-      }
+    List<Integer> terminals = terminals();
+    for (Integer i : terminals) {
+      retSensors[terminals.indexOf(i)] = i.intValue();
     }
     return retSensors;
+  }
+  
+  public List<Integer> terminals() {
+    List<Integer> terminals = new ArrayList<Integer>();
+    for (int i=0; i<sensors.length; i++) {
+      for (int j=0; j<sensors[i].length; j++) {
+        if(!terminals.contains(sensors[i][j].location.x)) {
+          terminals.add(sensors[i][j].location.x);
+        }
+        if(!terminals.contains(sensors[i][j].location.y)) {
+          terminals.add(sensors[i][j].location.y);
+        }
+      }
+    }
+    Collections.sort(terminals);
+    return terminals;
   }
 }

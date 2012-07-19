@@ -17,6 +17,8 @@ public class ArduinoTestWindow extends JFrame {
 
   private ArduinoDispatcher dispatcher;
   
+  private ArduinoSensor previous;
+  
   public void setDispatcher(ArduinoDispatcher newDispatcher) {
     dispatcher = newDispatcher;
   }
@@ -36,8 +38,21 @@ public class ArduinoTestWindow extends JFrame {
       pinTouch.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent event) {
           ArduinoSensor activated = ((StorageJButton)event.getSource()).sensorData;
-          ArduinoEvent touchEvent = new ArduinoEvent(activated, TouchDirection.TOUCH);
-          dispatcher.handleEvent(touchEvent);
+          if (ArduinoSetup.griddedSensors.contains(activated.location.x)) {
+            if (previous != null) {
+              ArduinoEvent touchEvent = new ArduinoEvent(ArduinoSetup.gridSensors[previous.location.x][activated.location.x], TouchDirection.TOUCH);
+              dispatcher.handleEvent(touchEvent);
+              // this... is a horrible hack.  :( we don't know what order we will get the sensors; x-first or y-first...
+              touchEvent = new ArduinoEvent(ArduinoSetup.gridSensors[activated.location.x][previous.location.x], TouchDirection.TOUCH);
+              dispatcher.handleEvent(touchEvent);
+              previous = null;
+            } else {
+              previous = activated;
+            }
+          } else {
+            ArduinoEvent touchEvent = new ArduinoEvent(activated, TouchDirection.TOUCH);
+            dispatcher.handleEvent(touchEvent);
+          }
         }
       });
       StorageJButton pinRelease = new StorageJButton("release "+i);

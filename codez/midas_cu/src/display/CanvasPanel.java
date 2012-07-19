@@ -116,9 +116,6 @@ public class CanvasPanel extends JPanel implements MouseListener,
     }
 
     setUp.pathwaysGenerator.paint(g2);
-
-    // do we need grid sensing?
-    setUp.serialCommunication.isGridded = (totalButtons > ArduinoSetup.NUM_TERMINALS);
   }
 
   SensorButtonGroup determineIntersection(Point pointClicked) {

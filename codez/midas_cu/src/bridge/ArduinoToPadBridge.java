@@ -143,8 +143,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
 
   public void execute(ArduinoSensorButton button) {
     if (this.contains(button)) {
-      // we might not need to do this at the moment... we aren't triggering on
-      // click
+      // we aren't triggering on click
       // this.interactivePiece.execute(whichPad)
     }
   }
@@ -178,7 +177,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
     }
 
     // now organize them
-    if (sensitivity.intValue() != sensors.size()) {
+    if (Math.sqrt(sensitivity.intValue())*2 != sensors.size()) {
       System.out.println("wrong number of sensors registered");
       arduinoPiece = null;
       return;
@@ -192,7 +191,7 @@ public class ArduinoToPadBridge extends ArduinoToDisplayBridge {
         newPad[i][j] = sensors.get(i * sideOfPad + j);
       }
     }
-    
+        
     arduinoPiece = new ArduinoPad(newPad);
     ArduinoSetup.addPad((ArduinoPad) arduinoPiece);
   }
