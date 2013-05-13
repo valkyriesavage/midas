@@ -88,7 +88,7 @@ public class SetUp extends JFrame {
   Border blackline = BorderFactory.createLineBorder(Color.black);
 
   public SetUp(boolean test) throws AWTException {
-    setSize(CANVAS_X + 350, CANVAS_Y + 135);
+    setSize(CANVAS_X + 350, CANVAS_Y + 380);
     setTitle("Midas");
 
     serialCommunication = new SerialCommunication();
@@ -301,12 +301,64 @@ public class SetUp extends JFrame {
         }
       }
     });
+    
+    
+    
     printingPanel.add(printSensors);
     printingPanel.add(generatePathways);
     printingPanel
         .setBorder(BorderFactory.createTitledBorder("create stickers"));
     JPanel printingPanelContainer = new JPanel(new GridLayout(0, 1));
     printingPanelContainer.add(printingPanel);
+    
+    JPanel clearPanel = new JPanel();
+    
+    JButton unrouteSensors = new JButton("unroute stickers");
+    unrouteSensors.addActionListener(new ActionListener() {
+      private void recursiveEnable(JComponent j) {
+        for(int i=0; i < j.getComponents().length; i++) {
+          j.getComponent(i).setEnabled(true);
+          try {
+            recursiveEnable((JComponent) j.getComponent(i));
+          } catch (ClassCastException e) {
+            continue;
+          }
+        }
+      }
+      
+      public void actionPerformed(ActionEvent event) {
+        cleanUpDeletions();
+        removePathways();
+        setSelectedBridge(currentBridge);
+        recursiveEnable(newButtonsPanel);
+      }
+    });
+    
+    JButton clearAll = new JButton("clear canvas");
+    clearAll.addActionListener(new ActionListener() {
+      private void recursiveEnable(JComponent j) {
+        for(int i=0; i < j.getComponents().length; i++) {
+          j.getComponent(i).setEnabled(true);
+          try {
+            recursiveEnable((JComponent) j.getComponent(i));
+          } catch (ClassCastException e) {
+            continue;
+          }
+        }
+      }
+      
+      public void actionPerformed(ActionEvent event) {
+        cleanUpDeletions();
+        removePathways();
+        recursiveEnable(newButtonsPanel);
+        displayedButtons.clear();
+        bridgeObjects.clear();
+      }
+    });
+    
+    clearPanel.add(unrouteSensors);
+    clearPanel.add(clearAll);
+    clearPanel.setBorder(BorderFactory.createTitledBorder("clear"));
 
     JButton reconnectDongle = new JButton("connect/reconnect dongle");
     reconnectDongle.addActionListener(new ActionListener() {
@@ -330,6 +382,7 @@ public class SetUp extends JFrame {
     dongleContainer.add(dongleButtonContainer);
     dongleContainer.add(stupidThingForGettingNewline);
     printingPanelContainer.add(dongleContainer);
+    printingPanelContainer.add(clearPanel);
 
     newButtonsPanel
         .setBorder(BorderFactory.createTitledBorder("design stickers"));
@@ -377,6 +430,12 @@ public class SetUp extends JFrame {
       assignArduinoConnectionsFromSVG();
       buttonCanvas.isInteractive = false;
     }
+  }
+  
+  public void removePathways() {
+    buttonCanvas.isInteractive = true;
+    pathwaysGenerator.removePaths();
+    repaint();
   }
 
   public void assignArduinoConnectionsFromSVG() {

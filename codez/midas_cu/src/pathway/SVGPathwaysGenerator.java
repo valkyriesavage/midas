@@ -128,6 +128,11 @@ public class SVGPathwaysGenerator {
   private void point(Graphics2D g, int x1, int y1) {
     g.drawRect(x1 - LINE_EXTENT, y1 - LINE_EXTENT, LINE_WIDTH, LINE_WIDTH);
   }
+  
+  public void removePaths() {
+    topLayerPaths = new ArrayList<List<Point>>();
+    bottomLayerPaths = new ArrayList<List<Point>>();
+  }
 
   public void paint(Graphics2D g) {
     g.setColor(CanvasPanel.LIGHT_COPPER);
