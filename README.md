@@ -1,4 +1,7 @@
-Midas Cu is exploring how to support designers in rapidly creating and
+Midas
+=====
+
+Midas is exploring how to support designers in rapidly creating and
 iterating on interaction ideas for objects.  We are moving increasingly
 towards a world where we can print any object we dream of in any material
 we like, and electronics and circuits should be no exception.  By using
@@ -9,15 +12,18 @@ object.  The "capturing" interface then allows them to "program" an action
 on the computer by demonstrating it, which will then be parroted back on the
 assigned trigger.
 
+You can check out a video summarizing the system on YouTube:
+[![Midas Conference Video](https://img.youtube.com/vi/lS60AH2_Pbs/0.jpg)](https://www.youtube.com/watch?v=lS60AH2_Pbs)
+
+
+
 Components of the system:
 
 codez/
-  mpr_121/
+  mpr\_121/
     This directory contains code to be loaded onto an Arduino.
-  midas_cu/
+  midas\_cu/
     This directory contains Java Swing code that makes the interface run.
-paper/
-  This directory contains the TeX source for the paper on Midas Cu.
 
 
 Other required things:
