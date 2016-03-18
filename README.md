@@ -50,3 +50,10 @@ FOR MAC OS X:
 You'll need an [Arduino](http://arduino.cc/hu/Main/Software) or
 [Teensyduino](http://www.pjrc.com/teensy/teensyduino.html) IDE for installing
 the code onto the board you're using.
+
+Here be Dragons
+=====================
+This code was written as a part of my PhD, and thus it can be sketchy in
+some places! It's not very well documented, but I wanted to provide it
+on github for anyone curious about spelunking through it and hopefully
+making use of it in some way.
