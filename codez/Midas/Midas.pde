@@ -2,15 +2,13 @@ PImage background;
 
 ClickableBox[] menu;
 DrawableLabel[] labels;
-Sensor[] sensors;
+ArrayList<Sensor> sensors = new ArrayList<Sensor>();
 
 void setup() {
   size(1000, 1000);
   background = loadImage("/Users/valkyrie/documents/images/hatrix-deepdream.jpg");
   createMenu();
-  sensors = new Sensor[1];
-  sensors[0] = new Sensor();
-  frame.setTitle("Midas: Create Custom Capacitive Touch Sensors");
+  surface.setTitle("Midas: Create Custom Capacitive Touch Sensors");
 }
 
 void draw() {
@@ -20,28 +18,36 @@ void draw() {
   rect(0,0,1000,1000);
   image(background, 0, 0);
   drawMenu();
-  sensors[0].drawIt();
+  for (Sensor sensor : sensors) {
+    sensor.drawIt();
+  }
 }
 
 void mousePressed() {
   for (ClickableBox button : menu) {
     button.clickMouse();
   }
-  sensors[0].clickMouse();
+  for (Sensor sensor : sensors) {
+    sensor.clickMouse();
+  }
 }
 
 void mouseDragged() {
   for (ClickableBox button : menu) {
     button.dragMouse();
   }
-  sensors[0].dragMouse();
+  for (Sensor sensor : sensors) {
+    sensor.dragMouse();
+  }
 }
 
 void mouseReleased() {
   for (ClickableBox button : menu) {
     button.releaseMouse();
   }
-  sensors[0].releaseMouse();
+  for (Sensor sensor : sensors) {
+    sensor.releaseMouse();
+  }
 }
 
 void createMenu() {
@@ -54,7 +60,7 @@ void createMenu() {
       newButton.setStuffDoer(new BackgroundChooser("backgroundSelected"));
     }
     if (buttonLabel.equals("add sensor")) {
-      newButton.setStuffDoer(new SensorAdder()); 
+      newButton.setStuffDoer(new SensorAdder(sensors)); 
     }
     menu[idx] = newButton;
     idx++;
