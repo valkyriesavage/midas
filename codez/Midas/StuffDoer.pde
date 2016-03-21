@@ -4,11 +4,13 @@ interface StuffDoer {
 
 class SensorAdder implements StuffDoer {
   ArrayList<Sensor> sensors;
-  public SensorAdder(ArrayList<Sensor> sensors) {
+  Shape shape;
+  public SensorAdder(ArrayList<Sensor> sensors, Shape shape) {
     this.sensors = sensors;
+    this.shape = shape;
   }
   public void doStuff() {
-    Sensor newSensor = new Sensor();
+    Sensor newSensor = new Sensor(shape);
     sensors.add(newSensor);
   }
 }

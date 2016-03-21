@@ -3,13 +3,17 @@ enum Shape {
 };
 
 class Sensor extends ClickableBox {
+  final public static color COPPER = #ED9E37;
+  
   Shape shape;
   
-  boolean resizing = false;
+  boolean resizingX = false;
+  boolean resizingY = false;
+  int resizingThresh = 10;
   
   private void initDefaults() {
     this.draggable = true;
-    this.setBaseColor(#ED9E37);
+    this.setBaseColor(COPPER);
     this.shape = Shape.RECTANGLE;
   }
   
@@ -44,22 +48,35 @@ class Sensor extends ClickableBox {
   
   public void dragMouse() {
     if(mouseClick && !disabled) {
-      posX = mouseX-xOffset; 
-      posY = mouseY-yOffset; 
+      if (!resizingX && !resizingY) {
+        posX = mouseX-xOffset; 
+        posY = mouseY-yOffset;
+      }
+      if (resizingX) {
+        boxX = int(abs(mouseX-posX));
+      } if (resizingY) {
+        boxY = int(abs(mouseY-posY));
+      }
     }
   }
   
   public void clickMouse() {
     if(isMouseOver() && !disabled) { 
       mouseClick = true;
+      resizingX = (abs(boxX - abs(mouseX-posX)) < resizingThresh);
+      resizingY = (abs(boxY - abs(mouseY-posY)) < resizingThresh);
     } else {
       mouseClick = false;
+      resizingX = false;
+      resizingY = false;
     }
     xOffset = mouseX-posX; 
-    yOffset = mouseY-posY; 
+    yOffset = mouseY-posY;
   }
   
   public void releaseMouse() {
-    mouseClick = false; 
+    mouseClick = false;
+    resizingX = false;
+    resizingY = false;
   }
 }

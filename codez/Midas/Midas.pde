@@ -1,6 +1,6 @@
 PImage background;
 
-ClickableBox[] menu;
+ArrayList<ClickableBox> menu = new ArrayList<ClickableBox>();
 DrawableLabel[] labels;
 ArrayList<Sensor> sensors = new ArrayList<Sensor>();
 
@@ -14,8 +14,9 @@ void setup() {
 void draw() {
   fill(155);
   stroke(155);
-  rectMode(CORNER);
-  rect(0,0,1000,1000);
+  rectMode(RADIUS);
+  ellipseMode(RADIUS);
+  rect(0,0,3000,3000);
   image(background, 0, 0);
   drawMenu();
   for (Sensor sensor : sensors) {
@@ -51,26 +52,31 @@ void mouseReleased() {
 }
 
 void createMenu() {
+  int wd = 95;
+  int ht = 20;
+  int posX = 850;
   String[] buttonLabels = {"load image", "add sensor", "route traces", "test mode is off"};
-  menu = new ClickableBox[buttonLabels.length];
-  int idx = 0;
-  for (String buttonLabel : buttonLabels) {
-    ClickableBox newButton = new ClickableBox(buttonLabel, 850, idx*100+100, 95, 20);
-    if (buttonLabel.equals("load image")) {
-      newButton.setStuffDoer(new BackgroundChooser("backgroundSelected"));
-    }
-    if (buttonLabel.equals("add sensor")) {
-      newButton.setStuffDoer(new SensorAdder(sensors)); 
-    }
-    menu[idx] = newButton;
-    idx++;
-  }
+  
+  ClickableBox loadImage =  new ClickableBox("load image", posX, 100, wd, ht);
+  loadImage.setStuffDoer(new BackgroundChooser("backgroundSelected"));
+  menu.add(loadImage);
+  
+  int row1Y = 200;
+  int row2Y = 250;
+  SensorAddButton addRectangle = new SensorAddButton(posX-80,row1Y,Shape.RECTANGLE);
+  addRectangle.setStuffDoer(new SensorAdder(sensors, Shape.RECTANGLE));
+  menu.add(addRectangle);
+  SensorAddButton addCircle = new SensorAddButton(posX,row1Y,Shape.CIRCLE);
+  addCircle.setStuffDoer(new SensorAdder(sensors, Shape.CIRCLE));
+  menu.add(addCircle);
+  
+  
   String[] sectionLabels = {"add a background",
                             "add some sensors",
                             "route your traces",
                             "test your design"};
   labels = new DrawableLabel[sectionLabels.length];
-  idx = 0;
+  int idx = 0;
   for (String sectionLabel : sectionLabels) {
     labels[idx] = new DrawableLabel(sectionLabel, 850, idx*100+75);
     idx++;
@@ -78,7 +84,6 @@ void createMenu() {
 }
 
 void drawMenu() {
-  rectMode(RADIUS);
   fill(195);
   stroke(195);
   rect(1000, 0, 300, 1000);
