@@ -1,14 +1,16 @@
 PImage background;
 
+int menuWd = 300;
 ArrayList<ClickableBox> menu = new ArrayList<ClickableBox>();
 DrawableLabel[] labels;
 ArrayList<Sensor> sensors = new ArrayList<Sensor>();
 
 void setup() {
-  size(1000, 1000);
-  background = loadImage("/Users/valkyrie/documents/images/hatrix-deepdream.jpg");
+  size(855, 1100);
+  background = loadImage("example.jpg");
   createMenu();
   surface.setTitle("Midas: Create Custom Capacitive Touch Sensors");
+  surface.setResizable(true);
 }
 
 void draw() {
@@ -16,8 +18,8 @@ void draw() {
   stroke(155);
   rectMode(RADIUS);
   ellipseMode(RADIUS);
-  rect(0,0,3000,3000);
-  image(background, 0, 0);
+  rect(0,0,width*2,height*2);
+  image(background, menuWd, 0);
   drawMenu();
   for (Sensor sensor : sensors) {
     sensor.drawIt();
@@ -54,31 +56,39 @@ void mouseReleased() {
 void createMenu() {
   int wd = 95;
   int ht = 20;
-  int posX = 850;
-  String[] buttonLabels = {"load image", "add sensor", "route traces", "test mode is off"};
+  int posX = int(menuWd/2.0);
   
   ClickableBox loadImage =  new ClickableBox("load image", posX, 100, wd, ht);
   loadImage.setStuffDoer(new BackgroundChooser("backgroundSelected"));
   menu.add(loadImage);
   
-  int row1Y = 200;
-  int row2Y = 250;
-  SensorAddButton addRectangle = new SensorAddButton(posX-80,row1Y,Shape.RECTANGLE);
+  int rowY = 200;
+  SensorAddButton addRectangle = new SensorAddButton(posX-80,rowY,Shape.RECTANGLE);
   addRectangle.setStuffDoer(new SensorAdder(sensors, Shape.RECTANGLE));
   menu.add(addRectangle);
-  SensorAddButton addCircle = new SensorAddButton(posX,row1Y,Shape.CIRCLE);
+  SensorAddButton addCircle = new SensorAddButton(posX,rowY,Shape.CIRCLE);
   addCircle.setStuffDoer(new SensorAdder(sensors, Shape.CIRCLE));
   menu.add(addCircle);
+  SensorAddButton addCustom = new SensorAddButton(posX+80,rowY,Shape.OTHER);
+  addCustom.setStuffDoer(new CustomSensorAdder(sensors));
+  menu.add(addCustom);
   
+  ClickableBox routeTraces =  new ClickableBox("route traces", posX, 300, wd, ht);
+  routeTraces.setStuffDoer(new TraceRouter());
+  menu.add(routeTraces);
   
-  String[] sectionLabels = {"add a background",
+  ClickableBox toggleTest =  new ClickableBox("test mode is off", posX, 400, wd, ht);
+  toggleTest.setStuffDoer(new TestToggler());
+  menu.add(toggleTest);
+  
+  String[] sectionLabels = {"change background object",
                             "add some sensors",
                             "route your traces",
                             "test your design"};
   labels = new DrawableLabel[sectionLabels.length];
   int idx = 0;
   for (String sectionLabel : sectionLabels) {
-    labels[idx] = new DrawableLabel(sectionLabel, 850, idx*100+75);
+    labels[idx] = new DrawableLabel(sectionLabel, posX, idx*100+75);
     idx++;
   }
 }
@@ -86,7 +96,7 @@ void createMenu() {
 void drawMenu() {
   fill(195);
   stroke(195);
-  rect(1000, 0, 300, 1000);
+  rect(0, 0, menuWd, height*2);
   for (DrawableLabel label : labels) {
     label.drawIt();
   }
@@ -98,5 +108,14 @@ void drawMenu() {
 void backgroundSelected(File bg) {
   if (bg != null) {
     background = loadImage(bg.getAbsolutePath());
+  }
+}
+  
+void makeNewCustomSensor(File sensor) {
+  if (sensor != null) {
+    PImage sensorImg = loadImage(sensor.getAbsolutePath());
+    Sensor newSensor = new Sensor(Shape.OTHER);
+    newSensor.setImage(sensorImg);
+    sensors.add(newSensor);
   }
 }

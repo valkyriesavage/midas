@@ -15,6 +15,15 @@ class SensorAdder implements StuffDoer {
   }
 }
 
+class CustomSensorAdder extends SensorAdder {
+  public CustomSensorAdder(ArrayList<Sensor> sensors) {
+    super(sensors, Shape.OTHER); 
+  }
+  public void doStuff() {
+    selectInput("choose an object to make sensors for:", "makeNewCustomSensor");
+  }
+}
+
 class BackgroundChooser implements StuffDoer {
   String callback;
   public BackgroundChooser(String callback) {
@@ -23,4 +32,14 @@ class BackgroundChooser implements StuffDoer {
   public void doStuff() {
     selectInput("choose an object to make sensors for:", callback);
   }
+}
+
+class TraceRouter implements StuffDoer {
+  public TraceRouter() {}
+  public void doStuff() {}
+}
+
+class TestToggler implements StuffDoer {
+  public TestToggler() {}
+  public void doStuff() {}
 }

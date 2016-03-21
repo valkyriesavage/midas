@@ -11,6 +11,8 @@ class Sensor extends ClickableBox {
   boolean resizingY = false;
   int resizingThresh = 10;
   
+  PImage customSensor;
+  
   private void initDefaults() {
     this.draggable = true;
     this.setBaseColor(COPPER);
@@ -41,8 +43,8 @@ class Sensor extends ClickableBox {
       rect(posX, posY, boxX, boxY); 
     } else if (shape==Shape.CIRCLE) {
       ellipse(posX,posY,boxX,boxY);
-    } else {
-      
+    } else if (shape==Shape.OTHER) {
+      image(customSensor,posX,posY);
     }
   }
   
@@ -78,5 +80,9 @@ class Sensor extends ClickableBox {
     mouseClick = false;
     resizingX = false;
     resizingY = false;
+  }
+  
+  public void setImage(PImage customSensor) {
+    this.customSensor = customSensor; 
   }
 }
