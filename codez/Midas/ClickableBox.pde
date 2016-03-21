@@ -1,4 +1,6 @@
 class ClickableBox {
+  final public static color DEFAULT_COLOR = #777777;
+  
   boolean mouseClick = false;
   float xOffset = 0.0; 
   float yOffset = 0.0;

@@ -24,6 +24,20 @@ class CustomSensorAdder extends SensorAdder {
   }
 }
 
+class ObstacleAdder implements StuffDoer {
+  ArrayList<Obstacle> obstacles;
+  public ObstacleAdder(ArrayList<Obstacle> obstacles) {
+    this.obstacles = obstacles;
+  }
+  public void doStuff() {
+    for (Obstacle obstacle : obstacles) {
+      obstacle.locked = true;
+    }
+    Obstacle obstacle = new Obstacle();
+    obstacles.add(obstacle);
+  }
+}
+
 class BackgroundChooser implements StuffDoer {
   String callback;
   public BackgroundChooser(String callback) {
@@ -34,12 +48,21 @@ class BackgroundChooser implements StuffDoer {
   }
 }
 
-class TraceRouter implements StuffDoer {
-  public TraceRouter() {}
-  public void doStuff() {}
-}
-
 class TestToggler implements StuffDoer {
-  public TestToggler() {}
-  public void doStuff() {}
+  ClickableBox toUpdate;
+  boolean testing = false;
+  public TestToggler(ClickableBox toUpdate) {
+    this.toUpdate = toUpdate;
+  }
+  public void doStuff() {
+    testing = !testing;
+    if (testing) {
+      toUpdate.label = "test mode is on";
+      toUpdate.setBaseColor(#54ED64);
+    }
+    else {
+      toUpdate.label = "test mode is off";
+      toUpdate.setBaseColor(ClickableBox.DEFAULT_COLOR);
+    }
+  }
 }

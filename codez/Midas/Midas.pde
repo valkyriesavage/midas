@@ -4,6 +4,7 @@ int menuWd = 300;
 ArrayList<ClickableBox> menu = new ArrayList<ClickableBox>();
 DrawableLabel[] labels;
 ArrayList<Sensor> sensors = new ArrayList<Sensor>();
+ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 
 void setup() {
   size(855, 1100);
@@ -24,6 +25,9 @@ void draw() {
   for (Sensor sensor : sensors) {
     sensor.drawIt();
   }
+  for (Obstacle obstacle : obstacles) {
+    obstacle.drawIt();
+  }
 }
 
 void mousePressed() {
@@ -33,6 +37,7 @@ void mousePressed() {
   for (Sensor sensor : sensors) {
     sensor.clickMouse();
   }
+  obstacles.get(obstacles.size() - 1).clickMouse();
 }
 
 void mouseDragged() {
@@ -42,6 +47,7 @@ void mouseDragged() {
   for (Sensor sensor : sensors) {
     sensor.dragMouse();
   }
+  obstacles.get(obstacles.size() - 1).dragMouse();
 }
 
 void mouseReleased() {
@@ -51,6 +57,7 @@ void mouseReleased() {
   for (Sensor sensor : sensors) {
     sensor.releaseMouse();
   }
+  obstacles.get(obstacles.size() - 1).releaseMouse();
 }
 
 void createMenu() {
@@ -73,22 +80,27 @@ void createMenu() {
   addCustom.setStuffDoer(new CustomSensorAdder(sensors));
   menu.add(addCustom);
   
-  ClickableBox routeTraces =  new ClickableBox("route traces", posX, 300, wd, ht);
+  ClickableBox addObstacle = new ClickableBox("draw new obstacle", posX, 300, wd, ht);
+  addObstacle.setStuffDoer(new ObstacleAdder(obstacles));
+  menu.add(addObstacle);
+  
+  ClickableBox routeTraces =  new ClickableBox("route traces", posX, 400, wd, ht);
   routeTraces.setStuffDoer(new TraceRouter());
   menu.add(routeTraces);
   
-  ClickableBox toggleTest =  new ClickableBox("test mode is off", posX, 400, wd, ht);
-  toggleTest.setStuffDoer(new TestToggler());
+  ClickableBox toggleTest =  new ClickableBox("test mode is off", posX, 500, wd, ht);
+  toggleTest.setStuffDoer(new TestToggler(toggleTest));
   menu.add(toggleTest);
   
   String[] sectionLabels = {"change background object",
                             "add some sensors",
+                            "add some routing obstacles",
                             "route your traces",
                             "test your design"};
   labels = new DrawableLabel[sectionLabels.length];
   int idx = 0;
   for (String sectionLabel : sectionLabels) {
-    labels[idx] = new DrawableLabel(sectionLabel, posX, idx*100+75);
+    labels[idx] = new DrawableLabel(sectionLabel, posX, idx*100+70);
     idx++;
   }
 }
