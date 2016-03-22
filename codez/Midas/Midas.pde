@@ -6,6 +6,8 @@ DrawableLabel[] labels;
 ArrayList<Sensor> sensors = new ArrayList<Sensor>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 
+TraceRouter router = new TraceRouter();
+
 void setup() {
   size(855, 1100);
   background = loadImage("example.jpg");
@@ -22,11 +24,16 @@ void draw() {
   rect(0,0,width*2,height*2);
   image(background, menuWd, 0);
   drawMenu();
+  if (router.save) { router.prepSVGSave(); }
   for (Sensor sensor : sensors) {
     sensor.drawIt();
   }
   for (Obstacle obstacle : obstacles) {
     obstacle.drawIt();
+  }
+  if (router.save) {
+    router.saveToSVG();
+    router.save = false;
   }
 }
 
@@ -37,7 +44,9 @@ void mousePressed() {
   for (Sensor sensor : sensors) {
     sensor.clickMouse();
   }
-  obstacles.get(obstacles.size() - 1).clickMouse();
+  if (obstacles.size() > 0) {
+    obstacles.get(obstacles.size() - 1).clickMouse();
+  }
 }
 
 void mouseDragged() {
@@ -47,7 +56,9 @@ void mouseDragged() {
   for (Sensor sensor : sensors) {
     sensor.dragMouse();
   }
-  obstacles.get(obstacles.size() - 1).dragMouse();
+  if (obstacles.size() > 0) {
+    obstacles.get(obstacles.size() - 1).dragMouse();
+  }
 }
 
 void mouseReleased() {
@@ -57,7 +68,9 @@ void mouseReleased() {
   for (Sensor sensor : sensors) {
     sensor.releaseMouse();
   }
-  obstacles.get(obstacles.size() - 1).releaseMouse();
+  if (obstacles.size() > 0) {
+    obstacles.get(obstacles.size() - 1).releaseMouse();
+  }
 }
 
 void createMenu() {
@@ -85,7 +98,7 @@ void createMenu() {
   menu.add(addObstacle);
   
   ClickableBox routeTraces =  new ClickableBox("route traces", posX, 400, wd, ht);
-  routeTraces.setStuffDoer(new TraceRouter());
+  routeTraces.setStuffDoer(router);
   menu.add(routeTraces);
   
   ClickableBox toggleTest =  new ClickableBox("test mode is off", posX, 500, wd, ht);

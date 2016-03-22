@@ -5,7 +5,7 @@ class Obstacle {
   boolean locked = false;
   
   final static float LOCK_THRESH = 5;
-  final static float XMIN = 295; // sloppy, but don't want to draw any obstacles in these places
+  final static float XMIN = 300; // sloppy, but don't want to draw any obstacles in these places
   
   public Obstacle() {
     vertices = new ArrayList<Vertex>(); 
