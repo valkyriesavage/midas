@@ -4,7 +4,7 @@ import processing.pdf.*;
 
 class SVGExporter {
   
-  private final String FILENAME = "routing.svg";
+  private final String FILENAME = "routing.pdf";
   private final String SKETCHPATH = "/Users/valkyrie/projects/midas-github/codez/Midas";
   
   public SVGExporter() {}
@@ -20,7 +20,18 @@ class SVGExporter {
     // convert to svg
     // via: http://www.inkscapeforum.com/viewtopic.php?f=5&amp;t=5391
     String[] outputFile = split(FILENAME, '.');
-    runUnixCommand("/Applications/Inkscape.app/Contents/Resources/script --without-gui " + SKETCHPATH + "/" + FILENAME + " --export-plain-svg=" + SKETCHPATH + "/" + outputFile[0] + ".svg", SKETCHPATH);
+    String inkscape = "/Applications/Inkscape.app/Contents/Resources/script";
+    String gui = "--with-gui";
+    String noGui = "--without-gui";
+    String input = "-f " + SKETCHPATH + "/" + FILENAME;
+    String verbs = "--verb EditSelectAll --verb SelectionUnion --verb FileSave --verb FileQuit";
+    String output = "--export-plain-svg=" + SKETCHPATH + "/" + outputFile[0] + ".svg";
+    
+    String[] convert = {inkscape,noGui,input,output};
+    runUnixCommand(join(convert, " "), SKETCHPATH);
+    
+    String[] union = {inkscape,gui,output,verbs};
+    runUnixCommand(join(union, " "), SKETCHPATH);
    
     runUnixCommand("rm " + FILENAME + " -f", SKETCHPATH);
    

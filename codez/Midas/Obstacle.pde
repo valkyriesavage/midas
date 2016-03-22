@@ -4,7 +4,7 @@ class Obstacle {
   ArrayList<Vertex> vertices;
   boolean locked = false;
   
-  final static float LOCK_THRESH = 5;
+  final static float LOCK_THRESH = 10;
   final static float XMIN = 300; // sloppy, but don't want to draw any obstacles in these places
   
   public Obstacle() {
@@ -23,7 +23,7 @@ class Obstacle {
   
   public void dragMouse() {
     if (mouseX < XMIN) return;
-    if (vertices.get(0).distance(new Vertex(mouseX,mouseY)) < LOCK_THRESH) {
+    if (vertices.size() > 30 && vertices.get(0).distance(new Vertex(mouseX,mouseY)) < LOCK_THRESH) {
       locked = true; 
     }
     if (!locked) {

@@ -73,6 +73,10 @@ void mouseReleased() {
   }
 }
 
+void keyPressed() {
+  router.save = true; 
+}
+
 void createMenu() {
   int wd = 95;
   int ht = 20;
