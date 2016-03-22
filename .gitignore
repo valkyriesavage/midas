@@ -21,5 +21,6 @@ testdata/*
 *Inkscape.app*
 outline.svg
 mask.svg
+routing.svg
 *.DS_Store
 paper/*.fdb_latexmk

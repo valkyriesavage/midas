@@ -24,15 +24,26 @@ void draw() {
   rect(0,0,width*2,height*2);
   image(background, menuWd, 0);
   drawMenu();
-  if (router.save) { router.prepSVGSave(); }
+  if (router.save) {
+    router.prepSVGSave(Paths.TRACES);
+  }
   for (Sensor sensor : sensors) {
     sensor.drawIt();
+  }
+  if (router.save) {
+    router.saveToSVG(Paths.TRACES);
+    router.prepSVGSave(Paths.OBSTACLES);
+    // first draw an outline of the image
+    fill(255);
+    stroke(0);
+    // outline of image; for some reason this is drawing in corner mode instead of radius mode??
+    rect(menuWd,0,width-menuWd,height);
   }
   for (Obstacle obstacle : obstacles) {
     obstacle.drawIt();
   }
   if (router.save) {
-    router.saveToSVG();
+    router.saveToSVG(Paths.OBSTACLES);
     router.save = false;
   }
 }

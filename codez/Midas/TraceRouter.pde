@@ -7,11 +7,11 @@ class TraceRouter implements StuffDoer {
   
   public void doStuff() {}
   
-  public void prepSVGSave() {
-    exporter.prepSVGSave(); 
+  public void prepSVGSave(Paths chosen) {
+    exporter.prepSVGSave(chosen); 
   }
   
-  public void saveToSVG() {
-    exporter.saveToSVG();
+  public void saveToSVG(Paths chosen) {
+    exporter.saveToSVG(chosen);
   }
 }

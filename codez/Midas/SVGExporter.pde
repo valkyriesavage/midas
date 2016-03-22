@@ -1,30 +1,37 @@
 // much of this code comes from http://www.jeffreythompson.org/blog/2012/05/29/easy-processing-illustrator-export-bonus-svg-export/
 
+enum Paths {
+  OBSTACLES, TRACES, ALL
+};
+
 import processing.pdf.*;
 
 class SVGExporter {
   
-  private final String FILENAME = "routing.pdf";
+  private final String[] FILENAMES = {"mask.pdf","routing.pdf","all.pdf"};
   private final String SKETCHPATH = "/Users/valkyrie/projects/midas-github/codez/Midas";
   
   public SVGExporter() {}
    
-  public void prepSVGSave() {
+  public void prepSVGSave(Paths chosen) {
     // pretend we're creating a normal pdf
-    beginRecord(PDF, FILENAME);
+    beginRecord(PDF, FILENAMES[chosen.ordinal()]);
   }
    
-  public void saveToSVG() {
+  public void saveToSVG(Paths chosen) {
     endRecord();
    
     // convert to svg
     // via: http://www.inkscapeforum.com/viewtopic.php?f=5&amp;t=5391
-    String[] outputFile = split(FILENAME, '.');
+    String[] outputFile = split(FILENAMES[chosen.ordinal()], '.');
     String inkscape = "/Applications/Inkscape.app/Contents/Resources/script";
     String gui = "--with-gui";
     String noGui = "--without-gui";
-    String input = "-f " + SKETCHPATH + "/" + FILENAME;
+    String input = "-f " + SKETCHPATH + "/" + FILENAMES[chosen.ordinal()];
     String verbs = "--verb EditSelectAll --verb SelectionUnion --verb FileSave --verb FileQuit";
+    if (chosen == Paths.OBSTACLES) {
+      verbs = "--verb EditSelectAll --verb SelectionDiff --verb FileSave --verb FileQuit";
+    }
     String output = "--export-plain-svg=" + SKETCHPATH + "/" + outputFile[0] + ".svg";
     
     String[] convert = {inkscape,noGui,input,output};
@@ -33,7 +40,7 @@ class SVGExporter {
     String[] union = {inkscape,gui,output,verbs};
     runUnixCommand(join(union, " "), SKETCHPATH);
    
-    runUnixCommand("rm " + FILENAME + " -f", SKETCHPATH);
+    runUnixCommand("rm " + FILENAMES[chosen.ordinal()] + " -f", SKETCHPATH);
    
     // X11 will still be running, so you'll have to quit it by hand...
   }
