@@ -6,7 +6,7 @@ DrawableLabel[] labels;
 ArrayList<Sensor> sensors = new ArrayList<Sensor>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 
-TraceRouter router = new TraceRouter();
+TraceRouter router = new TraceRouter(sensors, obstacles);
 
 void setup() {
   size(855, 1100);

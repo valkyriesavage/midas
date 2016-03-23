@@ -22,7 +22,14 @@ class Obstacle {
   }
   
   public void dragMouse() {
-    if (mouseX < XMIN) return;
+    if (mouseX < XMIN) {
+      if (vertices.size() > 2) {
+        locked = true; 
+      }
+      else {
+        return;
+      }
+    }
     if (vertices.size() > 30 && vertices.get(0).distance(new Vertex(mouseX,mouseY)) < LOCK_THRESH) {
       locked = true; 
     }
@@ -32,7 +39,14 @@ class Obstacle {
   }
   
   public void clickMouse() {
-    if (mouseX < XMIN) return;
+    if (mouseX < XMIN) {
+      if (vertices.size() > 2) {
+        locked = true; 
+      }
+      else {
+        return;
+      }
+    }
     if (vertices.size() > 2 && vertices.get(0).distance(new Vertex(mouseX,mouseY)) < LOCK_THRESH) {
       locked = true; 
     }

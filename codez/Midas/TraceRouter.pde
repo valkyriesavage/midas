@@ -3,7 +3,13 @@ class TraceRouter implements StuffDoer {
   SVGExporter exporter = new SVGExporter();
   public boolean save = false;
   
-  public TraceRouter() {}
+  ArrayList<Sensor> sensors;
+  ArrayList<Obstacle> obstacles;
+  
+  public TraceRouter(ArrayList<Sensor> sensors, ArrayList<Obstacle> obstacles) {
+    this.sensors = sensors;
+    this.obstacles = obstacles;
+  }
   
   public void doStuff() {}
   
