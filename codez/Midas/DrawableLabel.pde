@@ -22,4 +22,8 @@ class DrawableLabel {
   public void setFont(PFont f) {
     this.f = f; 
   }
+  
+  public void setText(String newText) {
+    this.label = newText; 
+  }
 }

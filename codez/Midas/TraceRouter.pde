@@ -5,13 +5,27 @@ class TraceRouter implements StuffDoer {
   
   ArrayList<Sensor> sensors;
   ArrayList<Obstacle> obstacles;
+  ArrayList<Trace> traces;
+  ArrayList<Point> terminals;
   
-  public TraceRouter(ArrayList<Sensor> sensors, ArrayList<Obstacle> obstacles) {
+  float pxPermm;
+  
+  public TraceRouter(ArrayList<Sensor> sensors, ArrayList<Obstacle> obstacles, ArrayList<Trace> traces) {
     this.sensors = sensors;
     this.obstacles = obstacles;
+    this.traces = traces;
+    this.pxPermm = 1.0;
   }
   
-  public void doStuff() {}
+  public void setScaleFactor(float scaleFactor) {
+    this.pxPermm = scaleFactor;
+  }
+  
+  public void doStuff() {
+    for (Sensor sensor : sensors) {
+      sensor.lock(); 
+    }
+  }
   
   public void prepSVGSave(Paths chosen) {
     exporter.prepSVGSave(chosen); 

@@ -1,12 +1,20 @@
+import interfascia.*;
+
+GUIController c;
+IFTextField bgwd;
+DrawableLabel bght;
+
 PImage background;
+float pxPermm = 10.0;
 
 int menuWd = 300;
 ArrayList<ClickableBox> menu = new ArrayList<ClickableBox>();
-DrawableLabel[] labels;
+ArrayList<DrawableLabel> labels = new ArrayList<DrawableLabel>();
 ArrayList<Sensor> sensors = new ArrayList<Sensor>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
+ArrayList<Trace> traces = new ArrayList<Trace>();
 
-TraceRouter router = new TraceRouter(sensors, obstacles);
+TraceRouter router = new TraceRouter(sensors, obstacles, traces);
 
 void setup() {
   size(855, 1100);
@@ -84,8 +92,17 @@ void mouseReleased() {
   }
 }
 
-void keyPressed() {
-  router.save = true; 
+void actionPerformed (GUIEvent e) {
+  float pxWide = background.width;
+  float pxHigh = background.height;
+  if (e.getSource() == bgwd) {
+    pxPermm = pxWide/float(bgwd.getValue());
+    float roundedHt = round(pxHigh/pxPermm * 10.0)/10.0;
+    bght.setText(str(roundedHt));
+    router.setScaleFactor(pxPermm);
+  } else {
+    return; 
+  }
 }
 
 void createMenu() {
@@ -96,8 +113,23 @@ void createMenu() {
   ClickableBox loadImage =  new ClickableBox("load image", posX, 100, wd, ht);
   loadImage.setStuffDoer(new BackgroundChooser("backgroundSelected"));
   menu.add(loadImage);
+ 
+  PFont f = createFont("Lato-Bold.ttf", 12);DrawableLabel wid = new DrawableLabel("width (mm):", posX-wd+15, 140);
+  DrawableLabel hte = new DrawableLabel("height (mm):", posX+35, 140);
+  bght = new DrawableLabel("NaN", posX+85, 140);
+  wid.setFont(f);
+  hte.setFont(f);
+  bght.setFont(f);
+  labels.add(wid);
+  labels.add(hte);
+  labels.add(bght);
+  c = new GUIController(this);
+  bgwd = new IFTextField("width", posX-45, 125, 40);
+  c.add(bgwd);
+  bgwd.addActionListener(this);
+  bgwd.setValue("83");
   
-  int rowY = 200;
+  int rowY = 225;
   SensorAddButton addRectangle = new SensorAddButton(posX-80,rowY,Shape.RECTANGLE);
   addRectangle.setStuffDoer(new SensorAdder(sensors, Shape.RECTANGLE));
   menu.add(addRectangle);
@@ -108,15 +140,15 @@ void createMenu() {
   addCustom.setStuffDoer(new CustomSensorAdder(sensors));
   menu.add(addCustom);
   
-  ClickableBox addObstacle = new ClickableBox("draw new obstacle", posX, 300, wd, ht);
+  ClickableBox addObstacle = new ClickableBox("draw new obstacle", posX, 325, wd, ht);
   addObstacle.setStuffDoer(new ObstacleAdder(obstacles));
   menu.add(addObstacle);
   
-  ClickableBox routeTraces =  new ClickableBox("route traces", posX, 400, wd, ht);
+  ClickableBox routeTraces =  new ClickableBox("route traces", posX, 425, wd, ht);
   routeTraces.setStuffDoer(router);
   menu.add(routeTraces);
   
-  ClickableBox toggleTest =  new ClickableBox("test mode is off", posX, 500, wd, ht);
+  ClickableBox toggleTest =  new ClickableBox("test mode is off", posX, 525, wd, ht);
   toggleTest.setStuffDoer(new TestToggler(toggleTest));
   menu.add(toggleTest);
   
@@ -125,10 +157,11 @@ void createMenu() {
                             "add some routing obstacles",
                             "route your traces",
                             "test your design"};
-  labels = new DrawableLabel[sectionLabels.length];
   int idx = 0;
   for (String sectionLabel : sectionLabels) {
-    labels[idx] = new DrawableLabel(sectionLabel, posX, idx*100+70);
+    int adjustment = 70;
+    if (idx > 0) adjustment += 25;
+    labels.add(new DrawableLabel(sectionLabel, posX, idx*100+adjustment));
     idx++;
   }
 }

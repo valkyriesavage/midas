@@ -13,21 +13,26 @@ class Sensor extends ClickableBox {
   
   PImage customSensor;
   
+  Point anchor;
+  
   private void initDefaults() {
     this.draggable = true;
     this.setBaseColor(COPPER);
     this.shape = Shape.RECTANGLE;
+    this.anchor = new Point(0,0);
   }
   
   public Sensor() {
     super();
     initDefaults();
+    determineAnchor();
   }
   
   public Sensor(Shape shape) {
     super();
     initDefaults();
     this.shape = shape;
+    determineAnchor();
   }
   
   public void drawIt() {
@@ -55,10 +60,23 @@ class Sensor extends ClickableBox {
         posY = mouseY-yOffset;
       }
       if (resizingX) {
+        float oldBoxX = boxX;
         boxX = int(abs(mouseX-posX));
+        if (mouseX < posX) {
+          posX = posX - (boxX-oldBoxX);
+        } else {
+          posX = posX + (boxX-oldBoxX);
+        }
       } if (resizingY) {
+        float oldBoxY = boxY;
         boxY = int(abs(mouseY-posY));
+        if (mouseY < posY) {
+          posY = posY - (boxY-oldBoxY);
+        } else {
+          posY = posY + (boxY-oldBoxY);
+        }
       }
+      determineAnchor();
     }
   }
   
@@ -84,5 +102,19 @@ class Sensor extends ClickableBox {
   
   public void setImage(PImage customSensor) {
     this.customSensor = customSensor; 
+  }
+  
+  public void lock() {
+    this.disabled = true;
+    this.draggable = false;
+  }
+  
+  public void unlock() {
+    this.disabled = false;
+    this.draggable = true;
+  }
+  
+  private void determineAnchor() {
+    
   }
 }
