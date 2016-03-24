@@ -1,4 +1,5 @@
 import interfascia.*;
+//import jnativehook.*;
 
 GUIController c;
 IFTextField bgwd;
@@ -149,7 +150,17 @@ void createMenu() {
   menu.add(routeTraces);
   
   ClickableBox toggleTest =  new ClickableBox("test mode is off", posX, 525, wd, ht);
-  toggleTest.setStuffDoer(new TestToggler(toggleTest));
+  TestToggler toggler = new TestToggler(toggleTest);
+  /*try {
+    GlobalScreen.registerNativeHook();
+  } catch (NativeHookException ex) {
+    println(ex.getMessage());
+    System.exit(1);
+  }
+  GlobalScreen.addNativeMouseListener(toggler);
+  GlobalScreen.addNativeMouseMotionListener(toggler);
+  GlobalScreen.addNativeKeyListener(toggler);*/
+  toggleTest.setStuffDoer(toggler);
   menu.add(toggleTest);
   
   String[] sectionLabels = {"change background object",

@@ -35,3 +35,49 @@ class TraceRouter implements StuffDoer {
     exporter.saveToSVG(chosen);
   }
 }
+
+class Grid {
+  float wd, ht;
+  float pxPermm;
+  
+  ArrayList<Point> padCoordinates;
+  
+  ArrayList<Integer> grid;
+  
+  private void initializePadCoordinates() {
+    padCoordinates = new ArrayList<Point>();
+    int[] pads = {0,1,2,3,4};
+    float firstCenter = 5.08;
+    float interPadDistance = 10.16;
+    for (int i : pads) {
+      Point pad = new Point(0,(firstCenter + i*interPadDistance)/pxPermm);
+      padCoordinates.add(pad);
+    }
+  }
+  
+  public Grid(float wd, float ht, float pxPermm) {
+    this.wd = wd;
+    this.ht = ht;
+    this.pxPermm = pxPermm;
+    initializePadCoordinates();
+  }
+  
+  public Trace routeAToB(Point a, Point b) {
+    return new Trace(new Point(0,0), new Point(0,0), 0); 
+  }
+}
+
+class Trace {
+  Point padConnection;
+  Point goalAnchor;
+  ArrayList<Point> vertices;
+  float widthInPx;
+  
+  public Trace(Point padConnection, Point goalAnchor, float widthInPx) {
+    this.padConnection = padConnection;
+    this.goalAnchor = goalAnchor;
+    this.widthInPx = widthInPx;
+  }
+  
+  
+}
